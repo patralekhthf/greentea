@@ -22,13 +22,6 @@ export const metadata: Metadata = {
   description:
     "Premium organic green and herbal teas crafted for your daily wellness ritual. Sourced from India's finest gardens.",
   keywords: ["organic tea", "herbal tea", "green tea", "wellness tea", "ayurvedic tea"],
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: { url: "/icon.svg", type: "image/svg+xml" },
-  },
   openGraph: {
     siteName: "Kanta Greens",
     type: "website",
