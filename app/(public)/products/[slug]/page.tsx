@@ -8,6 +8,7 @@ import ProductImageGallery from "@/components/product/ProductImageGallery";
 import ProductDetailCTA from "@/components/product/ProductDetailCTA";
 import ProductCard from "@/components/product/ProductCard";
 import ProductContentTabs from "@/components/product/ProductContentTabs";
+import ProductSizeSelector from "@/components/product/ProductSizeSelector";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -162,27 +163,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Price */}
+            {/* Price + size selector */}
             {price !== null && (
-              <div className="flex items-baseline gap-3 mb-6">
-                {salePrice !== null ? (
-                  <>
-                    <span className="text-3xl font-bold text-brand-green">
-                      {currencySymbol}{salePrice.toFixed(0)}
-                    </span>
-                    <span className="text-xl text-brand-muted line-through">
-                      {currencySymbol}{price.toFixed(0)}
-                    </span>
-                    <span className="text-sm font-semibold text-red-600">
-                      {Math.round(((price - salePrice) / price) * 100)}% off
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-3xl font-bold text-brand-green">
-                    {currencySymbol}{price.toFixed(0)}
-                  </span>
-                )}
-              </div>
+              <ProductSizeSelector
+                sizes={product.packagingSizes}
+                price={price}
+                salePrice={salePrice}
+                currencySymbol={currencySymbol}
+              />
             )}
 
             {/* Short description */}
@@ -190,19 +178,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
               {product.shortDescription}
             </p>
 
-            {/* Caffeine + packaging */}
+            {/* Caffeine badge */}
             <div className="flex flex-wrap gap-3 mb-6">
               <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${caffeine.color}`}>
                 {caffeine.label}
               </span>
-              {product.packagingSizes.map((size) => (
-                <span
-                  key={size}
-                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-brand-border bg-white text-brand-dark"
-                >
-                  {size}
-                </span>
-              ))}
             </div>
 
             {/* Wellness goals */}
