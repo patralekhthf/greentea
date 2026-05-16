@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { buildImageUrl } from "@/lib/cloudinary-url";
 
 const STATUS_OPTIONS = ["DRAFT", "PUBLISHED", "ARCHIVED"];
@@ -189,12 +188,12 @@ export default function BlogForm({ initial }: { initial: BlogFormValues }) {
             <h3 className="text-sm font-semibold text-gray-700 mb-4">Cover Image</h3>
             {values.coverImagePublicId ? (
               <div className="mb-3">
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100">
-                  <Image
+                <div className="w-full aspect-video rounded-xl overflow-hidden border border-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={buildImageUrl(values.coverImagePublicId, "w_600,h_338,c_fill,f_webp,q_auto")}
-                    alt="Cover"
-                    fill
-                    className="object-cover"
+                    alt="Cover preview"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <button
