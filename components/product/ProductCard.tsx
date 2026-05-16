@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ProductForCard } from "@/lib/products";
-import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary";
+import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
 
 type Props = {
   product: ProductForCard;
