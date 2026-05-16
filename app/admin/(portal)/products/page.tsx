@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Products" };
 
 const STATUS_STYLE: Record<string, string> = {
