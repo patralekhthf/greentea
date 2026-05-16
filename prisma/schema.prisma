@@ -1,0 +1,446 @@
+// Green Tea Portal — Prisma Schema
+// DB table prefix: tblgt_
+// Driver: @prisma/adapter-pg + pg (NOT @neondatabase/serverless)
+// DB: Neon PostgreSQL (serverless)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: connection URL is configured in prisma.config.ts (not here)
+// The adapter is passed directly to PrismaClient in lib/db.ts
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum CaffeineLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CategoryType {
+  TEA_TYPE
+  WELLNESS_GOAL
+  GIFT
+  SEASONAL
+}
+
+enum ImageType {
+  PRODUCT
+  LIFESTYLE
+  INGREDIENT
+  PACKAGING
+}
+
+enum StockStatus {
+  ACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum CouponType {
+  PERCENT
+  FLAT
+  FREE_SHIPPING
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AdminRole {
+  OWNER
+  PRODUCT_MANAGER
+  ORDER_MANAGER
+  CONTENT_MANAGER
+}
+
+enum InquiryType {
+  CORPORATE_GIFTING
+  BULK_ORDER
+  DISTRIBUTOR
+  WELLNESS_PARTNERSHIP
+  GENERAL
+}
+
+enum NotifyStatus {
+  PENDING
+  NOTIFIED
+}
+
+// ─── Countries ────────────────────────────────────────────────────────────────
+
+model Country {
+  id              String   @id @default(cuid())
+  name            String
+  code            String   @unique // IN, US, GB, AU
+  currencyCode    String   // INR, USD, GBP, AUD
+  currencySymbol  String   // ₹, $, £, A$
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  productConfigs  ProductCountryConfig[]
+  orders          Order[]
+  coupons         Coupon[]
+  banners         Banner[]
+
+  @@map("tblgt_countries")
+}
+
+// ─── Products ─────────────────────────────────────────────────────────────────
+
+model Product {
+  id                   String         @id @default(cuid())
+  name                 String
+  slug                 String         @unique
+  tagline              String?
+  shortDescription     String
+  longDescription      String         // Markdown
+  ingredients          String
+  brewingInstructions  String
+  benefits             String
+  caffeineLevel        CaffeineLevel  @default(NONE)
+  tasteProfile         String?
+  aromaProfile         String?
+  nutritionInfo        Json?
+  packagingSizes       String[]
+  storageInstructions  String?
+  status               ProductStatus  @default(DRAFT)
+  isFeatured           Boolean        @default(false)
+  isBestseller         Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  countryConfigs       ProductCountryConfig[]
+  categories           ProductCategory[]
+  images               ProductImage[]
+  orderItems           OrderItem[]
+  notifyRequests       NotifyMeRequest[]
+
+  @@map("tblgt_products")
+}
+
+model ProductCountryConfig {
+  id                    String      @id @default(cuid())
+  productId             String
+  countryId             String
+  isAvailable           Boolean     @default(true)
+  directPurchaseEnabled Boolean     @default(false)
+  amazonEnabled         Boolean     @default(false)
+  amazonUrl             String?
+  price                 Decimal     @db.Decimal(10, 2)
+  salePrice             Decimal?    @db.Decimal(10, 2)
+  stockQuantity         Int         @default(0)
+  lowStockThreshold     Int         @default(10)
+  displayRating         Decimal?    @db.Decimal(3, 2)
+  displayReviewCount    Int?
+  status                StockStatus @default(ACTIVE)
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  country   Country  @relation(fields: [countryId], references: [id])
+
+  @@unique([productId, countryId])
+  @@map("tblgt_product_country_config")
+}
+
+// ─── Categories ───────────────────────────────────────────────────────────────
+
+model Category {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  categoryType CategoryType
+  description  String?
+  imageUrl     String?
+  isActive     Boolean      @default(true)
+  displayOrder Int          @default(0)
+
+  products     ProductCategory[]
+
+  @@map("tblgt_categories")
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category  Category @relation(fields: [categoryId], references: [id])
+
+  @@id([productId, categoryId])
+  @@map("tblgt_product_categories")
+}
+
+// ─── Product Images ───────────────────────────────────────────────────────────
+
+model ProductImage {
+  id                 String    @id @default(cuid())
+  productId          String
+  cloudinaryPublicId String    // Store public_id, not URL — allows free transforms
+  altText            String
+  imageType          ImageType @default(PRODUCT)
+  displayOrder       Int       @default(0)
+  isPrimary          Boolean   @default(false)
+
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("tblgt_product_images")
+}
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+model Order {
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique // GT-YYYYMMDD-XXXX
+  customerName      String
+  customerEmail     String
+  customerMobile    String
+  countryId         String
+  subtotal          Decimal       @db.Decimal(10, 2)
+  shippingAmount    Decimal       @db.Decimal(10, 2) @default(0)
+  discountAmount    Decimal       @db.Decimal(10, 2) @default(0)
+  totalAmount       Decimal       @db.Decimal(10, 2)
+  paymentStatus     PaymentStatus @default(PENDING)
+  orderStatus       OrderStatus   @default(PLACED)
+  paymentGateway    String        @default("razorpay")
+  paymentReference  String?       // Razorpay payment_id
+  razorpayOrderId   String?
+  couponCode        String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  country    Country          @relation(fields: [countryId], references: [id])
+  items      OrderItem[]
+  address    OrderAddress?
+  tracking   ShipmentTracking?
+
+  @@map("tblgt_orders")
+}
+
+model OrderItem {
+  id                    String  @id @default(cuid())
+  orderId               String
+  productId             String
+  productNameSnapshot   String  // Frozen at order time
+  quantity              Int
+  unitPrice             Decimal @db.Decimal(10, 2)
+  totalPrice            Decimal @db.Decimal(10, 2)
+
+  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id])
+
+  @@map("tblgt_order_items")
+}
+
+model OrderAddress {
+  id           String  @id @default(cuid())
+  orderId      String  @unique
+  fullName     String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+  country      String  @default("India")
+
+  order  Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("tblgt_order_addresses")
+}
+
+model ShipmentTracking {
+  id                String    @id @default(cuid())
+  orderId           String    @unique
+  courierName       String
+  trackingNumber    String
+  trackingUrl       String?
+  shippedAt         DateTime?
+  estimatedDelivery DateTime?
+  deliveredAt       DateTime?
+
+  order  Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("tblgt_shipment_tracking")
+}
+
+// ─── Leads ────────────────────────────────────────────────────────────────────
+
+model NewsletterSubscriber {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  mobile      String?
+  countryCode String?
+  source      String?  // homepage, blog, checkout, etc.
+  consent     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("tblgt_newsletter_subscribers")
+}
+
+model NotifyMeRequest {
+  id          String       @id @default(cuid())
+  productId   String
+  email       String?
+  mobile      String?
+  countryCode String?
+  status      NotifyStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+
+  product  Product @relation(fields: [productId], references: [id])
+
+  @@map("tblgt_notify_me_requests")
+}
+
+model Inquiry {
+  id          String      @id @default(cuid())
+  inquiryType InquiryType
+  name        String
+  email       String
+  mobile      String?
+  companyName String?
+  country     String?
+  message     String
+  isActioned  Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  @@map("tblgt_inquiries")
+}
+
+// ─── Coupons ──────────────────────────────────────────────────────────────────
+
+model Coupon {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  type        CouponType
+  value       Decimal    @db.Decimal(10, 2)
+  minOrder    Decimal?   @db.Decimal(10, 2)
+  countryId   String?    // null = all countries
+  expiryAt    DateTime?
+  usageLimit  Int?
+  usedCount   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+
+  country  Country? @relation(fields: [countryId], references: [id])
+
+  @@map("tblgt_coupons")
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+
+model Blog {
+  id               String     @id @default(cuid())
+  title            String
+  slug             String     @unique
+  content          String     // Markdown
+  excerpt          String?
+  coverImageUrl    String?
+  metaTitle        String?
+  metaDescription  String?
+  status           BlogStatus @default(DRAFT)
+  publishedAt      DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@map("tblgt_blogs")
+}
+
+model Banner {
+  id           String    @id @default(cuid())
+  title        String
+  imageUrl     String
+  linkUrl      String?
+  position     String    // hero, promo-strip, category-top, etc.
+  countryId    String?   // null = all countries
+  isActive     Boolean   @default(true)
+  displayOrder Int       @default(0)
+  validFrom    DateTime?
+  validUntil   DateTime?
+
+  country  Country? @relation(fields: [countryId], references: [id])
+
+  @@map("tblgt_banners")
+}
+
+model Faq {
+  id           String  @id @default(cuid())
+  question     String
+  answer       String
+  category     String? // products, shipping, wellness, etc.
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  @@map("tblgt_faqs")
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  passwordHash String
+  role        AdminRole @default(CONTENT_MANAGER)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  auditLogs  AuditLog[]
+
+  @@map("tblgt_admin_users")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  adminUserId String
+  action      String   // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entityType  String   // Product, Order, Coupon, etc.
+  entityId    String?
+  oldValues   Json?
+  newValues   Json?
+  createdAt   DateTime @default(now())
+
+  adminUser  AdminUser @relation(fields: [adminUserId], references: [id])
+
+  @@map("tblgt_audit_logs")
+}
+
+// ─── Analytics ────────────────────────────────────────────────────────────────
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  eventType   String   // product_view, add_to_cart, amazon_redirect, etc.
+  productId   String?
+  countryCode String?
+  sessionId   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("tblgt_analytics_events")
+}

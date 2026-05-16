@@ -29,7 +29,9 @@ Premium organic green & herbal tea commerce platform. India = direct checkout (R
 - All tables prefixed `tblgt_` — e.g. `tblgt_products`, `tblgt_orders`
 - Prisma model names are PascalCase without prefix — e.g. `Product`, `Order`
 - Use `@prisma/adapter-pg` + `pg` driver, NOT `@neondatabase/serverless`
-- Migrations via `npx prisma migrate dev` locally, `npx prisma migrate deploy` in CI
+- Prisma 7 breaking change: `url` is NOT in `schema.prisma`; it lives in `prisma.config.ts` under `datasource.url`
+- Adapter (`PrismaPg`) is passed to `PrismaClient` constructor in `lib/db.ts`
+- Migrations: `npm run db:migrate` locally, `npm run db:migrate:deploy` in CI
 
 ## Architecture Rules
 - Modular monolith — no microservices
