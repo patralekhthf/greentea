@@ -1,4 +1,4 @@
-// Next.js middleware — runs on every request at the edge
+// Next.js proxy (formerly middleware) — runs on every request at the edge
 // Responsibilities:
 //   1. Resolve country from cookie → ipapi.co → browser locale → default (IN)
 //   2. Protect /admin/* routes — redirect to /admin/login if no valid session
@@ -11,7 +11,7 @@ const ADMIN_SESSION_COOKIE = "gt_admin_session";
 const SUPPORTED = ["IN", "US", "GB", "AU"];
 const DEFAULT = "IN";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // ── Admin route protection ──────────────────────────────────────────────────
