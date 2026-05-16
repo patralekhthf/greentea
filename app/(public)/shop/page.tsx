@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getProducts } from "@/lib/products";
 import { COUNTRY_CONFIG, isValidCountry } from "@/lib/ipapi";
 import ShopClient from "./ShopClient";
+import ShopCategoryQuickLinks from "@/components/product/ShopCategoryQuickLinks";
 
 export const metadata: Metadata = {
   title: "Shop All Teas",
@@ -93,17 +94,7 @@ export default async function ShopPage({ searchParams }: PageProps) {
             </div>
 
             {/* Category quick links */}
-            <div className="flex flex-wrap gap-2">
-              {["green-tea", "herbal-tea", "ayurvedic-tea", "gift-packs"].map((slug) => (
-                <Link
-                  key={slug}
-                  href={`/shop?category=${slug}`}
-                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-brand-border bg-white hover:border-brand-sage hover:text-brand-green transition-colors text-brand-muted capitalize"
-                >
-                  {slug.replace(/-/g, " ")}
-                </Link>
-              ))}
-            </div>
+            <ShopCategoryQuickLinks />
           </div>
         </div>
       </div>
