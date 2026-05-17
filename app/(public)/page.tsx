@@ -81,12 +81,52 @@ const TESTIMONIALS = [
   },
 ];
 
+// Country-specific trust microcopy shown under the hero CTAs
+const HERO_TRUST_COPY: Record<
+  "IN" | "US" | "GB" | "AU",
+  { shipping: string; freshness: string; testing: string }
+> = {
+  IN: {
+    shipping:  "Free shipping over ₹499",
+    freshness: "100-day freshness guarantee",
+    testing:   "Lab-tested for purity",
+  },
+  US: {
+    shipping:  "Free shipping with Amazon Prime",
+    freshness: "100-day freshness guarantee",
+    testing:   "Lab-tested for purity",
+  },
+  GB: {
+    shipping:  "Free delivery via Amazon UK",
+    freshness: "100-day freshness guarantee",
+    testing:   "Lab-tested for purity",
+  },
+  AU: {
+    shipping:  "Free delivery via Amazon AU",
+    freshness: "100-day freshness guarantee",
+    testing:   "Lab-tested for purity",
+  },
+};
+
+// Country-specific secondary CTA
+const HERO_SECONDARY_CTA: Record<
+  "IN" | "US" | "GB" | "AU",
+  { label: string; href: string }
+> = {
+  IN: { label: "Explore Bestsellers",  href: "/shop?sort=bestseller" },
+  US: { label: "Shop on Amazon US",    href: "/shop?sort=bestseller" },
+  GB: { label: "Shop on Amazon UK",    href: "/shop?sort=bestseller" },
+  AU: { label: "Shop on Amazon AU",    href: "/shop?sort=bestseller" },
+};
+
 export default async function HomePage() {
   // Resolve country
   const cookieStore = await cookies();
   const rawCountry = cookieStore.get("gt_country")?.value ?? "IN";
   const country = isValidCountry(rawCountry) ? rawCountry : "IN";
   const { currencySymbol } = COUNTRY_CONFIG[country];
+  const trustCopy = HERO_TRUST_COPY[country];
+  const secondaryCta = HERO_SECONDARY_CTA[country];
 
   // Parallel fetches — bestsellers + latest journal posts
   const [bestsellers, journalPosts] = await Promise.all([
@@ -167,33 +207,23 @@ export default async function HomePage() {
                 </svg>
               </Link>
               <Link
-                href="/shop?sort=bestseller"
+                href={secondaryCta.href}
                 className="inline-flex items-center gap-2 bg-transparent text-white border border-white/40 font-semibold px-7 py-3.5 rounded-full hover:bg-white/10 transition-colors text-sm"
               >
-                Explore Bestsellers
+                {secondaryCta.label}
               </Link>
             </div>
 
-            {/* Trust microcopy */}
+            {/* Trust microcopy — country-aware */}
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/60">
-              <span className="inline-flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Free shipping over ₹499
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                100-day freshness guarantee
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Lab-tested for purity
-              </span>
+              {[trustCopy.shipping, trustCopy.freshness, trustCopy.testing].map((line) => (
+                <span key={line} className="inline-flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {line}
+                </span>
+              ))}
             </div>
           </div>
         </div>
