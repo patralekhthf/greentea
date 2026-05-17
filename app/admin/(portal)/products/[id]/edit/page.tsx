@@ -41,6 +41,8 @@ export default async function EditProductPage({ params }: Props) {
     status:              product.status,
     isBestseller:        product.isBestseller,
     isFeatured:          product.isFeatured,
+    packedOn:            product.packedOn ? new Date(product.packedOn).toISOString().slice(0, 10) : "",
+    freshnessDays:       product.freshnessDays,
     existingImages:      product.images.map((img) => ({
       id:                 img.id,
       cloudinaryPublicId: img.cloudinaryPublicId,

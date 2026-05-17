@@ -135,6 +135,9 @@ model Product {
   status               ProductStatus  @default(DRAFT)
   isFeatured           Boolean        @default(false)
   isBestseller         Boolean        @default(false)
+  // Farmers Market / local delivery freshness
+  packedOn             DateTime?      // when this batch was packed (admin-editable)
+  freshnessDays        Int            @default(14) // shelf life in days from packedOn
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
@@ -443,4 +446,27 @@ model AnalyticsEvent {
   createdAt   DateTime @default(now())
 
   @@map("tblgt_analytics_events")
+}
+
+// ─── Farmers Market / Local Delivery Zone ─────────────────────────────────────
+// Single-row config (id="default") describing the local delivery area.
+// When a customer is within radiusKm of (centerLat, centerLng), they see
+// the Farmers Market offer with WhatsApp ordering.
+
+model LocalDeliveryZone {
+  id              String   @id @default("default")
+  isActive        Boolean  @default(false)
+  addressLabel    String   // human-readable label e.g. "Hauz Khas Warehouse, Delhi"
+  centerLat       Float
+  centerLng       Float
+  radiusKm        Float    @default(5)
+  whatsappNumber  String   // E.164, e.g. "919XXXXXXXXX" (no +)
+  // Customer-facing copy
+  bannerText      String   @default("You're in our local delivery zone — get ultra-fresh teas via WhatsApp.")
+  freshnessNote   String   @default("Zero preservatives. Fresh for 14 days from packaging.")
+  paymentNote     String   @default("Pay via WhatsApp, GPay, or any UPI app.")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("tblgt_local_delivery_zone")
 }

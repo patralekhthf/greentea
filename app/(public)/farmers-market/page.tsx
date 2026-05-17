@@ -1,0 +1,274 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { db } from "@/lib/db";
+import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
+
+export const metadata: Metadata = {
+  title: "Farmers Market — Fresh Local Delivery",
+  description:
+    "Get ultra-fresh, zero-preservative teas delivered locally. Order via WhatsApp, pay via UPI or GPay.",
+};
+
+export const dynamic = "force-dynamic";
+
+function formatINR(value: string | number) {
+  const n = typeof value === "string" ? parseFloat(value) : value;
+  return `₹${n.toFixed(0)}`;
+}
+
+/** Days remaining until best-before, based on packedOn + freshnessDays. */
+function freshnessFor(packedOn: Date | null, freshnessDays: number) {
+  if (!packedOn) return null;
+  const bestBefore = new Date(packedOn.getTime() + freshnessDays * 86400000);
+  const today = new Date();
+  const msLeft = bestBefore.getTime() - today.getTime();
+  const daysLeft = Math.floor(msLeft / 86400000);
+  const daysSincePacked = Math.floor((today.getTime() - packedOn.getTime()) / 86400000);
+  return { daysLeft, daysSincePacked, bestBefore };
+}
+
+export default async function FarmersMarketPage() {
+  // Fetch zone config — must be active
+  const zone = await db.localDeliveryZone.findUnique({ where: { id: "default" } });
+  if (!zone || !zone.isActive) notFound();
+
+  // Fetch products available in India with primary image + IN config
+  const products = await db.product.findMany({
+    where: {
+      status: "PUBLISHED",
+      countryConfigs: { some: { country: { code: "IN" }, isAvailable: true } },
+    },
+    include: {
+      images: { where: { isPrimary: true }, take: 1, select: { cloudinaryPublicId: true } },
+      countryConfigs: { where: { country: { code: "IN" } } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Build WhatsApp deep-link for a product (or general)
+  function waLink(text: string) {
+    const enc = encodeURIComponent(text);
+    return `https://wa.me/${zone!.whatsappNumber}?text=${enc}`;
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-cream">
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <section className="bg-gradient-to-br from-brand-green via-brand-mid to-brand-dark text-white relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/[0.04] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-white/[0.04] pointer-events-none" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-brand-gold/20 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-5 border border-brand-gold/30">
+              <span>🌱</span>
+              <span>Local Farmers Market · {zone.addressLabel}</span>
+            </div>
+            <h1
+              className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-5"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Ultra-Fresh Teas, <br className="hidden sm:block" />
+              <span className="text-brand-sage">Delivered Locally</span>
+            </h1>
+            <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
+              {zone.freshnessNote} Order via WhatsApp, pay via UPI — same-day delivery within {zone.radiusKm} km.
+            </p>
+
+            {/* Value chips */}
+            <div className="flex flex-wrap gap-3 mb-8">
+              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
+                <span>🚫</span> Zero preservatives
+              </span>
+              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
+                <span>📅</span> 14-day fresh window
+              </span>
+              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
+                <span>🛵</span> Same-day delivery
+              </span>
+              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
+                <span>💸</span> Pay via UPI / GPay
+              </span>
+            </div>
+
+            <a
+              href={waLink(`Hi Kanta Greens! I'd like to order from the Farmers Market. Could you share what's fresh today?`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity text-sm shadow-lg shadow-black/20"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+              </svg>
+              Order on WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it works ─────────────────────────────────────────────── */}
+      <section className="bg-white border-b border-brand-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid sm:grid-cols-3 gap-6">
+            {[
+              { n: "1", title: "Pick your blend", desc: "Browse below — each card shows how fresh that batch is." },
+              { n: "2", title: "WhatsApp us", desc: "Tap 'Order on WhatsApp' — message pre-filled with the product name." },
+              { n: "3", title: "UPI / Cash on delivery", desc: zone.paymentNote },
+            ].map((s) => (
+              <div key={s.n} className="flex items-start gap-4">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-brand-mint text-brand-green font-bold flex items-center justify-center">
+                  {s.n}
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-brand-green mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                    {s.title}
+                  </h3>
+                  <p className="text-sm text-brand-muted leading-relaxed">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Products grid ────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <h2
+            className="text-2xl sm:text-3xl font-bold text-brand-green mb-2"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            What&apos;s fresh today
+          </h2>
+          <p className="text-sm text-brand-muted">
+            Tap any tea to order via WhatsApp. Prices shown for the base pack — message us for other sizes.
+          </p>
+        </div>
+
+        {products.length === 0 ? (
+          <p className="text-center text-brand-muted py-20">No teas available right now. Check back soon.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {products.map((p) => {
+              const config = p.countryConfigs[0];
+              const fresh  = freshnessFor(p.packedOn, p.freshnessDays);
+              const imageUrl = p.images[0]?.cloudinaryPublicId
+                ? buildImageUrl(p.images[0].cloudinaryPublicId, TRANSFORMS.productCard)
+                : null;
+
+              const orderMsg = `Hi Kanta Greens! I'd like to order *${p.name}* from the Farmers Market. Could you confirm what's available and the freshest batch?`;
+
+              const freshChip = fresh
+                ? fresh.daysLeft > 5
+                  ? { tone: "bg-green-100 text-green-800",   text: `🌿 Packed ${fresh.daysSincePacked}d ago · ${fresh.daysLeft}d fresh remaining` }
+                  : fresh.daysLeft > 0
+                    ? { tone: "bg-amber-100 text-amber-800", text: `⚠️ Best within ${fresh.daysLeft}d — packed ${fresh.daysSincePacked}d ago` }
+                    : { tone: "bg-red-100 text-red-800",      text: `⏰ Past peak freshness — new batch arriving soon` }
+                : { tone: "bg-gray-100 text-gray-600",       text: "Batch info available on WhatsApp" };
+
+              return (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-2xl border border-brand-border overflow-hidden hover:shadow-lg transition-all flex flex-col"
+                >
+                  {/* Image */}
+                  <Link href={`/products/${p.slug}`} className="block relative aspect-square bg-brand-mint overflow-hidden group">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-6xl opacity-60">🍵</div>
+                    )}
+                  </Link>
+
+                  {/* Body */}
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3
+                      className="font-bold text-brand-green text-base leading-snug mb-1"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {p.name}
+                    </h3>
+                    {p.tagline && (
+                      <p className="text-xs text-brand-muted mb-3">{p.tagline}</p>
+                    )}
+
+                    {/* Freshness chip */}
+                    <div className={`inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full mb-4 self-start ${freshChip.tone}`}>
+                      {freshChip.text}
+                    </div>
+
+                    {/* Price */}
+                    {config?.price && (
+                      <div className="flex items-baseline gap-2 mb-4">
+                        <span className="text-lg font-bold text-brand-green">{formatINR(config.price.toString())}</span>
+                        {config.salePrice && (
+                          <span className="text-sm text-brand-muted line-through">{formatINR(config.salePrice.toString())}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* WhatsApp CTA */}
+                    <div className="mt-auto">
+                      <a
+                        href={waLink(orderMsg)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white text-sm font-semibold py-2.5 rounded-full hover:opacity-90 transition-opacity"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607z"/>
+                        </svg>
+                        Order on WhatsApp
+                      </a>
+                      <Link
+                        href={`/products/${p.slug}`}
+                        className="block text-center text-xs font-semibold text-brand-muted hover:text-brand-green mt-2 py-1"
+                      >
+                        See full details →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* ── Payment / trust footer ───────────────────────────────────── */}
+      <section className="bg-brand-mint border-t border-brand-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <h3
+            className="text-xl font-bold text-brand-green mb-3"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Paying is as easy as ordering
+          </h3>
+          <p className="text-sm text-brand-muted mb-6 max-w-xl mx-auto">{zone.paymentNote}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+            {[
+              { icon: "💬", label: "WhatsApp Pay" },
+              { icon: "🟢", label: "GPay" },
+              { icon: "🟣", label: "PhonePe" },
+              { icon: "🔵", label: "Paytm" },
+              { icon: "🏦", label: "Any UPI" },
+              { icon: "💵", label: "Cash on delivery" },
+            ].map((m) => (
+              <div key={m.label} className="flex items-center gap-2 bg-white border border-brand-border px-4 py-2 rounded-full text-sm font-medium text-brand-dark">
+                <span>{m.icon}</span> {m.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

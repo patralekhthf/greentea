@@ -13,6 +13,7 @@ export default async function NewProductPage() {
     benefits: "", caffeineLevel: "NONE", tasteProfile: "", aromaProfile: "",
     packagingSizes: "", storageInstructions: "", status: "DRAFT",
     isBestseller: false, isFeatured: false,
+    packedOn: "", freshnessDays: 14,
     existingImages: [],
     countryConfigs: countries.map((c) => ({
       countryId: c.id, code: c.code, price: "", salePrice: "",

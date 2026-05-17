@@ -51,6 +51,9 @@ export type ProductFormValues = {
   status: string;
   isBestseller: boolean;
   isFeatured: boolean;
+  // Farmers Market freshness — only shown to local customers
+  packedOn: string;       // "YYYY-MM-DD" or "" for none
+  freshnessDays: number;  // shelf life from packedOn, default 14
   countryConfigs: CountryConfig[];
   existingImages: ProductImage[];
 };
@@ -154,6 +157,8 @@ export default function ProductForm({ initial }: Props) {
         status:              values.status,
         isBestseller:        values.isBestseller,
         isFeatured:          values.isFeatured,
+        packedOn:            values.packedOn ? new Date(values.packedOn).toISOString() : null,
+        freshnessDays:       Number(values.freshnessDays) || 14,
       };
 
       let productId = initial.id;
@@ -308,6 +313,37 @@ export default function ProductForm({ initial }: Props) {
                 <input type="checkbox" checked={values.isFeatured} onChange={(e) => set("isFeatured", e.target.checked)} className="rounded" />
                 <span className="font-medium text-gray-700">Featured</span>
               </label>
+            </div>
+
+            {/* Farmers Market freshness */}
+            <div className="pt-5 border-t border-gray-100">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">🌿 Farmers Market freshness</h4>
+              <p className="text-xs text-gray-400 mb-4">Shown only to customers inside your local delivery zone.</p>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Packed on">
+                  <input
+                    type="date"
+                    value={values.packedOn}
+                    onChange={(e) => set("packedOn", e.target.value)}
+                    className={INPUT}
+                  />
+                </Field>
+                <Field label="Freshness window (days)">
+                  <input
+                    type="number"
+                    min={1}
+                    max={365}
+                    value={values.freshnessDays}
+                    onChange={(e) => set("freshnessDays", Number(e.target.value))}
+                    className={INPUT}
+                  />
+                </Field>
+              </div>
+              {values.packedOn && (
+                <p className="text-xs text-brand-green mt-2">
+                  Best before: {new Date(new Date(values.packedOn).getTime() + values.freshnessDays * 86400000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+              )}
             </div>
           </div>
         )}
