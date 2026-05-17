@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
+import DeliveryZoneMap from "@/components/local/DeliveryZoneMap";
 
 export const metadata: Metadata = {
   title: "Farmers Market — Fresh Local Delivery",
@@ -131,6 +132,31 @@ export default async function FarmersMarketPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── Delivery boundary map + address checker ─────────────────── */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-8">
+          <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-2">
+            Delivery Map
+          </p>
+          <h2
+            className="text-2xl sm:text-3xl font-bold text-brand-green mb-2"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Are you (or they) in our zone?
+          </h2>
+          <p className="text-sm text-brand-muted max-w-xl mx-auto">
+            We deliver fresh within a {zone.radiusKm} km radius of {zone.addressLabel}. Check below — or send a pincode to confirm a recipient&apos;s address.
+          </p>
+        </div>
+
+        <DeliveryZoneMap
+          centerLat={zone.centerLat}
+          centerLng={zone.centerLng}
+          radiusKm={zone.radiusKm}
+          addressLabel={zone.addressLabel}
+        />
       </section>
 
       {/* ── Products grid ────────────────────────────────────────────── */}

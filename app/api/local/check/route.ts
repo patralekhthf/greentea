@@ -76,6 +76,8 @@ export async function POST(req: NextRequest) {
     distanceKm:   Math.round(d * 10) / 10,
     resolvedFrom,
     pincodeLabel,
+    resolvedLat:  lat,
+    resolvedLng:  lng,
     zone: {
       addressLabel:   zone.addressLabel,
       radiusKm:       zone.radiusKm,

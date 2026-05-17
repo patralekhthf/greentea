@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import CountrySwitcher from "./CountrySwitcher";
+import LocationSwitcher from "./LocationSwitcher";
 
 const NAV = [
   { label: "Shop",     href: "/shop" },
@@ -46,7 +46,7 @@ export default function Header() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            <CountrySwitcher />
+            <LocationSwitcher />
 
             {/* Cart icon — shown always, non-functional Phase 1 */}
             <button
