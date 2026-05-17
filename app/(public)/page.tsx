@@ -128,8 +128,8 @@ export default async function HomePage() {
   const trustCopy = HERO_TRUST_COPY[country];
   const secondaryCta = HERO_SECONDARY_CTA[country];
 
-  // Parallel fetches — bestsellers + latest journal posts
-  const [bestsellers, journalPosts] = await Promise.all([
+  // Parallel fetches — bestsellers + latest journal posts + country hero image
+  const [bestsellers, journalPosts, heroBanner] = await Promise.all([
     getProducts({ country, sort: "bestseller" }).then((p) => p.slice(0, 4)),
     db.blog.findMany({
       where: { status: "PUBLISHED" },
@@ -143,6 +143,14 @@ export default async function HomePage() {
         coverImageUrl: true,
         publishedAt: true,
       },
+    }),
+    db.banner.findFirst({
+      where: {
+        position:  "hero",
+        isActive:  true,
+        country:   { code: country },
+      },
+      select: { imageUrl: true, title: true },
     }),
   ]);
 
@@ -166,64 +174,122 @@ export default async function HomePage() {
           <path d="M50,5 L50,90" stroke="currentColor" strokeWidth="0.5" fill="none" />
         </svg>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-          <div className="max-w-2xl">
-            {/* Eyebrow with rating */}
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-medium px-3 py-1.5 rounded-full border border-white/20">
-                <span>🌿</span>
-                <span>Premium Organic · Wellness Teas</span>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* ─── Left: copy ─────────────────────────────────────────────── */}
+            <div>
+              {/* Eyebrow with rating */}
+              <div className="flex flex-wrap items-center gap-2 mb-6">
+                <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-medium px-3 py-1.5 rounded-full border border-white/20">
+                  <span>🌿</span>
+                  <span>Premium Organic · Wellness Teas</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 bg-brand-gold/20 text-white text-xs font-medium px-3 py-1.5 rounded-full border border-brand-gold/30">
+                  <span className="text-brand-gold">★</span>
+                  <span>4.8 · Loved by 5,000+ tea drinkers</span>
+                </div>
               </div>
-              <div className="inline-flex items-center gap-1.5 bg-brand-gold/20 text-white text-xs font-medium px-3 py-1.5 rounded-full border border-brand-gold/30">
-                <span className="text-brand-gold">★</span>
-                <span>4.8 · Loved by 5,000+ tea drinkers</span>
-              </div>
-            </div>
 
-            {/* Headline */}
-            <h1
-              className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.05] mb-6 tracking-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Nature&apos;s Finest,
-              <br />
-              <span className="text-brand-sage">Steeped in Care</span>
-            </h1>
-
-            {/* Sub */}
-            <p className="text-lg text-white/75 leading-relaxed mb-10 max-w-xl">
-              Premium organic teas sourced from India&apos;s finest gardens — crafted for your daily wellness ritual, not just your cup.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap gap-4 mb-8">
-              <Link
-                href="/shop"
-                className="inline-flex items-center gap-2 bg-white text-brand-green font-semibold px-7 py-3.5 rounded-full hover:bg-brand-mint transition-colors text-sm shadow-lg shadow-black/10"
+              {/* Headline */}
+              <h1
+                className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.05] mb-6 tracking-tight"
+                style={{ fontFamily: "var(--font-display)" }}
               >
-                Shop All Teas
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <Link
-                href={secondaryCta.href}
-                className="inline-flex items-center gap-2 bg-transparent text-white border border-white/40 font-semibold px-7 py-3.5 rounded-full hover:bg-white/10 transition-colors text-sm"
-              >
-                {secondaryCta.label}
-              </Link>
-            </div>
+                Nature&apos;s Finest,
+                <br />
+                <span className="text-brand-sage">Steeped in Care</span>
+              </h1>
 
-            {/* Trust microcopy — country-aware */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/60">
-              {[trustCopy.shipping, trustCopy.freshness, trustCopy.testing].map((line) => (
-                <span key={line} className="inline-flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              {/* Sub */}
+              <p className="text-lg text-white/75 leading-relaxed mb-10 max-w-xl">
+                Premium organic teas sourced from India&apos;s finest gardens — crafted for your daily wellness ritual, not just your cup.
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-wrap gap-4 mb-8">
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 bg-white text-brand-green font-semibold px-7 py-3.5 rounded-full hover:bg-brand-mint transition-colors text-sm shadow-lg shadow-black/10"
+                >
+                  Shop All Teas
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  {line}
-                </span>
-              ))}
+                </Link>
+                <Link
+                  href={secondaryCta.href}
+                  className="inline-flex items-center gap-2 bg-transparent text-white border border-white/40 font-semibold px-7 py-3.5 rounded-full hover:bg-white/10 transition-colors text-sm"
+                >
+                  {secondaryCta.label}
+                </Link>
+              </div>
+
+              {/* Trust microcopy — country-aware */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/60">
+                {[trustCopy.shipping, trustCopy.freshness, trustCopy.testing].map((line) => (
+                  <span key={line} className="inline-flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {line}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* ─── Right: country-specific hero image (or fallback) ───────── */}
+            <div className="relative hidden lg:block">
+              {heroBanner?.imageUrl ? (
+                <div className="relative">
+                  {/* Decorative offset frame */}
+                  <div className="absolute -inset-4 rounded-[2rem] border border-white/15 pointer-events-none" />
+                  <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-brand-gold/20 blur-2xl pointer-events-none" />
+                  <div className="relative aspect-[4/5] rounded-[1.75rem] overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-white/10">
+                    <Image
+                      src={buildImageUrl(heroBanner.imageUrl, "w_800,h_1000,c_fill,f_webp,q_auto")}
+                      alt={heroBanner.title ?? "Kanta Greens"}
+                      fill
+                      sizes="(max-width: 1024px) 0px, 50vw"
+                      className="object-cover"
+                      priority
+                    />
+                    {/* Bottom-left floating badge */}
+                    <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between gap-3">
+                      <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+                        <span className="text-base">🌱</span>
+                        <span className="text-xs font-semibold text-brand-green">100% Organic</span>
+                      </div>
+                      <div className="bg-brand-green/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-1.5 shadow-lg">
+                        <span className="text-brand-gold text-sm">★</span>
+                        <span className="text-xs font-semibold text-white">4.8 / 5</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Fallback decorative illustration when no banner uploaded
+                <div className="relative aspect-[4/5] rounded-[1.75rem] overflow-hidden bg-gradient-to-br from-brand-sage/30 via-brand-green to-brand-dark ring-1 ring-white/10">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-3/5 h-3/5 text-white/15" viewBox="0 0 200 200" fill="none">
+                      {/* Stylized tea leaf */}
+                      <path
+                        d="M100,20 C60,40 30,90 60,160 C90,140 130,100 130,55 C125,35 115,25 100,20 Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M100,20 L75,155"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        fill="none"
+                        opacity="0.5"
+                      />
+                      <path d="M85,60 Q92,65 95,75" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
+                      <path d="M82,90 Q90,95 95,105" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
+                      <path d="M78,120 Q88,125 92,135" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
+                    </svg>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
