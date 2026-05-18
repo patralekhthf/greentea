@@ -50,8 +50,12 @@ export async function POST(req: NextRequest) {
 
   const itemCount = body.items.reduce((s, i) => s + i.quantity, 0);
   const subtotal  = body.items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const meta      = getRequestMeta(req);
   const mobile    = body.customerMobile.replace(/\D/g, "").slice(-10);
+
+  // The Order model doesn't have a `referrer` column (only the Cart does), so
+  // strip it before spreading. Every other meta field exists on both models.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { referrer: _omitReferrer, ...orderMeta } = getRequestMeta(req);
 
   // Verify the cartId points to an actual row before linking. A stale ID in
   // localStorage (e.g. cart was wiped from the DB) used to break the FK and
@@ -82,7 +86,7 @@ export async function POST(req: NextRequest) {
         itemCount,
         subtotal,
         whatsappSentAt: new Date(),
-        ...meta,
+        ...orderMeta,
       },
       select: { id: true, orderNumber: true },
     });
