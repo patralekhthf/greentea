@@ -25,6 +25,7 @@ export default async function EditProductPage({ params }: Props) {
 
   const initial: ProductFormValues = {
     id: product.id,
+    sku:                 product.sku ?? "",
     name:                product.name,
     slug:                product.slug,
     tagline:             product.tagline ?? "",

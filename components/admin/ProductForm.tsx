@@ -35,6 +35,7 @@ type ProductImage = {
 
 export type ProductFormValues = {
   id?: string;
+  sku: string;
   name: string;
   slug: string;
   tagline: string;
@@ -141,6 +142,7 @@ export default function ProductForm({ initial }: Props) {
     setError("");
     try {
       const payload = {
+        sku:                 values.sku || null,
         name:                values.name,
         slug:                values.slug,
         tagline:             values.tagline || null,
@@ -265,6 +267,16 @@ export default function ProductForm({ initial }: Props) {
                 <input value={values.slug} onChange={(e) => set("slug", slugify(e.target.value))} className={INPUT} />
               </Field>
             </div>
+
+            <Field label="SKU / Product Code">
+              <input
+                value={values.sku}
+                onChange={(e) => set("sku", e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
+                className={INPUT}
+                placeholder="KG-TUL-001"
+              />
+              <p className="text-xs text-gray-400 mt-1">Unique short code shown on WhatsApp orders. Letters, numbers, hyphens only.</p>
+            </Field>
 
             <Field label="Tagline">
               <input value={values.tagline} onChange={(e) => set("tagline", e.target.value)} className={INPUT} placeholder="Clarity in every sip" />

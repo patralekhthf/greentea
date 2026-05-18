@@ -19,16 +19,7 @@ function formatINR(value: string | number) {
   return `₹${n.toFixed(0)}`;
 }
 
-/** Days remaining until best-before, based on packedOn + freshnessDays. */
-function freshnessFor(packedOn: Date | null, freshnessDays: number) {
-  if (!packedOn) return null;
-  const bestBefore = new Date(packedOn.getTime() + freshnessDays * 86400000);
-  const today = new Date();
-  const msLeft = bestBefore.getTime() - today.getTime();
-  const daysLeft = Math.floor(msLeft / 86400000);
-  const daysSincePacked = Math.floor((today.getTime() - packedOn.getTime()) / 86400000);
-  return { daysLeft, daysSincePacked, bestBefore };
-}
+
 
 export default async function FarmersMarketPage() {
   // Fetch zone config — must be active
@@ -75,7 +66,7 @@ export default async function FarmersMarketPage() {
               <span className="text-brand-sage">Delivered Locally</span>
             </h1>
             <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
-              {zone.freshnessNote} Order via WhatsApp, pay via UPI — same-day delivery within {zone.radiusKm} km.
+              Every order is freshly packed the night before or same morning it ships — you get a full 14 days of freshness from the day you receive it. Order via WhatsApp, pay via UPI.
             </p>
 
             {/* Value chips */}
@@ -84,10 +75,13 @@ export default async function FarmersMarketPage() {
                 <span>🚫</span> Zero preservatives
               </span>
               <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
-                <span>📅</span> 14-day fresh window
+                <span>📦</span> Packed fresh on your order
               </span>
               <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
-                <span>🛵</span> Same-day delivery
+                <span>🛵</span> Ships next working day
+              </span>
+              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
+                <span>📅</span> Full 14 days freshness
               </span>
               <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
                 <span>💸</span> Pay via UPI / GPay
@@ -114,9 +108,9 @@ export default async function FarmersMarketPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { n: "1", title: "Pick your blend", desc: "Browse below — each card shows how fresh that batch is." },
-              { n: "2", title: "WhatsApp us", desc: "Tap 'Order on WhatsApp' — message pre-filled with the product name." },
-              { n: "3", title: "UPI / Cash on delivery", desc: zone.paymentNote },
+              { n: "1", title: "Pick your blend", desc: "Browse below or tap 'Build Your Order' to select multiple products." },
+              { n: "2", title: "Review & send", desc: "Choose quantity, payment method — 'Place Order' sends everything via WhatsApp." },
+              { n: "3", title: "Packed fresh & shipped", desc: "We pack your order fresh the night before / same morning, and ship next working day. Full 14-day freshness guaranteed." },
             ].map((s) => (
               <div key={s.n} className="flex items-start gap-4">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-brand-mint text-brand-green font-bold flex items-center justify-center">
@@ -161,16 +155,24 @@ export default async function FarmersMarketPage() {
 
       {/* ── Products grid ────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h2
-            className="text-2xl sm:text-3xl font-bold text-brand-green mb-2"
-            style={{ fontFamily: "var(--font-display)" }}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div>
+            <h2
+              className="text-2xl sm:text-3xl font-bold text-brand-green mb-2"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              What&apos;s fresh today
+            </h2>
+            <p className="text-sm text-brand-muted">
+              Quick-order a single product, or build a multi-item order with the button below.
+            </p>
+          </div>
+          <Link
+            href="/farmers-market/order"
+            className="inline-flex items-center gap-2 bg-brand-green text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-brand-mid transition-colors whitespace-nowrap self-start sm:self-auto"
           >
-            What&apos;s fresh today
-          </h2>
-          <p className="text-sm text-brand-muted">
-            Tap any tea to order via WhatsApp. Prices shown for the base pack — message us for other sizes.
-          </p>
+            🛒 Build Your Order
+          </Link>
         </div>
 
         {products.length === 0 ? (
@@ -179,20 +181,12 @@ export default async function FarmersMarketPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {products.map((p) => {
               const config = p.countryConfigs[0];
-              const fresh  = freshnessFor(p.packedOn, p.freshnessDays);
               const imageUrl = p.images[0]?.cloudinaryPublicId
                 ? buildImageUrl(p.images[0].cloudinaryPublicId, TRANSFORMS.productCard)
                 : null;
 
-              const orderMsg = `Hi Kanta Greens! I'd like to order *${p.name}* from the Farmers Market. Could you confirm what's available and the freshest batch?`;
-
-              const freshChip = fresh
-                ? fresh.daysLeft > 5
-                  ? { tone: "bg-green-100 text-green-800",   text: `🌿 Packed ${fresh.daysSincePacked}d ago · ${fresh.daysLeft}d fresh remaining` }
-                  : fresh.daysLeft > 0
-                    ? { tone: "bg-amber-100 text-amber-800", text: `⚠️ Best within ${fresh.daysLeft}d — packed ${fresh.daysSincePacked}d ago` }
-                    : { tone: "bg-red-100 text-red-800",      text: `⏰ Past peak freshness — new batch arriving soon` }
-                : { tone: "bg-gray-100 text-gray-600",       text: "Batch info available on WhatsApp" };
+              const skuDisplay = p.sku ?? p.slug.toUpperCase().slice(0, 8);
+              const orderMsg = `Hi Kanta Greens! I'd like to order *${p.name}* (${skuDisplay}) from the Farmers Market.`;
 
               return (
                 <div
@@ -216,19 +210,24 @@ export default async function FarmersMarketPage() {
 
                   {/* Body */}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3
-                      className="font-bold text-brand-green text-base leading-snug mb-1"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {p.name}
-                    </h3>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3
+                        className="font-bold text-brand-green text-base leading-snug"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {p.name}
+                      </h3>
+                      <span className="shrink-0 text-[10px] font-mono bg-brand-mint text-brand-green px-2 py-0.5 rounded-full">
+                        {skuDisplay}
+                      </span>
+                    </div>
                     {p.tagline && (
                       <p className="text-xs text-brand-muted mb-3">{p.tagline}</p>
                     )}
 
-                    {/* Freshness chip */}
-                    <div className={`inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full mb-4 self-start ${freshChip.tone}`}>
-                      {freshChip.text}
+                    {/* Freshness note */}
+                    <div className="inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full mb-4 self-start bg-green-50 text-green-800 border border-green-100">
+                      📦 Packed fresh on order · 14 days freshness
                     </div>
 
                     {/* Price */}

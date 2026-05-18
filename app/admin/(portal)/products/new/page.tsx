@@ -8,7 +8,7 @@ export default async function NewProductPage() {
   const countries = await db.country.findMany({ orderBy: { name: "asc" } });
 
   const initial: ProductFormValues = {
-    name: "", slug: "", tagline: "", shortDescription: "",
+    sku: "", name: "", slug: "", tagline: "", shortDescription: "",
     longDescription: "", ingredients: "", brewingInstructions: "",
     benefits: "", caffeineLevel: "NONE", tasteProfile: "", aromaProfile: "",
     packagingSizes: "", storageInstructions: "", status: "DRAFT",
