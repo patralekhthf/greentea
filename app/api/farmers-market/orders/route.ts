@@ -73,7 +73,8 @@ export async function POST(req: NextRequest) {
     const order = await db.farmersMarketOrder.create({
       data: {
         orderNumber,
-        cartId:         validCartId,
+        // Prisma 7 requires the relation-field syntax when a relation is defined
+        ...(validCartId ? { cart: { connect: { id: validCartId } } } : {}),
         customerName:   body.customerName?.trim() || null,
         customerMobile: mobile,
         paymentMethod:  body.paymentMethod,
