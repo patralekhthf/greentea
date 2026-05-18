@@ -454,6 +454,105 @@ model AnalyticsEvent {
 // When a customer is within radiusKm of (centerLat, centerLng), they see
 // the Farmers Market offer with WhatsApp ordering.
 
+enum FmCartStatus {
+  ACTIVE       // started, items in cart, no order yet
+  CONVERTED    // an order was placed from this cart
+  ABANDONED    // older than threshold and never converted
+}
+
+enum FmOrderStatus {
+  PLACED            // customer hit "Send Order" — WhatsApp opened
+  CONFIRMED         // seller confirmed availability
+  PAYMENT_AWAITED   // payment details shared, awaiting payment
+  PAID              // customer paid
+  PACKED            // packed, ready to ship
+  SHIPPED           // shipped
+  DELIVERED         // delivered
+  CANCELLED         // cancelled (any reason)
+}
+
+/**
+ * A Farmers Market cart, created when a customer adds their first item.
+ * Updated as the cart changes. Converted into a FarmersMarketOrder when
+ * the customer hits "Send Order".
+ */
+model FarmersMarketCart {
+  id             String        @id @default(cuid())
+  status         FmCartStatus  @default(ACTIVE)
+  items          Json          // [{productId, sku, name, size, quantity, price, imageUrl}]
+  subtotal       Decimal       @db.Decimal(10, 2) @default(0)
+  itemCount      Int           @default(0)
+
+  customerName   String?
+  customerMobile String?
+  paymentMethod  String?       // gpay | phonepe | paytm | upi | whatsapp_pay | cod
+
+  // Tracking / analytics
+  ipAddress      String?
+  userAgent      String?       @db.Text
+  countryCode    String?       // from IP (e.g. IN)
+  city           String?       // from IP
+  latitude       Float?        // from local-zone check or IP
+  longitude      Float?
+  pincode        String?       // if known
+  referrer       String?       @db.Text
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  lastSeenAt     DateTime      @default(now())
+
+  order          FarmersMarketOrder?
+
+  @@index([status, createdAt])
+  @@map("tblgt_fm_carts")
+}
+
+/**
+ * Snapshot of a Farmers Market order when the customer sends it via WhatsApp.
+ * Lifecycle is managed by the admin (status transitions).
+ */
+model FarmersMarketOrder {
+  id             String          @id @default(cuid())
+  orderNumber    String          @unique  // FM-YYYYMMDD-NNNN
+  cartId         String?         @unique  // null if pre-existing carts were missed
+  status         FmOrderStatus   @default(PLACED)
+
+  customerName   String?
+  customerMobile String                 // required at order time
+  paymentMethod  String
+
+  items          Json            // snapshot of cart items at order time
+  subtotal       Decimal         @db.Decimal(10, 2)
+  itemCount      Int
+
+  // Tracking
+  ipAddress      String?
+  userAgent      String?         @db.Text
+  countryCode    String?
+  city           String?
+  latitude       Float?
+  longitude      Float?
+  pincode        String?
+
+  // Lifecycle timestamps
+  whatsappSentAt DateTime?       // set on initial create
+  paidAt         DateTime?
+  packedAt       DateTime?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  cancelledAt   DateTime?
+
+  internalNotes  String?         @db.Text
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  cart           FarmersMarketCart? @relation(fields: [cartId], references: [id])
+
+  @@index([status, createdAt])
+  @@map("tblgt_fm_orders")
+}
+
 model LocalDeliveryZone {
   id              String   @id @default("default")
   isActive        Boolean  @default(false)

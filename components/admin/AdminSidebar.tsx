@@ -49,6 +49,11 @@ const NAV = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
+    children: [
+      { label: "Zone settings", href: "/admin/farmers-market" },
+      { label: "Orders",        href: "/admin/farmers-market/orders" },
+      { label: "Carts",         href: "/admin/farmers-market/carts" },
+    ],
   },
 ];
 
@@ -78,20 +83,42 @@ export default function AdminSidebar() {
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {NAV.map((item) => {
-          const active = pathname !== null && (pathname === item.href || pathname.startsWith(item.href + "/"));
+          const inSection = pathname !== null && (pathname === item.href || pathname.startsWith(item.href + "/"));
+          const children  = "children" in item ? item.children : undefined;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                active
-                  ? "bg-white/15 text-white"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
+            <div key={item.href}>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  inSection && (!children || pathname === item.href)
+                    ? "bg-white/15 text-white"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+              {children && inSection && (
+                <div className="ml-9 mt-1 space-y-0.5">
+                  {children.map((c) => {
+                    const childActive = pathname === c.href;
+                    return (
+                      <Link
+                        key={c.href}
+                        href={c.href}
+                        className={`block px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          childActive
+                            ? "bg-white/10 text-white"
+                            : "text-white/60 hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        {c.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>

@@ -8,6 +8,7 @@ import {
   updateQuantity,
   removeItem,
   clearCart,
+  getCartId,
   cartItemCount,
   cartSubtotal,
   type CartItem,
@@ -49,16 +50,22 @@ function buildWhatsAppMessage(opts: {
   payment: string;
   addressLabel: string;
   radiusKm: number;
+  orderNumber?: string | null;
+  mobile?: string;
 }): string {
-  const { cart, customerName, payment, addressLabel, radiusKm } = opts;
+  const { cart, customerName, payment, addressLabel, radiusKm, orderNumber, mobile } = opts;
   const lines: string[] = [];
 
   lines.push("🛒 *NEW FARMERS MARKET ORDER*");
+  if (orderNumber) lines.push(`📋 *Order:* ${orderNumber}`);
   lines.push("");
   if (customerName.trim()) {
     lines.push(`👤 *Customer:* ${customerName.trim()}`);
-    lines.push("");
   }
+  if (mobile) {
+    lines.push(`📱 *Mobile:* +91 ${mobile}`);
+  }
+  if (customerName.trim() || mobile) lines.push("");
 
   lines.push("*Order Details:*");
   lines.push("```");
@@ -109,24 +116,66 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
   const cart                    = useCart();
   const [payment, setPayment]   = useState<string>("");
   const [customerName, setName] = useState("");
+  const [mobile, setMobile]     = useState("");
+  const [error, setError]       = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [sent, setSent]         = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
 
-  const itemCount = cartItemCount(cart);
-  const subtotal  = cartSubtotal(cart);
-  const canPlace  = cart.length > 0 && payment !== "";
+  const itemCount     = cartItemCount(cart);
+  const subtotal      = cartSubtotal(cart);
+  const mobileDigits  = mobile.replace(/\D/g, "").slice(-10);
+  const mobileValid   = /^[6-9]\d{9}$/.test(mobileDigits);
+  const canPlace      = cart.length > 0 && payment !== "" && mobileValid && !submitting;
 
-  function placeOrder() {
-    const msg = buildWhatsAppMessage({ cart, customerName, payment, addressLabel, radiusKm });
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
-    setSent(true);
+  async function placeOrder() {
+    if (!canPlace) return;
+    setError("");
+    setSubmitting(true);
+    try {
+      // 1) Record the order on the server (captures IP, geo, timestamps)
+      const res = await fetch("/api/farmers-market/orders", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId:         getCartId(),
+          items:          cart,
+          customerName,
+          customerMobile: mobileDigits,
+          paymentMethod:  payment,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not place order — please try again.");
+        setSubmitting(false);
+        return;
+      }
+      setOrderNumber(data.orderNumber);
+
+      // 2) Open WhatsApp with the structured message
+      const msg = buildWhatsAppMessage({
+        cart, customerName, payment, addressLabel, radiusKm,
+        orderNumber: data.orderNumber,
+        mobile:      mobileDigits,
+      });
+      const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+      setSent(true);
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function startOver() {
     clearCart();
     setSent(false);
+    setOrderNumber(null);
     setPayment("");
     setName("");
+    setMobile("");
   }
 
   /* ── Empty cart ─────────────────────────────────────────────── */
@@ -158,9 +207,14 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
       <div className="min-h-screen bg-brand-cream">
         <div className="max-w-md mx-auto px-4 py-20 text-center">
           <div className="text-6xl mb-4">✅</div>
-          <h1 className="text-2xl font-bold text-brand-green mb-3" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-2xl font-bold text-brand-green mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Order sent on WhatsApp
           </h1>
+          {orderNumber && (
+            <p className="text-xs font-mono bg-brand-mint text-brand-green inline-block px-3 py-1 rounded-full mb-3">
+              {orderNumber}
+            </p>
+          )}
           <p className="text-sm text-brand-muted mb-2">
             Continue the conversation with the seller in WhatsApp. They&apos;ll confirm availability and share payment details shortly.
           </p>
@@ -289,18 +343,51 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
           </Link>
         </div>
 
-        {/* Customer name */}
+        {/* Contact details */}
         <div className="bg-white rounded-2xl border border-brand-border p-5 mb-6">
-          <label className="block text-sm font-bold text-brand-green mb-2" style={{ fontFamily: "var(--font-display)" }}>
-            Your Name <span className="text-xs font-normal text-brand-muted">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={customerName}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="So the seller knows who you are"
-            className="w-full px-4 py-2.5 text-sm border border-brand-border rounded-full focus:outline-none focus:ring-2 focus:ring-brand-sage bg-white"
-          />
+          <h2 className="text-sm font-bold text-brand-green mb-1" style={{ fontFamily: "var(--font-display)" }}>
+            Your Contact Details
+          </h2>
+          <p className="text-xs text-brand-muted mb-4">
+            We&apos;ll only use this to coordinate your delivery.
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-brand-muted mb-1.5">
+                Name <span className="text-[10px] font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                className="w-full px-4 py-2.5 text-sm border border-brand-border rounded-full focus:outline-none focus:ring-2 focus:ring-brand-sage bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-brand-muted mb-1.5">
+                Mobile <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-2.5 text-sm font-medium text-brand-dark bg-brand-mint rounded-full border border-brand-border">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  placeholder="10-digit mobile"
+                  className="flex-1 min-w-0 px-4 py-2.5 text-sm border border-brand-border rounded-full focus:outline-none focus:ring-2 focus:ring-brand-sage bg-white"
+                />
+              </div>
+              {mobile.length > 0 && !mobileValid && (
+                <p className="text-xs text-red-600 mt-1.5">Enter a valid 10-digit Indian mobile number.</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Payment method */}
@@ -330,17 +417,23 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
         </div>
 
         {/* Message preview */}
-        {canPlace && (
+        {cart.length > 0 && payment && mobileValid && (
           <div className="bg-brand-mint/60 rounded-2xl border border-brand-border p-5 mb-6">
             <h3 className="text-xs font-bold text-brand-green uppercase tracking-wider mb-3">
               Preview — message sent to seller
             </h3>
             <pre className="whitespace-pre-wrap text-[11px] sm:text-xs text-brand-dark font-mono leading-relaxed bg-white rounded-xl p-4 border border-brand-border overflow-x-auto">
-              {buildWhatsAppMessage({ cart, customerName, payment, addressLabel, radiusKm })}
+              {buildWhatsAppMessage({ cart, customerName, payment, addressLabel, radiusKm, mobile: mobileDigits })}
             </pre>
             <p className="text-[11px] text-brand-muted mt-3">
-              The seller receives the full table with SKU codes — no chance of mix-ups.
+              The seller receives the full table with SKU codes — no chance of mix-ups. A unique order number is added once you send.
             </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+            {error}
           </div>
         )}
 
@@ -353,10 +446,12 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24z"/>
           </svg>
-          Send Order via WhatsApp · {formatINR(subtotal)}
+          {submitting ? "Placing order…" : `Send Order via WhatsApp · ${formatINR(subtotal)}`}
         </button>
-        {!canPlace && cart.length > 0 && (
-          <p className="text-xs text-amber-700 text-center mt-3">Select a payment method to continue.</p>
+        {!canPlace && cart.length > 0 && !submitting && (
+          <p className="text-xs text-amber-700 text-center mt-3">
+            {!mobileValid ? "Enter your mobile number to continue." : !payment ? "Select a payment method to continue." : ""}
+          </p>
         )}
 
         {/* What happens next */}

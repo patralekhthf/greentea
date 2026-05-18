@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
 import DeliveryZoneMap from "@/components/local/DeliveryZoneMap";
 import FarmersMarketProductCard from "@/components/local/FarmersMarketProductCard";
-import CartFab from "@/components/local/CartFab";
+import FloatingCart from "@/components/local/FloatingCart";
 
 export const metadata: Metadata = {
   title: "Farmers Market — Fresh Local Delivery",
@@ -200,8 +200,8 @@ export default async function FarmersMarketPage() {
         )}
       </section>
 
-      {/* Floating WhatsApp Cart pill */}
-      <CartFab />
+      {/* Persistent WhatsApp Cart (right panel on desktop, bottom bar/sheet on mobile) */}
+      <FloatingCart />
 
       {/* ── Payment / trust footer ───────────────────────────────────── */}
       <section className="bg-brand-mint border-t border-brand-border">
