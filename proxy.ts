@@ -33,25 +33,32 @@ export async function proxy(req: NextRequest) {
     return res; // Already set — nothing to do
   }
 
-  // 2. Detect from IP via ipapi.co
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    ""; // Empty in local dev — falls back to default
-
   let country = DEFAULT;
 
-  if (ip && ip !== "::1" && ip !== "127.0.0.1") {
-    try {
-      const r = await fetch(`https://ipapi.co/${ip}/country/`, {
-        signal: AbortSignal.timeout(1500),
-      });
-      if (r.ok) {
-        const code = (await r.text()).trim().toUpperCase();
-        if (SUPPORTED.includes(code)) country = code;
+  // 2a. Fast path on Vercel — geolocation header is set on every edge request,
+  //     no external lookup needed.
+  const vercelCountry = req.headers.get("x-vercel-ip-country")?.toUpperCase();
+  if (vercelCountry && SUPPORTED.includes(vercelCountry)) {
+    country = vercelCountry;
+  } else {
+    // 2b. Fallback to ipapi.co (other hosts, or country we don't sell in → keep DEFAULT)
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      req.headers.get("x-real-ip") ??
+      "";
+
+    if (ip && ip !== "::1" && ip !== "127.0.0.1") {
+      try {
+        const r = await fetch(`https://ipapi.co/${ip}/country/`, {
+          signal: AbortSignal.timeout(1500),
+        });
+        if (r.ok) {
+          const code = (await r.text()).trim().toUpperCase();
+          if (SUPPORTED.includes(code)) country = code;
+        }
+      } catch {
+        // ipapi.co unavailable — use default
       }
-    } catch {
-      // ipapi.co unavailable — use default
     }
   }
 
