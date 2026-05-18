@@ -97,10 +97,18 @@ export default function HeroImagesClient() {
   return (
     <div className="p-8 max-w-5xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Hero Images</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-2">
         Upload one hero image per country. Shown on the home page hero based on the visitor&apos;s detected country.
-        Recommended size: <strong>1200×900px</strong> (4:3 aspect ratio), JPG or PNG, under 500 KB.
       </p>
+      <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900 max-w-2xl">
+        <p className="font-semibold mb-1">📐 Recommended specs</p>
+        <ul className="space-y-1 text-xs leading-relaxed">
+          <li>• <strong>Portrait</strong> orientation — <strong>1200 × 1500 px</strong> (4:5 aspect ratio)</li>
+          <li>• JPG or PNG, under <strong>500 KB</strong></li>
+          <li>• Keep the focal subject in the <strong>center-vertical band</strong> — the image is cropped to fill a portrait card on the home page</li>
+          <li>• Any landscape image will get its left/right edges cropped — see the preview below before publishing</li>
+        </ul>
+      </div>
 
       {error && (
         <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
@@ -125,17 +133,20 @@ export default function HeroImagesClient() {
                   </div>
                 </div>
 
-                {/* Preview */}
+                {/* Preview — same crop ratio + Cloudinary transform the home page uses */}
                 {banner ? (
                   <div className="mb-3">
-                    <div className="w-full aspect-[4/3] rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                    <div className="w-full max-w-xs mx-auto aspect-[4/5] rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={buildImageUrl(banner.imageUrl, "w_800,h_600,c_fill,f_webp,q_auto")}
+                        src={buildImageUrl(banner.imageUrl, "w_800,h_1000,c_fill,f_webp,q_auto")}
                         alt={`Hero for ${c.label}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
+                    <p className="text-[10px] text-gray-400 text-center mt-1.5">
+                      Live preview — this is exactly how the home page will show it.
+                    </p>
                     <div className="flex items-center justify-between mt-2">
                       <button
                         onClick={() => handleRemove(c.code)}
@@ -149,8 +160,8 @@ export default function HeroImagesClient() {
                     </div>
                   </div>
                 ) : (
-                  <div className="mb-3 w-full aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-sm">
-                    No image — fallback will show
+                  <div className="mb-3 w-full max-w-xs mx-auto aspect-[4/5] rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-sm text-center px-4">
+                    No image yet<br/>(decorative fallback will show)
                   </div>
                 )}
 
