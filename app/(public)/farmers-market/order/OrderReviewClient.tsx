@@ -167,12 +167,18 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
         paymentMethod:  payment,
       }),
     });
-    const data = await res.json();
+    // Defensively parse — a 500 may return HTML instead of JSON
+    const data = await res.json().catch(() => ({} as { error?: string; orderId?: string; orderNumber?: string; cartIdInvalid?: boolean }));
     if (!res.ok) {
-      setError(data.error ?? "Could not place order — please try again.");
+      setError(data.error ?? `Server error (${res.status}) — please try again.`);
       return null;
     }
-    return { id: data.orderId, orderNumber: data.orderNumber };
+    // If the server told us our cached cartId was stale, clear it now so the
+    // next "add to cart" creates a fresh one.
+    if (data.cartIdInvalid && typeof window !== "undefined") {
+      try { window.localStorage.removeItem("gt_fm_cart_id_v1"); } catch { /* ignore */ }
+    }
+    return { id: data.orderId!, orderNumber: data.orderNumber! };
   }
 
   /** Open WhatsApp with the assembled order message, optionally including UTR. */

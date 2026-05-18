@@ -51,38 +51,66 @@ export async function POST(req: NextRequest) {
   const itemCount = body.items.reduce((s, i) => s + i.quantity, 0);
   const subtotal  = body.items.reduce((s, i) => s + i.price * i.quantity, 0);
   const meta      = getRequestMeta(req);
+  const mobile    = body.customerMobile.replace(/\D/g, "").slice(-10);
 
-  const orderNumber = await nextOrderNumber();
-  const mobile      = body.customerMobile.replace(/\D/g, "").slice(-10);
-
-  // Create the order, link to cart if present, and mark cart converted
-  const order = await db.farmersMarketOrder.create({
-    data: {
-      orderNumber,
-      cartId:         body.cartId ?? null,
-      customerName:   body.customerName?.trim() || null,
-      customerMobile: mobile,
-      paymentMethod:  body.paymentMethod,
-      items:          body.items as unknown as object,
-      itemCount,
-      subtotal,
-      whatsappSentAt: new Date(),
-      ...meta,
-    },
-    select: { id: true, orderNumber: true },
-  });
-
+  // Verify the cartId points to an actual row before linking. A stale ID in
+  // localStorage (e.g. cart was wiped from the DB) used to break the FK and
+  // make the whole POST fail — instead, just drop the link and continue.
+  let validCartId: string | null = null;
   if (body.cartId) {
-    await db.farmersMarketCart.update({
-      where: { id: body.cartId },
+    try {
+      const cart = await db.farmersMarketCart.findUnique({
+        where:  { id: body.cartId },
+        select: { id: true },
+      });
+      if (cart) validCartId = cart.id;
+    } catch { /* fall through with null */ }
+  }
+
+  try {
+    const orderNumber = await nextOrderNumber();
+
+    const order = await db.farmersMarketOrder.create({
       data: {
-        status:         "CONVERTED",
+        orderNumber,
+        cartId:         validCartId,
         customerName:   body.customerName?.trim() || null,
         customerMobile: mobile,
         paymentMethod:  body.paymentMethod,
+        items:          body.items as unknown as object,
+        itemCount,
+        subtotal,
+        whatsappSentAt: new Date(),
+        ...meta,
       },
-    }).catch(() => { /* cart may have been deleted */ });
-  }
+      select: { id: true, orderNumber: true },
+    });
 
-  return NextResponse.json({ orderId: order.id, orderNumber: order.orderNumber });
+    if (validCartId) {
+      await db.farmersMarketCart.update({
+        where: { id: validCartId },
+        data: {
+          status:         "CONVERTED",
+          customerName:   body.customerName?.trim() || null,
+          customerMobile: mobile,
+          paymentMethod:  body.paymentMethod,
+        },
+      }).catch(() => { /* race condition — cart was just deleted, ignore */ });
+    }
+
+    return NextResponse.json({
+      orderId:     order.id,
+      orderNumber: order.orderNumber,
+      // Signal to the client whether the stale cartId should be cleared
+      cartIdInvalid: body.cartId != null && validCartId === null,
+    });
+  } catch (err) {
+    // Log full stack server-side, surface a useful hint to the client
+    console.error("[fm/orders POST]", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json(
+      { error: `Could not save order: ${message}` },
+      { status: 500 }
+    );
+  }
 }
