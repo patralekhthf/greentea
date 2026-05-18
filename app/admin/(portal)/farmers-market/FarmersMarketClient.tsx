@@ -9,6 +9,9 @@ type Zone = {
   centerLng:      number;
   radiusKm:       number;
   whatsappNumber: string;
+  upiVpa:         string;
+  upiPayeeName:   string;
+  upiInstructions: string;
   bannerText:     string;
   freshnessNote:  string;
   paymentNote:    string;
@@ -21,6 +24,9 @@ const EMPTY: Zone = {
   centerLng:      77.2120,
   radiusKm:       5,
   whatsappNumber: "919XXXXXXXXX",
+  upiVpa:         "",
+  upiPayeeName:   "",
+  upiInstructions: "",
   bannerText:     "You're in our local delivery zone — get ultra-fresh teas via WhatsApp.",
   freshnessNote:  "Zero preservatives. Fresh for 14 days from packaging.",
   paymentNote:    "Pay via WhatsApp, GPay, or any UPI app.",
@@ -52,6 +58,9 @@ export default function FarmersMarketClient() {
             centerLng:      Number(data.centerLng),
             radiusKm:       Number(data.radiusKm),
             whatsappNumber: data.whatsappNumber ?? "",
+            upiVpa:          data.upiVpa ?? "",
+            upiPayeeName:    data.upiPayeeName ?? "",
+            upiInstructions: data.upiInstructions ?? "",
             bannerText:     data.bannerText ?? EMPTY.bannerText,
             freshnessNote:  data.freshnessNote ?? EMPTY.freshnessNote,
             paymentNote:    data.paymentNote ?? EMPTY.paymentNote,
@@ -239,6 +248,54 @@ export default function FarmersMarketClient() {
             <p className="text-xs text-gray-400">
               Tip: open <a href={mapsLink} target="_blank" rel="noreferrer" className="text-brand-green hover:underline">in Google Maps</a> to fine-tune the pin, then copy lat/lng back here.
             </p>
+          </div>
+
+          {/* UPI Payment */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700">UPI Payment</h3>
+              <p className="text-xs text-gray-400 mt-1">
+                Customers see a per-order QR code (with the exact amount pre-filled) on the checkout page.
+                Leave VPA blank to disable the in-checkout payment step.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>UPI VPA *</label>
+                <input
+                  value={zone.upiVpa}
+                  onChange={(e) => set("upiVpa", e.target.value.trim())}
+                  className={INPUT}
+                  placeholder="kumarikanta218@oksbi"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Format: name@bank</p>
+              </div>
+              <div>
+                <label className={LABEL}>Payee Display Name</label>
+                <input
+                  value={zone.upiPayeeName}
+                  onChange={(e) => set("upiPayeeName", e.target.value)}
+                  className={INPUT}
+                  placeholder="Kanta Kumari"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Shown in the customer&apos;s UPI app.</p>
+              </div>
+            </div>
+            <div>
+              <label className={LABEL}>UPI Instructions (optional)</label>
+              <textarea
+                rows={2}
+                value={zone.upiInstructions}
+                onChange={(e) => set("upiInstructions", e.target.value)}
+                className={`${INPUT} resize-none`}
+                placeholder="e.g. After paying, share the screenshot on WhatsApp — we'll ship as soon as we verify."
+              />
+            </div>
+            {zone.upiVpa && (
+              <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-lg">
+                ✅ In-checkout UPI is enabled. Customers will see a dynamic QR + intent link for {zone.upiPayeeName || "the payee"} ({zone.upiVpa}).
+              </p>
+            )}
           </div>
 
           {/* Customer-facing copy */}

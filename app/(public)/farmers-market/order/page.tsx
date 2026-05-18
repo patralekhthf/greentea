@@ -19,6 +19,15 @@ export default async function OrderReviewPage() {
       whatsappNumber={zone.whatsappNumber}
       addressLabel={zone.addressLabel}
       radiusKm={zone.radiusKm}
+      upi={
+        zone.upiVpa
+          ? {
+              vpa:          zone.upiVpa,
+              payeeName:    zone.upiPayeeName ?? "",
+              instructions: zone.upiInstructions ?? "",
+            }
+          : null
+      }
     />
   );
 }

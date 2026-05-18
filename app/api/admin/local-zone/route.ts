@@ -46,6 +46,16 @@ export async function PUT(req: NextRequest) {
   // Strip non-digits from whatsappNumber so wa.me deep-links always work
   const whatsappNumber = body.whatsappNumber.replace(/[^0-9]/g, "");
 
+  // UPI fields — empty string means "clear it"
+  const upiVpa          = typeof body.upiVpa          === "string" ? body.upiVpa.trim()          : null;
+  const upiPayeeName    = typeof body.upiPayeeName    === "string" ? body.upiPayeeName.trim()    : null;
+  const upiInstructions = typeof body.upiInstructions === "string" ? body.upiInstructions.trim() : null;
+
+  // Light VPA validation: must contain @ and at least one char on each side
+  if (upiVpa && !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$/.test(upiVpa)) {
+    return NextResponse.json({ error: "Invalid UPI VPA — expected format: name@bank" }, { status: 400 });
+  }
+
   const data = {
     isActive:       Boolean(body.isActive),
     addressLabel:   body.addressLabel.trim(),
@@ -53,6 +63,9 @@ export async function PUT(req: NextRequest) {
     centerLng,
     radiusKm,
     whatsappNumber,
+    upiVpa:          upiVpa          || null,
+    upiPayeeName:    upiPayeeName    || null,
+    upiInstructions: upiInstructions || null,
     bannerText:     body.bannerText    ?? undefined,
     freshnessNote:  body.freshnessNote ?? undefined,
     paymentNote:    body.paymentNote   ?? undefined,

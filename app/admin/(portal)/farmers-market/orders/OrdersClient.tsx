@@ -4,23 +4,29 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 
 type Order = {
-  id:              string;
-  orderNumber:     string;
-  status:          string;
-  customerName:    string | null;
-  customerMobile:  string;
-  paymentMethod:   string;
-  items:           { sku: string; name: string; size: string; quantity: number; price: number }[];
-  itemCount:       number;
-  subtotal:        string;
-  city:            string | null;
-  countryCode:     string | null;
-  whatsappSentAt:  string | null;
-  paidAt:          string | null;
-  shippedAt:       string | null;
-  deliveredAt:     string | null;
-  createdAt:       string;
-  internalNotes:   string | null;
+  id:                 string;
+  orderNumber:        string;
+  status:             string;
+  customerName:       string | null;
+  customerMobile:     string;
+  paymentMethod:      string;
+  items:              { sku: string; name: string; size: string; quantity: number; price: number }[];
+  itemCount:          number;
+  subtotal:           string;
+  city:               string | null;
+  countryCode:        string | null;
+  whatsappSentAt:     string | null;
+  paidAt:             string | null;
+  shippedAt:          string | null;
+  deliveredAt:        string | null;
+  createdAt:          string;
+  internalNotes:      string | null;
+  // Phase 1 UPI
+  upiVpa:             string | null;
+  upiUtr:             string | null;
+  paymentSubmittedAt: string | null;
+  paymentVerified:    boolean;
+  paymentVerifiedAt:  string | null;
 };
 
 const STATUS_OPTIONS = [
@@ -324,11 +330,70 @@ function OrderDetailDrawer({
             </div>
           </Section>
 
+          {/* Payment */}
+          <Section title="Payment (UPI)">
+            {order.upiUtr ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-emerald-900">Customer says paid</p>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
+                    order.paymentVerified
+                      ? "bg-emerald-600 text-white"
+                      : "bg-amber-200 text-amber-900"
+                  }`}>
+                    {order.paymentVerified ? "✓ Verified" : "Unverified"}
+                  </span>
+                </div>
+                <KV k="UTR / Ref" v={order.upiUtr} />
+                <KV k="Paid to VPA" v={order.upiVpa ?? "—"} />
+                <KV k="Submitted at" v={formatDate(order.paymentSubmittedAt)} />
+                {order.paymentVerified && (
+                  <KV k="Verified at" v={formatDate(order.paymentVerifiedAt)} />
+                )}
+                <div className="pt-2">
+                  <button
+                    onClick={async () => {
+                      const res = await fetch(`/api/admin/farmers-market/orders/${order.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ paymentVerified: !order.paymentVerified }),
+                      });
+                      if (res.ok) {
+                        const updated = await res.json();
+                        // crude refresh — parent state updates via prop on next open
+                        Object.assign(order, updated);
+                        // force re-render
+                        setNotes((n) => n);
+                      }
+                    }}
+                    className={`w-full px-4 py-2 text-sm font-semibold rounded-full transition-colors ${
+                      order.paymentVerified
+                        ? "bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                    }`}
+                  >
+                    {order.paymentVerified ? "Mark as unverified" : "Mark as verified ✓"}
+                  </button>
+                  <p className="text-[11px] text-emerald-700 mt-2">
+                    Cross-check the UTR <span className="font-mono">{order.upiUtr}</span> in your UPI app&apos;s transaction history before verifying.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p className="text-sm text-amber-900">
+                  Customer hasn&apos;t submitted a UTR yet — payment will be coordinated over WhatsApp.
+                </p>
+              </div>
+            )}
+          </Section>
+
           {/* Timeline */}
           <Section title="Timeline">
             <KV k="Order placed"     v={formatDate(order.createdAt)} />
             <KV k="WhatsApp sent"    v={formatDate(order.whatsappSentAt)} />
-            <KV k="Paid"             v={formatDate(order.paidAt)} />
+            <KV k="Paid (claimed)"   v={formatDate(order.paidAt)} />
+            <KV k="Payment verified" v={formatDate(order.paymentVerifiedAt)} />
             <KV k="Shipped"          v={formatDate(order.shippedAt)} />
             <KV k="Delivered"        v={formatDate(order.deliveredAt)} />
           </Section>

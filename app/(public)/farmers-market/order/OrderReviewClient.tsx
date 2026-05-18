@@ -13,11 +13,19 @@ import {
   cartSubtotal,
   type CartItem,
 } from "@/lib/farmers-market-cart";
+import UpiPaymentStep from "@/components/local/UpiPaymentStep";
+
+type UpiConfig = {
+  vpa:          string;
+  payeeName:    string;
+  instructions: string;
+};
 
 type Props = {
   whatsappNumber: string;
   addressLabel:   string;
   radiusKm:       number;
+  upi:            UpiConfig | null;
 };
 
 const PAYMENT_METHODS = [
@@ -52,8 +60,10 @@ function buildWhatsAppMessage(opts: {
   radiusKm: number;
   orderNumber?: string | null;
   mobile?: string;
+  upiUtr?: string | null;
+  upiVpa?: string | null;
 }): string {
-  const { cart, customerName, payment, addressLabel, radiusKm, orderNumber, mobile } = opts;
+  const { cart, customerName, payment, addressLabel, radiusKm, orderNumber, mobile, upiUtr, upiVpa } = opts;
   const lines: string[] = [];
 
   lines.push("🛒 *NEW FARMERS MARKET ORDER*");
@@ -103,65 +113,105 @@ function buildWhatsAppMessage(opts: {
   lines.push(`📍 *Delivery:* within ${radiusKm} km of ${addressLabel}`);
   lines.push("");
 
-  if (payment === "cod") {
+  // Payment status — depends on whether the customer paid via the in-checkout UPI step
+  if (upiUtr) {
+    lines.push("");
+    lines.push("✅ *PAYMENT COMPLETED VIA UPI*");
+    lines.push(`🔖 *UTR / Reference:* ${upiUtr}`);
+    if (upiVpa) lines.push(`💳 *Paid to:* ${upiVpa}`);
+    lines.push("");
+    lines.push("📸 *Sharing the payment screenshot in this chat now* — please verify and confirm shipping.");
+  } else if (payment === "cod") {
+    lines.push("");
     lines.push("Please confirm availability and tentative delivery date.");
   } else {
-    lines.push(`Please share your ${payLabel} ID / QR so I can complete the payment.`);
+    lines.push("");
+    lines.push("Please share your UPI ID / QR so I can complete the payment.");
   }
 
   return lines.join("\n");
 }
 
-export default function OrderReviewClient({ whatsappNumber, addressLabel, radiusKm }: Props) {
+type Step = "review" | "pay" | "sent";
+
+export default function OrderReviewClient({ whatsappNumber, addressLabel, radiusKm, upi }: Props) {
   const cart                    = useCart();
-  const [payment, setPayment]   = useState<string>("upi"); // default to the only enabled option
+  const [step, setStep]         = useState<Step>("review");
+  const [payment, setPayment]   = useState<string>("upi");
   const [customerName, setName] = useState("");
   const [mobile, setMobile]     = useState("");
   const [error, setError]       = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [sent, setSent]         = useState(false);
+  const [orderId, setOrderId]   = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [orderAmount, setOrderAmount] = useState<number>(0);
+  const [orderItems, setOrderItems]   = useState<CartItem[]>([]);
 
   const itemCount     = cartItemCount(cart);
   const subtotal      = cartSubtotal(cart);
   const mobileDigits  = mobile.replace(/\D/g, "").slice(-10);
   const mobileValid   = /^[6-9]\d{9}$/.test(mobileDigits);
   const canPlace      = cart.length > 0 && payment !== "" && mobileValid && !submitting;
+  const upiEnabled    = upi !== null;
 
-  async function placeOrder() {
+  /** Create the order row on the server. Returns the order id+number or null on failure. */
+  async function createOrder(): Promise<{ id: string; orderNumber: string } | null> {
+    const res = await fetch("/api/farmers-market/orders", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cartId:         getCartId(),
+        items:          cart,
+        customerName,
+        customerMobile: mobileDigits,
+        paymentMethod:  payment,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Could not place order — please try again.");
+      return null;
+    }
+    return { id: data.orderId, orderNumber: data.orderNumber };
+  }
+
+  /** Open WhatsApp with the assembled order message, optionally including UTR. */
+  function openWhatsApp(opts: { upiUtr?: string | null }) {
+    const msg = buildWhatsAppMessage({
+      cart:        orderItems.length > 0 ? orderItems : cart,
+      customerName,
+      payment,
+      addressLabel,
+      radiusKm,
+      orderNumber,
+      mobile: mobileDigits,
+      upiUtr: opts.upiUtr ?? null,
+      upiVpa: upi?.vpa,
+    });
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  }
+
+  /** Review step → submit. Creates the order then routes to either pay or sent. */
+  async function handleContinue() {
     if (!canPlace) return;
     setError("");
     setSubmitting(true);
     try {
-      // 1) Record the order on the server (captures IP, geo, timestamps)
-      const res = await fetch("/api/farmers-market/orders", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cartId:         getCartId(),
-          items:          cart,
-          customerName,
-          customerMobile: mobileDigits,
-          paymentMethod:  payment,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Could not place order — please try again.");
-        setSubmitting(false);
-        return;
-      }
-      setOrderNumber(data.orderNumber);
+      const created = await createOrder();
+      if (!created) { setSubmitting(false); return; }
+      setOrderId(created.id);
+      setOrderNumber(created.orderNumber);
+      setOrderAmount(subtotal);
+      setOrderItems(cart); // snapshot — cart may be cleared after WhatsApp opens
 
-      // 2) Open WhatsApp with the structured message
-      const msg = buildWhatsAppMessage({
-        cart, customerName, payment, addressLabel, radiusKm,
-        orderNumber: data.orderNumber,
-        mobile:      mobileDigits,
-      });
-      const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-      window.open(url, "_blank");
-      setSent(true);
+      // If UPI is configured, route to the payment step. Otherwise send WhatsApp now.
+      if (upiEnabled) {
+        setStep("pay");
+      } else {
+        openWhatsApp({ upiUtr: null });
+        setStep("sent");
+      }
     } catch {
       setError("Network error — please try again.");
     } finally {
@@ -169,17 +219,51 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
     }
   }
 
+  /** Pay step → user submitted UTR. Save it and open WhatsApp. */
+  async function handlePaymentConfirmed(utr: string) {
+    if (!orderId) return;
+    setError("");
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/farmers-market/orders/${orderId}/payment`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ upiUtr: utr, upiVpa: upi?.vpa }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Could not save payment — please try again.");
+        return;
+      }
+      openWhatsApp({ upiUtr: utr });
+      setStep("sent");
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  /** Pay step → user wants to pay later via WhatsApp directly. */
+  function handlePaymentSkipped() {
+    openWhatsApp({ upiUtr: null });
+    setStep("sent");
+  }
+
   function startOver() {
     clearCart();
-    setSent(false);
+    setStep("review");
+    setOrderId(null);
     setOrderNumber(null);
-    setPayment("");
+    setOrderAmount(0);
+    setOrderItems([]);
+    setPayment("upi");
     setName("");
     setMobile("");
   }
 
   /* ── Empty cart ─────────────────────────────────────────────── */
-  if (cart.length === 0 && !sent) {
+  if (cart.length === 0 && step !== "sent") {
     return (
       <div className="min-h-screen bg-brand-cream">
         <div className="max-w-md mx-auto px-4 py-20 text-center">
@@ -202,7 +286,7 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
   }
 
   /* ── Sent confirmation ──────────────────────────────────────── */
-  if (sent) {
+  if (step === "sent") {
     return (
       <div className="min-h-screen bg-brand-cream">
         <div className="max-w-md mx-auto px-4 py-20 text-center">
@@ -235,6 +319,41 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
               Back to Farmers Market
             </Link>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Pay step ──────────────────────────────────────────────── */
+  if (step === "pay" && upi && orderNumber) {
+    return (
+      <div className="min-h-screen bg-brand-cream">
+        <div className="bg-white border-b border-brand-border sticky top-16 z-30">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <button onClick={() => setStep("review")} className="text-sm text-brand-muted hover:text-brand-green">
+              ← Back to cart
+            </button>
+            <h1 className="text-base sm:text-lg font-bold text-brand-green" style={{ fontFamily: "var(--font-display)" }}>
+              Pay &amp; send
+            </h1>
+            <span className="text-xs font-mono text-brand-muted">{orderNumber}</span>
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <UpiPaymentStep
+            orderNumber={orderNumber}
+            amount={orderAmount}
+            upi={upi}
+            onSubmit={handlePaymentConfirmed}
+            onSkip={handlePaymentSkipped}
+            submitting={submitting}
+          />
+          {error && (
+            <div className="mt-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+              {error}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -458,14 +577,12 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
 
         {/* Place order */}
         <button
-          onClick={placeOrder}
+          onClick={handleContinue}
           disabled={!canPlace}
-          className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold px-6 py-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#25D366]/20"
+          className="w-full flex items-center justify-center gap-2 bg-brand-green text-white font-bold px-6 py-4 rounded-full hover:bg-brand-mid transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-brand-green/20"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24z"/>
-          </svg>
-          {submitting ? "Placing order…" : `Send Order via WhatsApp · ${formatINR(subtotal)}`}
+          {submitting ? "Placing order…" : upiEnabled ? `Continue to Payment · ${formatINR(subtotal)}` : `Send Order via WhatsApp · ${formatINR(subtotal)}`}
+          <span>→</span>
         </button>
         {!canPlace && cart.length > 0 && !submitting && (
           <p className="text-xs text-amber-700 text-center mt-3">
@@ -479,26 +596,49 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
             What happens next?
           </h3>
           <ol className="space-y-2 text-sm text-brand-muted">
-            <li className="flex gap-3">
-              <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">1</span>
-              <span>Your order table is sent to the seller on WhatsApp</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">2</span>
-              <span>Seller confirms availability and shares their payment ID</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">3</span>
-              <span>You pay and share the screenshot</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">4</span>
-              <span>We pack fresh the night before / same morning and ship the next working day</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">5</span>
-              <span>You receive your order with a full 14 days of freshness — zero preservatives</span>
-            </li>
+            {upiEnabled ? (
+              <>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">1</span>
+                  <span>Click <strong>Continue to Payment</strong> — we generate a UPI QR with the exact amount</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">2</span>
+                  <span>Pay via GPay, PhonePe, or any UPI app — paste the UTR back here</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">3</span>
+                  <span>WhatsApp opens with your full order &amp; payment reference — <strong>share the screenshot here</strong></span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">4</span>
+                  <span>We verify the payment, pack fresh the night before / same morning, and ship next working day</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">5</span>
+                  <span>You receive your order with a full 14 days of freshness — zero preservatives</span>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">1</span>
+                  <span>Your order table is sent to the seller on WhatsApp</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">2</span>
+                  <span>Seller confirms availability and shares their payment ID</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">3</span>
+                  <span>You pay and share the screenshot</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">4</span>
+                  <span>We pack fresh and ship next working day — 14-day freshness</span>
+                </li>
+              </>
+            )}
           </ol>
         </div>
       </div>

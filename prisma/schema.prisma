@@ -534,9 +534,16 @@ model FarmersMarketOrder {
   longitude      Float?
   pincode        String?
 
+  // Payment (UPI Phase 1 — customer-claimed, admin verifies manually)
+  upiVpa             String?        // VPA the customer paid (snapshot at order time)
+  upiUtr             String?        // 12-digit UTR / RRN entered by customer
+  paymentSubmittedAt DateTime?      // when customer submitted UTR
+  paymentVerified    Boolean        @default(false)
+  paymentVerifiedAt  DateTime?      // when admin verified the payment in their UPI app
+
   // Lifecycle timestamps
   whatsappSentAt DateTime?       // set on initial create
-  paidAt         DateTime?
+  paidAt         DateTime?       // set when customer claims payment
   packedAt       DateTime?
   shippedAt      DateTime?
   deliveredAt    DateTime?
@@ -561,6 +568,10 @@ model LocalDeliveryZone {
   centerLng       Float
   radiusKm        Float    @default(5)
   whatsappNumber  String   // E.164, e.g. "919XXXXXXXXX" (no +)
+  // UPI payment (admin-controlled — used to render the in-checkout QR + intent)
+  upiVpa          String?  // e.g. kumarikanta218@oksbi
+  upiPayeeName    String?  // e.g. Kanta Kumari — shown in the UPI app
+  upiInstructions String?  @db.Text // optional short note shown above the QR
   // Customer-facing copy
   bannerText      String   @default("You're in our local delivery zone — get ultra-fresh teas via WhatsApp.")
   freshnessNote   String   @default("Zero preservatives. Fresh for 14 days from packaging.")

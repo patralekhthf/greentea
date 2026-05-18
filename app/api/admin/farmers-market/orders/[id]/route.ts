@@ -38,6 +38,10 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (typeof body.internalNotes === "string") data.internalNotes = body.internalNotes;
   if (typeof body.customerName === "string")  data.customerName  = body.customerName;
   if (typeof body.customerMobile === "string") data.customerMobile = body.customerMobile;
+  if (typeof body.paymentVerified === "boolean") {
+    data.paymentVerified   = body.paymentVerified;
+    data.paymentVerifiedAt = body.paymentVerified ? new Date() : null;
+  }
 
   const updated = await db.farmersMarketOrder.update({ where: { id }, data });
   return NextResponse.json(updated);
