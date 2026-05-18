@@ -21,12 +21,12 @@ type Props = {
 };
 
 const PAYMENT_METHODS = [
-  { id: "gpay",         label: "Google Pay (GPay)", icon: "🟢" },
-  { id: "phonepe",      label: "PhonePe",           icon: "🟣" },
-  { id: "paytm",        label: "Paytm",             icon: "🔵" },
-  { id: "upi",          label: "Any UPI App",       icon: "🏦" },
-  { id: "whatsapp_pay", label: "WhatsApp Pay",      icon: "💬" },
-  { id: "cod",          label: "Cash on Delivery",  icon: "💵" },
+  { id: "upi",          label: "Any UPI App",       icon: "🏦", enabled: true  },
+  { id: "gpay",         label: "Google Pay",        icon: "🟢", enabled: false },
+  { id: "phonepe",      label: "PhonePe",           icon: "🟣", enabled: false },
+  { id: "paytm",        label: "Paytm",             icon: "🔵", enabled: false },
+  { id: "whatsapp_pay", label: "WhatsApp Pay",      icon: "💬", enabled: false },
+  { id: "cod",          label: "Cash on Delivery",  icon: "💵", enabled: false },
 ] as const;
 
 function formatINR(n: number) {
@@ -114,7 +114,7 @@ function buildWhatsAppMessage(opts: {
 
 export default function OrderReviewClient({ whatsappNumber, addressLabel, radiusKm }: Props) {
   const cart                    = useCart();
-  const [payment, setPayment]   = useState<string>("");
+  const [payment, setPayment]   = useState<string>("upi"); // default to the only enabled option
   const [customerName, setName] = useState("");
   const [mobile, setMobile]     = useState("");
   const [error, setError]       = useState("");
@@ -399,21 +399,40 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
             The seller will share their payment ID after they receive your order on WhatsApp.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {PAYMENT_METHODS.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setPayment(m.id)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
-                  payment === m.id
-                    ? "border-brand-green bg-brand-mint text-brand-green ring-2 ring-brand-sage/30"
-                    : "border-brand-border text-brand-dark hover:border-brand-sage hover:bg-brand-mint/50"
-                }`}
-              >
-                <span>{m.icon}</span>
-                <span className="truncate text-left">{m.label}</span>
-              </button>
-            ))}
+            {PAYMENT_METHODS.map((m) => {
+              const selected = payment === m.id;
+              if (!m.enabled) {
+                return (
+                  <div
+                    key={m.id}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 text-gray-400 text-sm font-medium cursor-not-allowed relative"
+                    title="Coming soon"
+                  >
+                    <span className="grayscale opacity-60">{m.icon}</span>
+                    <span className="truncate text-left">{m.label}</span>
+                    <span className="absolute top-1 right-2 text-[9px] uppercase tracking-wider font-bold text-gray-400">Soon</span>
+                  </div>
+                );
+              }
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setPayment(m.id)}
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
+                    selected
+                      ? "border-brand-green bg-brand-mint text-brand-green ring-2 ring-brand-sage/30"
+                      : "border-brand-border text-brand-dark hover:border-brand-sage hover:bg-brand-mint/50"
+                  }`}
+                >
+                  <span>{m.icon}</span>
+                  <span className="truncate text-left">{m.label}</span>
+                </button>
+              );
+            })}
           </div>
+          <p className="text-[11px] text-brand-muted mt-3">
+            More payment options coming soon. UPI works with any UPI app (GPay, PhonePe, Paytm, BHIM, etc.).
+          </p>
         </div>
 
         {/* Message preview */}

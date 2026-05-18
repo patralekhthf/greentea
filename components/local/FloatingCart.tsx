@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,27 +15,107 @@ function formatINR(n: number) {
   return `₹${n.toFixed(0)}`;
 }
 
+const POS_KEY        = "gt_fm_cart_pos_v1";        // { x, y } in CSS pixels from top-left
+const COLLAPSED_KEY  = "gt_fm_cart_collapsed_v1";  // "1" when collapsed
+const DEFAULT_WIDTH  = 320;
+const COLLAPSED_W    = 240;
+const HEADER_OFFSET  = 80; // keep clear of the top header
+
+type Pos = { x: number; y: number };
+
+/** Compute a default desktop position: top-right, just below the header. */
+function defaultPos(): Pos {
+  if (typeof window === "undefined") return { x: 0, y: 0 };
+  return { x: window.innerWidth - DEFAULT_WIDTH - 24, y: 96 };
+}
+
+function clampPos(p: Pos, w: number, h: number): Pos {
+  if (typeof window === "undefined") return p;
+  const maxX = window.innerWidth  - w - 8;
+  const maxY = window.innerHeight - 60; // keep header always visible
+  return {
+    x: Math.max(8, Math.min(p.x, maxX)),
+    y: Math.max(HEADER_OFFSET - 16, Math.min(p.y, maxY)),
+  };
+}
+
 /**
  * Persistent cart UI for the Farmers Market.
- * - Desktop (lg+): always-expanded panel pinned to the right side, below the header
- * - Mobile (< lg): collapsed bottom bar with item count → tap to expand into a slide-up sheet
- *
- * Both views share the same scrollable item list, qty controls, and "Review & Checkout" CTA.
+ * - Desktop (lg+): draggable + collapsible floating card, position remembered in localStorage
+ * - Mobile (< lg): bottom bar → tap to expand into a slide-up sheet
  */
 export default function FloatingCart() {
-  const cart = useCart();
+  const cart  = useCart();
   const count = cartItemCount(cart);
   const total = cartSubtotal(cart);
+
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed]   = useState(false);
+  const [pos, setPos]               = useState<Pos>({ x: 0, y: 0 });
+  const [mounted, setMounted]       = useState(false);
+  const dragRef                     = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
+
+  // Initialise from localStorage once mounted
+  useEffect(() => {
+    let p: Pos | null = null;
+    try {
+      const raw = localStorage.getItem(POS_KEY);
+      if (raw) p = JSON.parse(raw);
+    } catch { /* ignore */ }
+    const initial = p ?? defaultPos();
+    setPos(clampPos(initial, DEFAULT_WIDTH, 400));
+    setCollapsed(localStorage.getItem(COLLAPSED_KEY) === "1");
+    setMounted(true);
+
+    // Re-clamp on resize so the panel never ends up off-screen
+    const onResize = () => setPos((cur) => clampPos(cur, DEFAULT_WIDTH, 400));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Persist collapse state
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
+  }, [collapsed, mounted]);
 
   // Close mobile sheet if cart empties out
   useEffect(() => {
     if (count === 0) setMobileOpen(false);
   }, [count]);
 
+  // ─── Drag handlers ─────────────────────────────────────────────
+  const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    // Ignore clicks on actual buttons inside the header
+    if ((e.target as HTMLElement).closest("button")) return;
+    dragRef.current = {
+      startX: e.clientX, startY: e.clientY,
+      origX:  pos.x,     origY:  pos.y,
+      moved:  false,
+    };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }, [pos]);
+
+  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (Math.abs(dx) + Math.abs(dy) > 3) d.moved = true;
+    const w = collapsed ? COLLAPSED_W : DEFAULT_WIDTH;
+    setPos(clampPos({ x: d.origX + dx, y: d.origY + dy }, w, 400));
+  }, [collapsed]);
+
+  const onPointerUp = useCallback(() => {
+    if (dragRef.current?.moved) {
+      try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* ignore */ }
+    }
+    dragRef.current = null;
+  }, [pos]);
+
   if (count === 0) return null;
 
-  // The body shared by desktop panel and mobile sheet
+  // ─── Shared body (item list + footer) ─────────────────────────
   const itemList = (
     <div className="divide-y divide-brand-border">
       {cart.map((item) => (
@@ -100,29 +180,72 @@ export default function FloatingCart() {
     </div>
   );
 
+  // ─── Desktop floating card ────────────────────────────────────
+  // Build the panel as a separately positioned element so it can drag
+  const desktopWidth = collapsed ? COLLAPSED_W : DEFAULT_WIDTH;
+  const desktopStyle: React.CSSProperties = mounted
+    ? {
+        left:   `${pos.x}px`,
+        top:    `${pos.y}px`,
+        width:  `${desktopWidth}px`,
+        bottom: collapsed ? "auto" : "16px",
+        maxHeight: collapsed ? "auto" : "calc(100vh - 96px - 16px)",
+      }
+    : { right: "16px", top: "96px", width: `${DEFAULT_WIDTH}px`, bottom: "16px" };
+
   return (
     <>
-      {/* ─── Desktop: right-side fixed panel ─────────────────────────── */}
+      {/* ─── Desktop (lg+) ─────────────────────────────────────── */}
       <aside
-        className="hidden lg:flex fixed right-4 top-24 bottom-4 w-80 bg-white rounded-2xl border border-brand-border shadow-xl shadow-black/10 z-30 flex-col overflow-hidden"
+        className="hidden lg:flex fixed bg-white rounded-2xl border border-brand-border shadow-xl shadow-black/10 z-30 flex-col overflow-hidden"
+        style={desktopStyle}
         aria-label="WhatsApp Cart"
       >
-        <header className="px-4 py-3 border-b border-brand-border bg-brand-green text-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <header
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          className="px-3 py-2.5 border-b border-brand-border bg-brand-green text-white flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing select-none touch-none"
+        >
+          <span className="text-[10px] uppercase tracking-wider text-white/60 select-none">⋮⋮ drag</span>
+          <div className="flex items-center gap-1.5 flex-1 justify-center pointer-events-none">
             <span className="text-base">🛒</span>
-            <h3 className="text-sm font-bold" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-sm font-bold" style={{ fontFamily: "var(--font-display)" }}>
               WhatsApp Cart
-            </h3>
+            </span>
+            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-semibold">
+              {count}
+            </span>
           </div>
-          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-semibold">
-            {count} {count === 1 ? "item" : "items"}
-          </span>
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "Expand cart" : "Collapse cart"}
+            className="text-white/80 hover:text-white w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 text-sm leading-none"
+          >
+            {collapsed ? "▾" : "▴"}
+          </button>
         </header>
-        <div className="flex-1 overflow-y-auto">{itemList}</div>
-        {footer}
+
+        {/* Collapsed mini-summary */}
+        {collapsed ? (
+          <Link
+            href="/farmers-market/order"
+            className="flex items-center justify-between px-4 py-3 hover:bg-brand-mint/50 transition-colors"
+          >
+            <span className="text-xs text-brand-muted">{count} {count === 1 ? "item" : "items"}</span>
+            <span className="text-sm font-bold text-brand-green">{formatINR(total)}</span>
+            <span className="text-xs font-semibold text-brand-green">Checkout →</span>
+          </Link>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto">{itemList}</div>
+            {footer}
+          </>
+        )}
       </aside>
 
-      {/* ─── Mobile: collapsed bottom bar ──────────────────────────── */}
+      {/* ─── Mobile bottom bar ────────────────────────────────── */}
       <button
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed bottom-4 left-4 right-4 z-30 bg-brand-green text-white rounded-2xl shadow-xl shadow-brand-green/30 px-4 py-3 flex items-center justify-between gap-3 hover:bg-brand-mid transition-colors"
@@ -137,7 +260,7 @@ export default function FloatingCart() {
         </span>
       </button>
 
-      {/* ─── Mobile: slide-up sheet ────────────────────────────────── */}
+      {/* ─── Mobile slide-up sheet ────────────────────────────── */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-50 flex items-end bg-black/50 backdrop-blur-sm"

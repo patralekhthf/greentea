@@ -31,6 +31,7 @@ export default function DeliveryZoneMap({
   const [checking, setChecking] = useState(false);
   const [result, setResult]     = useState<CheckResult | null>(null);
   const [error, setError]       = useState("");
+  const [autoDetected, setAutoDetected] = useState(false);
 
   // ─── Initialise the Leaflet map once ────────────────────────────────────
   useEffect(() => {
@@ -110,31 +111,44 @@ export default function DeliveryZoneMap({
       setResult({ inZone: data.inZone, distanceKm: data.distanceKm, pincodeLabel: data.pincodeLabel });
 
       // Drop a marker for the resolved pincode location on the map
-      if (mapInstance.current && typeof data.resolvedLat === "number" && typeof data.resolvedLng === "number") {
-        const L = (await import("leaflet")).default;
-        if (userMarkerRef.current) userMarkerRef.current.remove();
-        const youIcon = L.divIcon({
-          className: "",
-          html:
-            '<div style="background:#d4a04a;border:2px solid white;border-radius:9999px;width:16px;height:16px;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
-          iconSize:  [16, 16],
-          iconAnchor:[8, 8],
-        });
-        userMarkerRef.current = L.marker([data.resolvedLat, data.resolvedLng], { icon: youIcon })
-          .addTo(mapInstance.current)
-          .bindPopup(`Pincode ${pincode}`)
-          .openPopup();
-        const bounds = L.latLngBounds([
-          [centerLat, centerLng],
-          [data.resolvedLat, data.resolvedLng],
-        ]).pad(0.4);
-        mapInstance.current.fitBounds(bounds);
+      if (typeof data.resolvedLat === "number" && typeof data.resolvedLng === "number") {
+        await dropUserMarker(data.resolvedLat, data.resolvedLng, `Pincode ${pincode}`);
+        setAutoDetected(false);
       }
     } catch {
       setError("Network error. Try again.");
     } finally {
       setChecking(false);
     }
+  }
+
+  /** Place a "you are here" marker and fit the map to include warehouse + user. */
+  async function dropUserMarker(lat: number, lng: number, label: string) {
+    if (!mapInstance.current) return;
+    const L = (await import("leaflet")).default;
+    if (userMarkerRef.current) userMarkerRef.current.remove();
+    const youIcon = L.divIcon({
+      className: "",
+      html:
+        '<div style="background:#d4a04a;border:2px solid white;border-radius:9999px;width:16px;height:16px;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+      iconSize:  [16, 16],
+      iconAnchor:[8, 8],
+    });
+    userMarkerRef.current = L.marker([lat, lng], { icon: youIcon })
+      .addTo(mapInstance.current)
+      .bindPopup(label)
+      .openPopup();
+    const bounds = L.latLngBounds([[centerLat, centerLng], [lat, lng]]).pad(0.4);
+    mapInstance.current.fitBounds(bounds);
+  }
+
+  async function lookupCoords(lat: number, lng: number) {
+    const res = await fetch("/api/local/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat, lng }),
+    });
+    return { res, data: await res.json() };
   }
 
   async function checkWithGeolocation() {
@@ -148,38 +162,12 @@ export default function DeliveryZoneMap({
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const res = await fetch("/api/local/check", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-          });
-          const data = await res.json();
+          const { res, data } = await lookupCoords(pos.coords.latitude, pos.coords.longitude);
           if (!res.ok) {
             setError(data.error ?? "Check failed");
           } else {
             setResult({ inZone: data.inZone, distanceKm: data.distanceKm });
-            // Place a marker on the map
-            if (mapInstance.current) {
-              const L = (await import("leaflet")).default;
-              if (userMarkerRef.current) userMarkerRef.current.remove();
-              const youIcon = L.divIcon({
-                className: "",
-                html:
-                  '<div style="background:#d4a04a;border:2px solid white;border-radius:9999px;width:16px;height:16px;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
-                iconSize:  [16, 16],
-                iconAnchor:[8, 8],
-              });
-              userMarkerRef.current = L.marker([pos.coords.latitude, pos.coords.longitude], { icon: youIcon })
-                .addTo(mapInstance.current)
-                .bindPopup("You are here")
-                .openPopup();
-              // Fit both points
-              const bounds = L.latLngBounds([
-                [centerLat, centerLng],
-                [pos.coords.latitude, pos.coords.longitude],
-              ]).pad(0.4);
-              mapInstance.current.fitBounds(bounds);
-            }
+            await dropUserMarker(pos.coords.latitude, pos.coords.longitude, "You are here");
           }
         } catch {
           setError("Network error. Try again.");
@@ -194,6 +182,45 @@ export default function DeliveryZoneMap({
       { timeout: 10000 }
     );
   }
+
+  /**
+   * Auto-detect location on mount — only fires silently if the user has
+   * ALREADY granted geolocation permission. We never trigger an unprompted
+   * browser popup; the explicit "Use my location" button handles that case.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined" || !navigator.geolocation || !navigator.permissions) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const perm = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+        if (perm.state !== "granted") return;
+        // Wait a beat so the map has time to initialise
+        setTimeout(() => {
+          if (cancelled) return;
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              if (cancelled) return;
+              try {
+                const { res, data } = await lookupCoords(pos.coords.latitude, pos.coords.longitude);
+                if (res.ok) {
+                  setResult({ inZone: data.inZone, distanceKm: data.distanceKm });
+                  await dropUserMarker(pos.coords.latitude, pos.coords.longitude, "Detected — your location");
+                  setAutoDetected(true);
+                }
+              } catch { /* silent */ }
+            },
+            () => { /* silent — user can still click the button */ },
+            { timeout: 8000, maximumAge: 5 * 60 * 1000 }
+          );
+        }, 600);
+      } catch { /* Permissions API not available — skip */ }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="bg-white rounded-2xl border border-brand-border overflow-hidden">
@@ -241,6 +268,12 @@ export default function DeliveryZoneMap({
 
         {error && (
           <p className="text-sm text-red-600 mb-2">{error}</p>
+        )}
+
+        {result && autoDetected && (
+          <p className="text-[11px] text-brand-muted mb-2">
+            🛰️ Auto-detected your location. Checking for someone else? Enter their pincode above to override.
+          </p>
         )}
 
         {result && (
