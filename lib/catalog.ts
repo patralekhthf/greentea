@@ -13,8 +13,9 @@ export const DISH_TYPES = [
   { slug: "gravies",   label: "Curries & Gravies", icon: "🍛" },
   { slug: "dal",       label: "Dal & Sambhar",     icon: "🥣" },
   { slug: "breakfast", label: "Breakfast",         icon: "🍽️" },
-  { slug: "sweets",    label: "Sweets & Desserts", icon: "🍮" },
   { slug: "rice",      label: "Biryani & Rice",    icon: "🍚" },
+  { slug: "sides",     label: "Chutneys & Sides",  icon: "🥥" },
+  { slug: "sweets",    label: "Sweets & Desserts", icon: "🍮" },
 ] as const;
 
 /** What the customer adds to the premix. */

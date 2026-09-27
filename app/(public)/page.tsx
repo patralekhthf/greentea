@@ -257,8 +257,8 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {DISH_TYPES.slice(0, 4).map((d) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {DISH_TYPES.map((d) => (
             <Link
               key={d.slug}
               href={`/shop?dish=${d.slug}`}

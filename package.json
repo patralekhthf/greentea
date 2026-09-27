@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed": "tsx --env-file=.env.local scripts/seed.ts"
+    "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "db:import-premixes": "tsx --env-file=.env.local scripts/import-premixes.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
