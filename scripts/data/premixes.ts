@@ -11,7 +11,7 @@
  * - Prices: picked between ₹45 and ₹110.
  * - Spice levels and allergens: best guess.
  * - Products without a back label yet: ingredients, method, net weight and
- *   shelf life are pending (ingredients show a "coming soon" note on the site).
+ *   shelf life are pending (ingredients and method show "coming soon" on the site).
  *
  * Slugs are stable identifiers. Changing one creates a new product on re-import.
  */
@@ -27,7 +27,7 @@ export type PremixSeed = {
   longDescription: string;      // Markdown
   highlights: string;           // Markdown, stored in Product.benefits
   ingredients: string;
-  cookingInstructions: string | null; // Markdown; null hides the "How to Cook" tab
+  cookingInstructions: string;  // Markdown
   dishType: string;             // DISH_TYPES slug (lib/catalog.ts)
   pairsWith: string[];          // COOK_WITH slugs
   spiceLevel: SpiceLevel | null;
@@ -41,12 +41,16 @@ export type PremixSeed = {
   priceINR: number;
   isBestseller?: boolean;
   isFeatured?: boolean;
+  /** Files in scripts/data/images, first = primary. Empty = placeholder until photos arrive. */
+  images: string[];
 };
 
 const STORAGE = "Store in a cool, dry place and keep in an airtight container.";
 const SERVES = "Serves 3–4";
 const INGREDIENTS_PENDING =
   "Full ingredient list coming soon. Please check the back of the pack.";
+const METHOD_PENDING =
+  "Step-by-step cooking instructions coming soon. Until then, please follow the method printed on the back of the pack.";
 
 /** Claims printed on the front of every pack. */
 const PACK_CLAIMS = `- 100% natural ingredients
@@ -60,6 +64,7 @@ export const PREMIXES: PremixSeed[] = [
   // ─── Back label available ────────────────────────────────────────────────
   {
     slug: "sambhar-premix",
+    images: ["sambhar-premix-1.jpg"],
     sku: "KG-SAM-100",
     name: "Sambhar Premix",
     tagline: "Homestyle sambhar, no grinding",
@@ -78,7 +83,7 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
     dishType: "dal",
     pairsWith: ["vegetables"],
     spiceLevel: "MEDIUM", // TODO: placeholder
-    noOnionGarlic: false,
+    noOnionGarlic: true, // confirmed by owner 2026-09-27
     netWeight: "100g",
     servings: SERVES,
     yieldNote: "4 tbsp (50 g) makes one pot, so a 100 g pack makes two",
@@ -90,6 +95,7 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
   },
   {
     slug: "moong-dal-halwa-premix",
+    images: ["moong-dal-halwa-premix-1.webp"],
     sku: "KG-MDH-150",
     name: "Moong Dal Halwa Premix",
     tagline: "Pure desi taste that brings sweet cravings",
@@ -122,6 +128,7 @@ Roast it in a little ghee, add milk or water, and a rich, festive halwa is ready
   },
   {
     slug: "rawa-idli-premix",
+    images: ["rawa-idli-premix-1.webp", "rawa-idli-premix-2.webp"],
     sku: "KG-RID-220",
     name: "Rawa Idli Premix",
     tagline: "Soft, fluffy idlis in 20 minutes",
@@ -156,6 +163,7 @@ Whisk it with water and curd, rest the batter for five minutes and steam. Serve 
   // ─── Back label pending: ingredients, method, weight, shelf life TODO ────
   {
     slug: "paneer-tikka-gravy-premix",
+    images: [], // TODO: photo pending
     sku: "KG-PTG-100",
     name: "Paneer Tikka Gravy Premix",
     tagline: "Restaurant-style tikka gravy at home",
@@ -166,7 +174,7 @@ Whisk it with water and curd, rest the batter for five minutes and steam. Serve 
 Also available in a No Onion No Garlic version.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "gravies",
     pairsWith: ["paneer"],
     spiceLevel: "MEDIUM", // TODO: placeholder
@@ -182,6 +190,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "paneer-tikka-gravy-premix-no-onion-no-garlic",
+    images: [], // TODO: photo pending
     sku: "KG-PTG-NOG-100",
     name: "Paneer Tikka Gravy Premix (No Onion No Garlic)",
     tagline: "Tikka gravy, without onion or garlic",
@@ -190,7 +199,7 @@ Also available in a No Onion No Garlic version.`,
     longDescription: `The same tikka gravy, made for households that cook without onion and garlic. Cook it as directed on the pack, add paneer, and serve with naan or rice.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "gravies",
     pairsWith: ["paneer"],
     spiceLevel: "MEDIUM", // TODO: placeholder
@@ -205,6 +214,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "chhole-masala-premix",
+    images: [], // TODO: photo pending
     sku: "KG-CHM-100",
     name: "Chhole Masala Premix",
     tagline: "Punjabi-style chhole, simplified",
@@ -215,7 +225,7 @@ Also available in a No Onion No Garlic version.`,
 Also available in a No Onion No Garlic version.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "gravies",
     pairsWith: ["chickpeas"],
     spiceLevel: "HOT", // TODO: placeholder
@@ -231,6 +241,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "chhole-masala-premix-no-onion-no-garlic",
+    images: ["chhole-masala-premix-no-onion-no-garlic-1.webp"],
     sku: "KG-CHM-NOG-100",
     name: "Chhole Masala Premix (No Onion No Garlic)",
     tagline: "Chhole masala, without onion or garlic",
@@ -239,7 +250,7 @@ Also available in a No Onion No Garlic version.`,
     longDescription: `Our chhole masala, for households that skip onion and garlic. Cook it as directed on the pack with boiled chickpeas and serve hot.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "gravies",
     pairsWith: ["chickpeas"],
     spiceLevel: "HOT", // TODO: placeholder
@@ -254,6 +265,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "white-gravy-premix",
+    images: ["white-gravy-premix-1.webp"],
     sku: "KG-WGR-100",
     name: "White Gravy Premix",
     tagline: "Creamy, mild and rich",
@@ -262,7 +274,7 @@ Also available in a No Onion No Garlic version.`,
     longDescription: `A creamy white gravy base, made without onion or garlic. Cook it as directed on the pack and add paneer, mixed vegetables or chicken.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "gravies",
     pairsWith: ["paneer", "vegetables", "chicken"],
     spiceLevel: "MILD", // TODO: placeholder
@@ -277,6 +289,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "all-purpose-gravy-premix",
+    images: ["all-purpose-gravy-premix-1.webp"],
     sku: "KG-APG-100",
     name: "All Purpose Gravy Premix",
     tagline: "One gravy, endless dishes",
@@ -285,7 +298,7 @@ Also available in a No Onion No Garlic version.`,
     longDescription: `The everyday gravy base for busy kitchens. Cook it as directed on the pack and add whatever you have: paneer, mixed vegetables, chana, boiled eggs or chicken. Made without onion or garlic.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "gravies",
     pairsWith: ["paneer", "vegetables", "chickpeas", "chicken", "egg"],
     spiceLevel: "MEDIUM", // TODO: placeholder
@@ -300,6 +313,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "biryani-premix",
+    images: ["biryani-premix-1.webp"],
     sku: "KG-BIR-100",
     name: "Biryani Premix",
     tagline: "Fragrant biryani, made easy",
@@ -308,7 +322,7 @@ Also available in a No Onion No Garlic version.`,
     longDescription: `Biryani without a long spice list. Cook the premix with rice as directed on the pack, with your choice of vegetables, paneer or chicken. Made without onion or garlic.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "rice",
     pairsWith: ["vegetables", "paneer", "chicken"],
     spiceLevel: "MEDIUM", // TODO: placeholder
@@ -323,6 +337,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "coconut-chutney-premix",
+    images: ["coconut-chutney-premix-1.webp"],
     sku: "KG-CCH-100",
     name: "Coconut Chutney Premix",
     tagline: "South Indian chutney in minutes",
@@ -331,7 +346,7 @@ Also available in a No Onion No Garlic version.`,
     longDescription: `The classic partner to idli, dosa and vada, without grating a coconut. Prepare it as directed on the pack. Made without onion or garlic.`,
     highlights: PACK_CLAIMS,
     ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: null,
+    cookingInstructions: METHOD_PENDING,
     dishType: "sides",
     pairsWith: [],
     spiceLevel: "MILD", // TODO: placeholder

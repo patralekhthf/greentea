@@ -4,14 +4,19 @@
  *   npm run db:import-premixes -- --dry-run        validate the data, no DB access
  *   npm run db:import-premixes -- --yes            upsert as DRAFT (existing status kept)
  *   npm run db:import-premixes -- --yes --publish  upsert and set status PUBLISHED
+ *   add --skip-images to leave product photos untouched
  *
  * - Matches products by slug, so it is safe to re-run after editing the data file.
  * - Writes the India price (ProductCountryConfig for IN). The migration
  *   20260927100000_premix_product_line must already be applied.
- * - Images are not touched; upload them in Admin > Products.
+ * - Photos listed in the data file (scripts/data/images) are uploaded to Cloudinary
+ *   as gt/products/premix/<file name>, overwriting on re-runs, and attached with
+ *   the first one as the primary image. Needs the CLOUDINARY_* env vars.
  * - Uses DATABASE_URL from .env.local. Check the host it prints before passing --yes.
  */
 
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { COOK_WITH, DISH_TYPES } from "../lib/catalog";
 import { PREMIXES, STORAGE, type PremixSeed } from "./data/premixes";
 
@@ -19,6 +24,9 @@ const args = new Set(process.argv.slice(2));
 const DRY_RUN = args.has("--dry-run");
 const CONFIRMED = args.has("--yes");
 const PUBLISH = args.has("--publish");
+const SKIP_IMAGES = args.has("--skip-images");
+const IMAGE_DIR = path.join(__dirname, "data", "images");
+const CLOUDINARY_FOLDER = "gt/products/premix";
 
 function validate(items: PremixSeed[]): string[] {
   const errors: string[] = [];
@@ -38,6 +46,9 @@ function validate(items: PremixSeed[]): string[] {
     if (!dishSlugs.has(p.dishType)) errors.push(`${at} unknown dishType "${p.dishType}"`);
     for (const c of p.pairsWith) if (!cookSlugs.has(c)) errors.push(`${at} unknown pairsWith "${c}"`);
     if (!(p.priceINR > 0)) errors.push(`${at} price must be positive`);
+    for (const file of p.images) {
+      if (!existsSync(path.join(IMAGE_DIR, file))) errors.push(`${at} image not found: ${file}`);
+    }
     for (const field of ["name", "shortDescription", "longDescription", "ingredients"] as const) {
       if (!p[field].trim()) errors.push(`${at} ${field} is empty`);
     }
@@ -57,7 +68,8 @@ async function main() {
       price: `₹${p.priceINR}`,
       spice: p.spiceLevel ?? "—",
       nog: p.noOnionGarlic ? "yes" : "",
-      method: p.cookingInstructions ? "yes" : "pending",
+      method: p.cookingInstructions.includes("coming soon") ? "pending" : "yes",
+      photos: p.images.length || "pending",
     }))
   );
   if (errors.length) {
@@ -79,6 +91,16 @@ async function main() {
   const { db } = await import("../lib/db");
   const india = await db.country.findUnique({ where: { code: "IN" } });
   if (!india) throw new Error("Country IN not found. Run the base seed first.");
+
+  // Cloudinary SDK configured directly: lib/cloudinary.ts is "server-only" (Next.js only)
+  const { v2: cloudinary } = await import("cloudinary");
+  if (!SKIP_IMAGES) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key:    process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
 
   for (const p of PREMIXES) {
     const fields = {
@@ -126,11 +148,39 @@ async function main() {
       update: { price: p.priceINR, isAvailable: true, directPurchaseEnabled: true },
     });
 
-    console.log(`✔ ${p.sku.padEnd(15)} ${p.name} (${product.status})`);
+    let photos = 0;
+    if (!SKIP_IMAGES && p.images.length > 0) {
+      for (const [i, file] of p.images.entries()) {
+        const publicId = `${CLOUDINARY_FOLDER}/${path.parse(file).name}`;
+        const uploaded = await cloudinary.uploader.upload(path.join(IMAGE_DIR, file), {
+          public_id: publicId,
+          overwrite: true,
+          invalidate: true,
+          resource_type: "image",
+        });
+        const existing = await db.productImage.findFirst({
+          where: { productId: product.id, cloudinaryPublicId: uploaded.public_id },
+          select: { id: true },
+        });
+        if (i === 0) {
+          // Our first photo becomes the primary (card) image
+          await db.productImage.updateMany({ where: { productId: product.id }, data: { isPrimary: false } });
+        }
+        const data = { altText: p.name, displayOrder: i, isPrimary: i === 0, imageType: "PRODUCT" as const };
+        if (existing) {
+          await db.productImage.update({ where: { id: existing.id }, data });
+        } else {
+          await db.productImage.create({ data: { productId: product.id, cloudinaryPublicId: uploaded.public_id, ...data } });
+        }
+        photos++;
+      }
+    }
+
+    console.log(`✔ ${p.sku.padEnd(15)} ${p.name} (${product.status}, ${photos} photo${photos === 1 ? "" : "s"})`);
   }
 
   await db.$disconnect();
-  console.log("\nDone. Upload product photos in Admin > Products.");
+  console.log("\nDone. Products without photos show a placeholder until you upload one in Admin > Products.");
 }
 
 main().catch((err) => {
