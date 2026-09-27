@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { getProducts } from "@/lib/products";
+import { getProducts, listParam } from "@/lib/products";
 import { COUNTRY_CONFIG, isValidCountry } from "@/lib/ipapi";
 import ShopClient from "./ShopClient";
 import ShopCategoryQuickLinks from "@/components/product/ShopCategoryQuickLinks";
@@ -35,19 +35,19 @@ export default async function ShopPage({ searchParams }: PageProps) {
   const products = await getProducts({
     country,
     search:        getString(params.search),
-    dish:          getString(params.dish),
-    cookWith:      getString(params.cookWith),
-    spice:         getString(params.spice),
+    dish:          listParam(getString(params.dish)),
+    cookWith:      listParam(getString(params.cookWith)),
+    spice:         listParam(getString(params.spice)),
     noOnionGarlic: getString(params.nog) === "1",
     sort:          getString(params.sort),
   });
 
   // Active filter labels for the breadcrumb/header
   const activeSearch   = getString(params.search);
-  const dishSlug       = getString(params.dish);
-  const cookWithSlug   = getString(params.cookWith);
-  const activeCategory = dishSlug ? dishTypeLabel(dishSlug) : null;
-  const activeWellness = cookWithSlug ? `Cook with ${cookWithLabel(cookWithSlug)}` : null;
+  const dishLabels     = listParam(getString(params.dish)).flatMap((s) => dishTypeLabel(s) ?? []);
+  const cookLabels     = listParam(getString(params.cookWith)).map(cookWithLabel);
+  const activeCategory = dishLabels.length ? dishLabels.join(" + ") : null;
+  const activeWellness = cookLabels.length ? `Cook with ${cookLabels.join(" or ")}` : null;
 
   return (
     <div className="min-h-screen bg-brand-cream">

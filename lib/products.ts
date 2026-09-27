@@ -35,14 +35,20 @@ export type GetProductsParams = {
   line?: ProductLine;  // defaults to PREMIX
   country?: string;
   search?: string;
-  dish?: string;       // DISH_TYPES slug
-  cookWith?: string;   // COOK_WITH slug
-  spice?: string;      // SpiceLevel
+  dish?: string[];      // DISH_TYPES slugs (any of)
+  cookWith?: string[];  // COOK_WITH slugs (pairs with any of)
+  spice?: string[];     // SpiceLevel values (any of)
   noOnionGarlic?: boolean;
   sort?: string;
 };
 
 const SPICE_VALUES: SpiceLevel[] = ["MILD", "MEDIUM", "HOT", "EXTRA_HOT"];
+
+/** Parses a multi-select URL param like "gravies,dal" into a clean, de-duplicated list. */
+export function listParam(value: string | undefined): string[] {
+  if (!value) return [];
+  return [...new Set(value.split(",").map((v) => v.trim()).filter(Boolean))].slice(0, 12);
+}
 
 export async function getProducts(params: GetProductsParams): Promise<ProductForCard[]> {
   const {
@@ -56,7 +62,7 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
     sort = "newest",
   } = params;
 
-  const spiceFilter = SPICE_VALUES.find((v) => v === spice);
+  const spiceFilter = (spice ?? []).filter((v): v is SpiceLevel => (SPICE_VALUES as string[]).includes(v));
 
   const where: Prisma.ProductWhereInput = {
     productLine: line,
@@ -77,9 +83,10 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
           ],
         }
       : {}),
-    ...(dish ? { dishType: dish } : {}),
-    ...(cookWith ? { pairsWith: { has: cookWith } } : {}),
-    ...(spiceFilter ? { spiceLevel: spiceFilter } : {}),
+    // Within a group the choices widen the results (OR); across groups they narrow them (AND)
+    ...(dish?.length ? { dishType: { in: dish } } : {}),
+    ...(cookWith?.length ? { pairsWith: { hasSome: cookWith } } : {}),
+    ...(spiceFilter.length ? { spiceLevel: { in: spiceFilter } } : {}),
     ...(noOnionGarlic ? { noOnionGarlic: true } : {}),
   };
 

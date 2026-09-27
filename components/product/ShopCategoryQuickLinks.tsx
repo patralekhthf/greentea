@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback } from "react";
 import { DISH_TYPES } from "@/lib/catalog";
 
 const QUICK_CATEGORIES = DISH_TYPES.slice(0, 4);
@@ -9,30 +8,25 @@ const QUICK_CATEGORIES = DISH_TYPES.slice(0, 4);
 export default function ShopCategoryQuickLinks() {
   const router   = useRouter();
   const pathname = usePathname();
-  const rawParams = useSearchParams();
-  const searchParams = rawParams ?? new URLSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
-  const activeCategory = searchParams.get("dish");
+  const activeDishes = (searchParams.get("dish") ?? "").split(",").filter(Boolean);
 
-  const handleClick = useCallback(
-    (slug: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (params.get("dish") === slug) {
-        // Already active — toggle off
-        params.delete("dish");
-      } else {
-        params.set("dish", slug);
-      }
-      params.delete("page");
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [router, pathname, searchParams]
-  );
+  function handleClick(slug: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    // Same multi-select list as the sidebar's Dish Type filter
+    const current = (params.get("dish") ?? "").split(",").filter(Boolean);
+    const next = current.includes(slug) ? current.filter((s) => s !== slug) : [...current, slug];
+    if (next.length) params.set("dish", next.join(","));
+    else params.delete("dish");
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   return (
     <div className="flex flex-wrap gap-2">
       {QUICK_CATEGORIES.map(({ label, slug }) => {
-        const isActive = activeCategory === slug;
+        const isActive = activeDishes.includes(slug);
         return (
           <button
             key={slug}

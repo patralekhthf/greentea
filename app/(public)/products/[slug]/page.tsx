@@ -63,7 +63,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   // Related products — same dish type (or any premix), exclude current
   const related = (
-    await getProducts({ country, dish: product.dishType ?? undefined })
+    await getProducts({ country, dish: product.dishType ? [product.dishType] : undefined })
   ).filter((p) => p.slug !== product.slug).slice(0, 4);
 
   return (
