@@ -11,7 +11,8 @@ import { buildImageUrl } from "@/lib/cloudinary-url";
 import { BRAND_TAGLINE, DISH_TYPES } from "@/lib/catalog";
 
 export const metadata: Metadata = {
-  title: "Kanta Greens — Ready-to-Cook Masala Premixes",
+  // absolute: skip the "| Kanta Greens" template suffix, the brand is already in the title
+  title: { absolute: "Kanta Greens — Ready-to-Cook Masala Premixes" },
   description:
     "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
 };
