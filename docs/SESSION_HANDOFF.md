@@ -40,9 +40,21 @@ Load with `npm run db:import-premixes -- --dry-run` (validate), then `-- --yes` 
 - Manufacturer address on labels: Tower S10, Flat 106, Saraswati Apartment D6, Vasant Kunj, New Delhi 110070. Customer care 9350784240.
 - Some halwa mock-ups say "Kanta's Kit" instead of "Kanta Greens"; confirm the brand name on that pack.
 
+## Website cart + checkout (2026-09-27, commit cbe9722, LOCAL until next approved push)
+- Two separate carts: Farmers Market WhatsApp cart (local Delhi zone, `lib/farmers-market-cart.ts`) and the website cart for all-India shipping (`lib/site-cart.ts`, localStorage `gt_site_cart_v1`).
+- Flow: Add to Cart (shop / product page) > `/cart` > `/checkout` (address) > UPI QR + UTR > confirmation. `/track` = order number + mobile, and pay a still-unpaid order.
+- Delivery: Rs 60 first pack + Rs 5 each additional (`lib/shipping.ts`). Promise: ships 1 to 2 working days, delivered 3 to 7.
+- Orders use the existing `Order`/`OrderItem`/`OrderAddress`/`ShipmentTracking` tables; numbers `KG-YYYYMMDD-NNNN` (IST). Server re-prices from DB.
+- Admin > Website Orders (`/admin/orders`): verify UTR, clear bad UTR, mark shipped (courier + AWB), delivered, cancel.
+- UPI VPA is shared with the Farmers Market (Admin > Farmers Market > UPI Payment).
+- Migration `20260927140000_website_orders_upi` is ALREADY applied to Neon (tested locally against it).
+- Test order `KG-20260928-0001` ("Test Customer (Claude)", UTR TESTUTR00001) left in the DB so the owner can try the admin flow; cancel or delete it afterwards.
+- Draft policy pages `/legal/{shipping,refund,terms,privacy}` and `/contact` need owner review before the push.
+- Razorpay: later (owner decision). Order confirmation emails: not built (Resend not wired).
+
 ## Uncommitted / in-flight
 - `.DS_Store` only (ignore).
-- Local commits not pushed: 4c121d0 (pivot), 139e614 (catalogue + import script), plus handoff commits.
+- Pushed to production 2026-09-27: pivot + catalogue (f2ac1e2). Local, unpushed: home title fix (eb7afc1), hero source image (596e04c), website cart + checkout (cbe9722).
 
 ## Next / pending
 1. User reviews the pivot. Go-live checklist when they say deploy:
