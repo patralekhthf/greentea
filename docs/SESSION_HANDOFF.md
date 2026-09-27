@@ -31,20 +31,18 @@
   - Admin product form: product-line picker + premix details section.
 - Verified: `tsc --noEmit` clean, `next build` succeeds. NOT verified in a browser (pages need the migration first).
 
-## Launch products (from the user's pack labels)
-All 100 g, veg mark, best before 6 months, "Store in cool, dry place, airtight container". Brand line "A Delicacy of Kittu's Kitchen", pack tagline "Healthy, Hygienic, Homemade for Busy Bees".
-1. Sambhar Premix (dal): 4 tbsp (50 g) + 500 ml water, cooker with 3 tbsp oil + veggies, 2 whistles, tadka. Ingredients on pack.
-2. Moong Dal Halwa Premix (sweets)
-3. Rawa Idli Premix (breakfast)
-4. Paneer Tikka Gravy Premix, regular (gravies)
-5. Paneer Tikka Gravy Premix, No Onion No Garlic
-6. Chhole Masala Gravy Premix, regular (gravies)
-7. Chhole Masala Gravy Premix, No Onion No Garlic
-Prices, SKUs, product photos and most ingredient lists still needed from the user.
+## Launch products (11, in scripts/data/premixes.ts)
+Load with `npm run db:import-premixes -- --dry-run` (validate), then `-- --yes` (upsert as Draft) or `-- --yes --publish`. It prints the DB host before writing.
+- Full back-label data: Sambhar (100 g, 6 mo), Moong Dal Halwa (150 g, 4 to 5 mo, no spice level), Rawa Idli (220 g, 12 to 15 idlis, No Onion No Garlic).
+- Back label pending (ingredients show "coming soon", no How to Cook tab, 100 g and 6 mo assumed): Paneer Tikka Gravy (+ NOG), Chhole Masala (+ NOG), White Gravy (NOG), All Purpose Gravy (NOG), Biryani (NOG), Coconut Chutney (NOG, dish type "Chutneys & Sides").
+- Owner-approved placeholders, marked `// TODO` in the data file: prices (Rs 45 to 110), spice levels, allergens. Every product "Serves 3 to 4".
+- Photos: owner will supply; upload in Admin > Products after import.
+- Manufacturer address on labels: Tower S10, Flat 106, Saraswati Apartment D6, Vasant Kunj, New Delhi 110070. Customer care 9350784240.
+- Some halwa mock-ups say "Kanta's Kit" instead of "Kanta Greens"; confirm the brand name on that pack.
 
 ## Uncommitted / in-flight
 - `.DS_Store` only (ignore).
-- Local commits not pushed: 4c121d0 (+ this handoff commit).
+- Local commits not pushed: 4c121d0 (pivot), 139e614 (catalogue + import script), plus handoff commits.
 
 ## Next / pending
 1. User reviews the pivot. Go-live checklist when they say deploy:
@@ -64,6 +62,7 @@ Prices, SKUs, product photos and most ingredient lists still needed from the use
 
 ## Gotchas
 - **The project lives in iCloud-synced ~/Documents.** macOS "Optimize Mac Storage" offloads files (`find . -flags +dataless`). Offloaded `node_modules` makes tsc / prisma / next hang silently at 0% CPU. Fix: `npm ci` (fast) and `brctl download .` for the rest. Better: right-click the folder in Finder > "Keep Downloaded", or move the repo out of iCloud.
+- iCloud also creates conflict copies named "X 2" (67 appeared in node_modules/@types after the reinstall, breaking tsc with "Cannot find type definition file for 'node 2'"). Delete a "X 2" copy only when "X" exists. A stray `.git/index 2` is harmless.
 - `npm ci` now skips install scripts (prisma, sharp). Run `CHECKPOINT_DISABLE=1 ./node_modules/.bin/prisma generate` afterwards.
 - Prisma CLI can hang on its telemetry check: prefix with `CHECKPOINT_DISABLE=1`. Prefer `./node_modules/.bin/<tool>` over `npx`.
 - `prisma migrate diff --from-schema/--to-schema` hung; write migration SQL by hand.
