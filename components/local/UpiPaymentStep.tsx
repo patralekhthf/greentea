@@ -12,8 +12,11 @@ type Props = {
     instructions: string;
   };
   onSubmit:     (utr: string) => Promise<void> | void;
-  onSkip:       () => void;
+  /** Only used by the WhatsApp flow ("pay later via WhatsApp") */
+  onSkip?:      () => void;
   submitting:   boolean;
+  /** "whatsapp" = Farmers Market order (default); "site" = website order */
+  variant?:     "whatsapp" | "site";
 };
 
 /** Build the upi:// payment URI consumed by every Indian UPI app. */
@@ -30,8 +33,9 @@ function buildUpiUri(vpa: string, payeeName: string, amount: number, orderNumber
 }
 
 export default function UpiPaymentStep({
-  orderNumber, amount, upi, onSubmit, onSkip, submitting,
+  orderNumber, amount, upi, onSubmit, onSkip, submitting, variant = "whatsapp",
 }: Props) {
+  const isSite = variant === "site";
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [utr, setUtr]             = useState("");
   const [error, setError]         = useState("");
@@ -76,7 +80,7 @@ export default function UpiPaymentStep({
       {/* Header */}
       <div className="bg-white rounded-2xl border border-brand-border overflow-hidden">
         <div className="px-5 py-4 bg-brand-mint/40 border-b border-brand-border">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-sage">Step 2 of 2 · Payment</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-sage">{isSite ? "Final step · Payment" : "Step 2 of 2 · Payment"}</p>
           <h2 className="text-base font-bold text-brand-green mt-0.5" style={{ fontFamily: "var(--font-display)" }}>
             Pay ₹{amount.toFixed(0)} via UPI
           </h2>
@@ -132,11 +136,23 @@ export default function UpiPaymentStep({
       <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex gap-4">
         <div className="text-3xl shrink-0">📸</div>
         <div>
-          <h3 className="text-sm font-bold text-amber-900 mb-1">Important — share a payment screenshot on WhatsApp</h3>
-          <p className="text-sm text-amber-800 leading-relaxed">
-            After paying, take a screenshot of the &quot;Payment Successful&quot; screen from your UPI app
-            and send it on the WhatsApp chat that opens next. This helps us verify and ship your order faster.
-          </p>
+          {isSite ? (
+            <>
+              <h3 className="text-sm font-bold text-amber-900 mb-1">Keep your payment screenshot</h3>
+              <p className="text-sm text-amber-800 leading-relaxed">
+                After paying, take a screenshot of the &quot;Payment Successful&quot; screen from your UPI app.
+                We match every payment by its UTR, and may ask for the screenshot if we can&apos;t find it.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-sm font-bold text-amber-900 mb-1">Important — share a payment screenshot on WhatsApp</h3>
+              <p className="text-sm text-amber-800 leading-relaxed">
+                After paying, take a screenshot of the &quot;Payment Successful&quot; screen from your UPI app
+                and send it on the WhatsApp chat that opens next. This helps us verify and ship your order faster.
+              </p>
+            </>
+          )}
         </div>
       </div>
 
@@ -168,6 +184,15 @@ export default function UpiPaymentStep({
       </div>
 
       {/* Actions */}
+      {isSite ? (
+        <button
+          onClick={handleConfirm}
+          disabled={submitting}
+          className="w-full bg-brand-green text-white font-bold px-6 py-3.5 rounded-full hover:bg-brand-mid transition-colors disabled:opacity-40 shadow-lg shadow-brand-green/20"
+        >
+          {submitting ? "Confirming…" : "I've paid — Confirm my order"}
+        </button>
+      ) : (
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={onSkip}
@@ -187,6 +212,7 @@ export default function UpiPaymentStep({
           {submitting ? "Confirming…" : "I've paid — Send WhatsApp"}
         </button>
       </div>
+      )}
     </div>
   );
 }

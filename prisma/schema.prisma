@@ -250,7 +250,7 @@ model ProductImage {
 
 model Order {
   id                String        @id @default(cuid())
-  orderNumber       String        @unique // GT-YYYYMMDD-XXXX
+  orderNumber       String        @unique // KG-YYYYMMDD-NNNN
   customerName      String
   customerEmail     String
   customerMobile    String
@@ -261,8 +261,10 @@ model Order {
   totalAmount       Decimal       @db.Decimal(10, 2)
   paymentStatus     PaymentStatus @default(PENDING)
   orderStatus       OrderStatus   @default(PLACED)
-  paymentGateway    String        @default("razorpay")
-  paymentReference  String?       // Razorpay payment_id
+  paymentGateway    String        @default("razorpay") // "upi" for manual UPI + UTR
+  paymentReference  String?       // Razorpay payment_id, or the customer's UPI UTR
+  paymentSubmittedAt DateTime?    // UPI: when the customer entered their UTR
+  paymentVerifiedAt  DateTime?    // UPI: when an admin matched it in the bank app
   razorpayOrderId   String?
   couponCode        String?
   createdAt         DateTime      @default(now())
@@ -281,6 +283,8 @@ model OrderItem {
   orderId               String
   productId             String
   productNameSnapshot   String  // Frozen at order time
+  skuSnapshot           String?
+  sizeSnapshot          String?
   quantity              Int
   unitPrice             Decimal @db.Decimal(10, 2)
   totalPrice            Decimal @db.Decimal(10, 2)

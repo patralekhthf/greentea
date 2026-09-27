@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { addToCart } from "@/lib/farmers-market-cart";
+import { addToSiteCart } from "@/lib/site-cart";
 
 export type ModalProduct = {
   id: string;
+  slug?: string;
   sku: string;
   name: string;
   tagline: string | null;
@@ -18,13 +20,16 @@ export type ModalProduct = {
 type Props = {
   product: ModalProduct;
   onClose: () => void;
+  /** "whatsapp" = Farmers Market local cart (default); "site" = all-India website cart */
+  target?: "whatsapp" | "site";
 };
 
 function formatINR(n: number) {
   return `₹${n.toFixed(0)}`;
 }
 
-export default function QuickAddModal({ product, onClose }: Props) {
+export default function QuickAddModal({ product, onClose, target = "whatsapp" }: Props) {
+  const isSite = target === "site";
   const router = useRouter();
   const sizes = product.sizes.length > 0 ? product.sizes : ["Standard"];
   const [size, setSize]         = useState(sizes[0]);
@@ -43,6 +48,19 @@ export default function QuickAddModal({ product, onClose }: Props) {
   }, [onClose]);
 
   function add() {
+    if (isSite) {
+      addToSiteCart({
+        productId: product.id,
+        slug:      product.slug ?? "",
+        sku:       product.sku,
+        name:      product.name,
+        size,
+        quantity,
+        price:     product.price,
+        imageUrl:  product.imageUrl,
+      });
+      return;
+    }
     addToCart({
       productId: product.id,
       sku:       product.sku,
@@ -61,7 +79,7 @@ export default function QuickAddModal({ product, onClose }: Props) {
 
   function handleAddAndCheckout() {
     add();
-    router.push("/farmers-market/order");
+    router.push(isSite ? "/cart" : "/farmers-market/order");
   }
 
   const lineTotal = product.price * quantity;
@@ -78,7 +96,7 @@ export default function QuickAddModal({ product, onClose }: Props) {
         {/* Header strip */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-brand-border">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-sage">
-            Add to WhatsApp Cart
+            {isSite ? "Add to Cart" : "Add to WhatsApp Cart"}
           </span>
           <button
             onClick={onClose}
@@ -110,7 +128,7 @@ export default function QuickAddModal({ product, onClose }: Props) {
               <p className="text-xs text-brand-muted mt-1">{product.tagline}</p>
             )}
             <p className="text-sm font-bold text-brand-dark mt-1">
-              {formatINR(product.price)} <span className="text-xs font-normal text-brand-muted">base</span>
+              {formatINR(product.price)} <span className="text-xs font-normal text-brand-muted">per pack</span>
             </p>
           </div>
         </div>
@@ -175,7 +193,7 @@ export default function QuickAddModal({ product, onClose }: Props) {
             onClick={handleAddAndCheckout}
             className="px-5 py-3 bg-brand-green text-white rounded-full text-sm font-semibold hover:bg-brand-mid transition-colors"
           >
-            Add &amp; Checkout →
+            {isSite ? "Add & Go to Cart →" : "Add & Checkout →"}
           </button>
         </div>
       </div>

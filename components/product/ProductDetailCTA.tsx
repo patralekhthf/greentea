@@ -1,11 +1,16 @@
 "use client";
 
+import AddToCartButton from "./AddToCartButton";
+import type { ModalProduct } from "@/components/local/QuickAddModal";
+import { DELIVERY_PROMISE } from "@/lib/shipping";
+
 type Props = {
   country: string;
   outOfStock: boolean;
   amazonEnabled: boolean;
   amazonUrl: string | null;
-  productSlug: string;
+  /** Needed for the India cart; null when the product has no India price */
+  cartProduct: (ModalProduct & { slug: string }) | null;
 };
 
 export default function ProductDetailCTA({
@@ -13,25 +18,15 @@ export default function ProductDetailCTA({
   outOfStock,
   amazonEnabled,
   amazonUrl,
-  productSlug: _productSlug,
+  cartProduct,
 }: Props) {
   const isIndia = country === "IN";
 
-  if (isIndia) {
+  if (isIndia && cartProduct) {
     return (
-      <div className="flex flex-col gap-3">
-        <button
-          disabled={outOfStock}
-          className="w-full py-3.5 rounded-full bg-brand-green text-white font-semibold text-sm hover:bg-brand-mid transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          title={outOfStock ? "Out of stock" : "Add to cart — coming soon"}
-        >
-          {outOfStock ? "Out of Stock" : "Add to Cart"}
-        </button>
-        {outOfStock && (
-          <button className="w-full py-3 rounded-full border border-brand-green text-brand-green font-semibold text-sm hover:bg-brand-mint transition-colors">
-            Notify Me When Available
-          </button>
-        )}
+      <div className="flex flex-col gap-2">
+        <AddToCartButton product={cartProduct} disabled={outOfStock} variant="full" />
+        <p className="text-xs text-brand-muted text-center">🚚 {DELIVERY_PROMISE}</p>
       </div>
     );
   }
@@ -54,7 +49,7 @@ export default function ProductDetailCTA({
 
   return (
     <p className="text-sm text-brand-muted text-center py-3 border border-brand-border rounded-full">
-      Not available in your region yet
+      Not available to order right now
     </p>
   );
 }

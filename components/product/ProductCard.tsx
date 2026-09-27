@@ -4,6 +4,7 @@ import type { ProductForCard } from "@/lib/products";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
 import { dishTypeLabel, spiceLevel } from "@/lib/catalog";
 import VegMark from "./VegMark";
+import AddToCartButton from "./AddToCartButton";
 
 type Props = {
   product: ProductForCard;
@@ -147,14 +148,20 @@ export default function ProductCard({ product, country, currencySymbol }: Props)
           )}
 
           {/* CTA */}
-          {isIndia ? (
-            <button
+          {isIndia && config?.price ? (
+            <AddToCartButton
               disabled={outOfStock}
-              className="w-full text-xs font-semibold py-2.5 rounded-full border border-brand-green text-brand-green hover:bg-brand-green hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              title={outOfStock ? "Out of stock" : "Add to cart — coming soon"}
-            >
-              {outOfStock ? "Out of Stock" : "Add to Cart"}
-            </button>
+              product={{
+                id:       product.id,
+                slug:     product.slug,
+                sku:      product.sku ?? product.slug.toUpperCase().slice(0, 12),
+                name:     product.name,
+                tagline:  product.tagline,
+                price:    parseFloat(config.salePrice ?? config.price),
+                sizes:    product.packagingSizes,
+                imageUrl,
+              }}
+            />
           ) : config?.amazonEnabled && config.amazonUrl ? (
             <a
               href={config.amazonUrl}

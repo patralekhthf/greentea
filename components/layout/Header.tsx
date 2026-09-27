@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LocationSwitcher from "./LocationSwitcher";
 import { BRAND_TAGLINE } from "@/lib/catalog";
+import { useSiteCart, siteCartUnits } from "@/lib/site-cart";
 
 const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Premixes", href: "/shop" },
@@ -24,6 +25,8 @@ function SoonPill() {
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { cart } = useSiteCart();
+  const cartCount = siteCartUnits(cart);
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-brand-border">
@@ -69,16 +72,22 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <LocationSwitcher />
 
-            {/* Cart icon — shown always, non-functional Phase 1 */}
-            <button
-              aria-label="Cart"
+            {/* Website cart (all-India). The Farmers Market WhatsApp cart has its own panel. */}
+            <Link
+              href="/cart"
+              aria-label={cartCount > 0 ? `Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}` : "Cart"}
               className="relative p-2 rounded-lg hover:bg-brand-mint transition-colors text-brand-muted hover:text-brand-green"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.857-7.152a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
               </svg>
-            </button>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-green text-white text-[10px] font-bold flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
 
             {/* Mobile menu toggle */}
             <button

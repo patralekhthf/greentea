@@ -5,6 +5,8 @@ export type ProductForCard = {
   id: string;
   name: string;
   slug: string;
+  sku: string | null;
+  packagingSizes: string[];
   tagline: string | null;
   shortDescription: string;
   productLine: ProductLine;
@@ -111,6 +113,8 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
       id: p.id,
       name: p.name,
       slug: p.slug,
+      sku: p.sku,
+      packagingSizes: p.packagingSizes,
       tagline: p.tagline,
       shortDescription: p.shortDescription,
       productLine: p.productLine,

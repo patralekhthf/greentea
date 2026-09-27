@@ -11,6 +11,7 @@ import ProductContentTabs from "@/components/product/ProductContentTabs";
 import ProductSizeSelector from "@/components/product/ProductSizeSelector";
 import VegMark from "@/components/product/VegMark";
 import { TEA_LINE_LIVE, cookWithLabel, dishTypeLabel, spiceLevel } from "@/lib/catalog";
+import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -225,7 +226,22 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 outOfStock={outOfStock}
                 amazonEnabled={config?.amazonEnabled ?? false}
                 amazonUrl={config?.amazonUrl ?? null}
-                productSlug={product.slug}
+                cartProduct={
+                  price !== null
+                    ? {
+                        id:       product.id,
+                        slug:     product.slug,
+                        sku:      product.sku ?? product.slug.toUpperCase().slice(0, 12),
+                        name:     product.name,
+                        tagline:  product.tagline,
+                        price:    salePrice ?? price,
+                        sizes:    product.packagingSizes,
+                        imageUrl: product.images[0]
+                          ? buildImageUrl(product.images[0].cloudinaryPublicId, TRANSFORMS.productCard)
+                          : null,
+                      }
+                    : null
+                }
               />
             </div>
 
