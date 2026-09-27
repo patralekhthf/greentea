@@ -40,6 +40,7 @@ export default async function AdminProductsPage() {
           <thead>
             <tr className="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
               <th className="text-left px-5 py-3.5">Product</th>
+              <th className="text-left px-5 py-3.5">Line</th>
               <th className="text-left px-5 py-3.5">Status</th>
               <th className="text-left px-5 py-3.5">IN Price</th>
               <th className="text-left px-5 py-3.5">Flags</th>
@@ -52,6 +53,17 @@ export default async function AdminProductsPage() {
                 <td className="px-5 py-4">
                   <div className="font-medium text-gray-900">{p.name}</div>
                   <div className="text-xs text-gray-400 mt-0.5">{p.slug}</div>
+                </td>
+                <td className="px-5 py-4">
+                  {p.productLine === "TEA" ? (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700" title="Teas are shown as coming soon and cannot be ordered">
+                      Tea · coming soon
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-mint text-brand-green">
+                      Premix
+                    </span>
+                  )}
                 </td>
                 <td className="px-5 py-4">
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLE[p.status] ?? STATUS_STYLE.DRAFT}`}>

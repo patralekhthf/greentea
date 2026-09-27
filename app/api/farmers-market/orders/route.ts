@@ -48,6 +48,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payment method required" }, { status: 400 });
   }
 
+  // Only published premixes can be ordered. This also catches teas (coming
+  // soon) left over in a customer's localStorage cart from the old tea site.
+  const productIds = [...new Set(body.items.map((i) => i.productId))];
+  const orderable = await db.product.findMany({
+    where:  { id: { in: productIds }, productLine: "PREMIX", status: "PUBLISHED" },
+    select: { id: true },
+  });
+  const orderableIds = new Set(orderable.map((p) => p.id));
+  const unavailable = body.items.filter((i) => !orderableIds.has(i.productId));
+  if (unavailable.length > 0) {
+    const names = [...new Set(unavailable.map((i) => i.name))].join(", ");
+    return NextResponse.json(
+      { error: `These items are no longer available: ${names}. Please remove them from your cart and try again.` },
+      { status: 400 }
+    );
+  }
+
   const itemCount = body.items.reduce((s, i) => s + i.quantity, 0);
   const subtotal  = body.items.reduce((s, i) => s + i.price * i.quantity, 0);
   const mobile    = body.customerMobile.replace(/\D/g, "").slice(-10);

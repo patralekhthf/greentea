@@ -3,12 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-// Standard countries — drive currency/pricing
+// Standard countries — drive currency/pricing. India only for the Phase 1
+// launch; add countries back here (and in proxy.ts) to go international.
 const COUNTRIES = [
   { code: "IN", name: "India",     currency: "INR", symbol: "₹",  flag: "🇮🇳" },
-  { code: "US", name: "USA",       currency: "USD", symbol: "$",  flag: "🇺🇸" },
-  { code: "GB", name: "UK",        currency: "GBP", symbol: "£",  flag: "🇬🇧" },
-  { code: "AU", name: "Australia", currency: "AUD", symbol: "A$", flag: "🇦🇺" },
 ] as const;
 
 // Special location code for the Farmers Market view.

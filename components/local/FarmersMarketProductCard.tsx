@@ -4,11 +4,19 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import QuickAddModal, { type ModalProduct } from "./QuickAddModal";
+import VegMark from "@/components/product/VegMark";
+import { dishTypeLabel, spiceLevel } from "@/lib/catalog";
+import type { SpiceLevel } from "@prisma/client";
 
 type Props = {
   product: ModalProduct & {
     slug: string;
     salePrice: number | null;
+    isVeg: boolean;
+    noOnionGarlic: boolean;
+    spiceLevel: SpiceLevel | null;
+    cookTimeMinutes: number | null;
+    dishType: string | null;
   };
 };
 
@@ -18,6 +26,8 @@ function formatINR(n: number) {
 
 export default function FarmersMarketProductCard({ product }: Props) {
   const [open, setOpen] = useState(false);
+  const spice = spiceLevel(product.spiceLevel);
+  const dish  = dishTypeLabel(product.dishType);
 
   return (
     <>
@@ -33,7 +43,7 @@ export default function FarmersMarketProductCard({ product }: Props) {
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl opacity-60">🍵</div>
+            <div className="w-full h-full flex items-center justify-center text-6xl opacity-60">🥘</div>
           )}
         </Link>
 
@@ -54,9 +64,17 @@ export default function FarmersMarketProductCard({ product }: Props) {
             <p className="text-xs text-brand-muted mb-3">{product.tagline}</p>
           )}
 
-          {/* Freshness note */}
-          <div className="inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full mb-4 self-start bg-green-50 text-green-800 border border-green-100">
-            📦 Packed fresh on order · 14 days freshness
+          {/* Premix facts */}
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-xs">
+            <VegMark isVeg={product.isVeg} />
+            {dish && <span className="text-brand-muted">{dish}</span>}
+            {product.cookTimeMinutes && <span className="text-brand-muted">· ⏱ {product.cookTimeMinutes} min</span>}
+            {spice && <span className={`px-2 py-0.5 rounded-full ${spice.tone}`}>{spice.label}</span>}
+            {product.noOnionGarlic && (
+              <span className="px-2 py-0.5 rounded-full bg-green-50 text-green-800 border border-green-100">
+                No Onion · No Garlic
+              </span>
+            )}
           </div>
 
           {/* Price */}

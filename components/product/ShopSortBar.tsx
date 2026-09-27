@@ -74,7 +74,7 @@ export default function ShopSortBar({ total, onMobileFiltersOpen }: Props) {
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search teas..."
+            placeholder="Search premixes..."
             className="pl-9 pr-8 py-2 text-sm border border-brand-border rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-brand-sage w-44 sm:w-56"
           />
           <svg

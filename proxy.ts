@@ -1,17 +1,15 @@
 // Next.js proxy (formerly middleware) — runs on every request at the edge
 // Responsibilities:
-//   1. Resolve country from cookie → ipapi.co → browser locale → default (IN)
-//   2. Protect /admin/* routes — redirect to /admin/login if no valid session
-//   3. Write gt_country cookie for SSR pages to read
+//   1. Protect /admin/* routes — redirect to /admin/login if no valid session
+//   2. Pin the gt_country cookie to IN (India-only launch)
 
 import { NextRequest, NextResponse } from "next/server";
 
 const COUNTRY_COOKIE = "gt_country";
 const ADMIN_SESSION_COOKIE = "gt_admin_session";
-const SUPPORTED = ["IN", "US", "GB", "AU"];
 const DEFAULT = "IN";
 
-export async function proxy(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // ── Admin route protection ──────────────────────────────────────────────────
@@ -24,51 +22,19 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Country resolution (public routes) ──────────────────────────────────────
+  // ── Country (public routes) ─────────────────────────────────────────────────
+  // Phase 1 sells in India only, so every visitor is pinned to IN. This also
+  // resets anyone who still has a US/GB/AU cookie from the old tea site.
+  // To go international again, restore IP detection (see git history).
   const res = NextResponse.next();
-
-  // 1. Check existing cookie (manual override or saved preference)
-  const existing = req.cookies.get(COUNTRY_COOKIE)?.value;
-  if (existing && SUPPORTED.includes(existing)) {
-    return res; // Already set — nothing to do
+  if (req.cookies.get(COUNTRY_COOKIE)?.value !== DEFAULT) {
+    res.cookies.set(COUNTRY_COOKIE, DEFAULT, {
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      httpOnly: false,            // Read by client JS (location switcher)
+      sameSite: "lax",
+      path: "/",
+    });
   }
-
-  let country = DEFAULT;
-
-  // 2a. Fast path on Vercel — geolocation header is set on every edge request,
-  //     no external lookup needed.
-  const vercelCountry = req.headers.get("x-vercel-ip-country")?.toUpperCase();
-  if (vercelCountry && SUPPORTED.includes(vercelCountry)) {
-    country = vercelCountry;
-  } else {
-    // 2b. Fallback to ipapi.co (other hosts, or country we don't sell in → keep DEFAULT)
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      req.headers.get("x-real-ip") ??
-      "";
-
-    if (ip && ip !== "::1" && ip !== "127.0.0.1") {
-      try {
-        const r = await fetch(`https://ipapi.co/${ip}/country/`, {
-          signal: AbortSignal.timeout(1500),
-        });
-        if (r.ok) {
-          const code = (await r.text()).trim().toUpperCase();
-          if (SUPPORTED.includes(code)) country = code;
-        }
-      } catch {
-        // ipapi.co unavailable — use default
-      }
-    }
-  }
-
-  // 3. Write cookie so SSR pages read it without a fresh IP lookup
-  res.cookies.set(COUNTRY_COOKIE, country, {
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-    httpOnly: false,            // Needs to be readable by client JS for the switcher
-    sameSite: "lax",
-    path: "/",
-  });
 
   return res;
 }

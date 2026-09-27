@@ -15,6 +15,20 @@ datasource db {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
+// Which catalogue a product belongs to. Teas are "coming soon" (not orderable)
+// until the tea line is launched; see TEA_LINE_LIVE in lib/catalog.ts.
+enum ProductLine {
+  TEA
+  PREMIX
+}
+
+enum SpiceLevel {
+  MILD
+  MEDIUM
+  HOT
+  EXTRA_HOT
+}
+
 enum CaffeineLevel {
   NONE
   LOW
@@ -119,14 +133,27 @@ model Country {
 model Product {
   id                   String         @id @default(cuid())
   sku                  String?        @unique // Human-readable product code e.g. "KG-TUL-001"
+  productLine          ProductLine    @default(PREMIX)
   name                 String
   slug                 String         @unique
   tagline              String?
   shortDescription     String
   longDescription      String         // Markdown
   ingredients          String
-  brewingInstructions  String
-  benefits             String
+  brewingInstructions  String?        // Tea only
+  benefits             String         // Tea: benefits. Premix: highlights (may be empty)
+  // Premix details (null for teas)
+  spiceLevel           SpiceLevel?
+  dishType             String?        // slug from DISH_TYPES in lib/catalog.ts
+  pairsWith            String[]       // slugs from COOK_WITH in lib/catalog.ts
+  cookTimeMinutes      Int?
+  servings             String?        // e.g. "Serves 3–4"
+  yieldNote            String?        // e.g. "1 pack cooks 500 g paneer or chicken"
+  cookingInstructions  String?        // Markdown
+  isVeg                Boolean        @default(true) // FSSAI veg / non-veg mark for the pack itself
+  noOnionGarlic        Boolean        @default(false) // "No Onion No Garlic" variant
+  allergens            String?
+  shelfLifeMonths      Int?
   caffeineLevel        CaffeineLevel  @default(NONE)
   tasteProfile         String?
   aromaProfile         String?
@@ -148,6 +175,7 @@ model Product {
   orderItems           OrderItem[]
   notifyRequests       NotifyMeRequest[]
 
+  @@index([productLine, status])
   @@map("tblgt_products")
 }
 

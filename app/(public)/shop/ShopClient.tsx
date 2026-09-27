@@ -78,15 +78,15 @@ export default function ShopClient({ products, country, currencySymbol }: Props)
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <span className="text-6xl mb-6 block">🍵</span>
+      <span className="text-6xl mb-6 block">🥘</span>
       <h3
         className="text-xl font-bold text-brand-green mb-2"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        No teas found
+        No premixes found
       </h3>
       <p className="text-brand-muted text-sm max-w-xs">
-        Try adjusting your filters or search term. Our collection is growing — check back soon.
+        Try adjusting your filters or search term. New premixes are on the way.
       </p>
     </div>
   );

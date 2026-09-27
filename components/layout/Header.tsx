@@ -2,15 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import LocationSwitcher from "./LocationSwitcher";
+import { BRAND_TAGLINE } from "@/lib/catalog";
 
-const NAV = [
-  { label: "Shop",     href: "/shop" },
-  { label: "Wellness", href: "/wellness" },
-  { label: "Blog",     href: "/blog" },
+const NAV: { label: string; href: string; soon?: boolean }[] = [
+  { label: "Premixes", href: "/shop" },
+  { label: "Recipes",  href: "/blog" },
+  { label: "Teas",     href: "/teas", soon: true },
   { label: "About",    href: "/about" },
   { label: "Contact",  href: "/contact" },
 ];
+
+function SoonPill() {
+  return (
+    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-wider bg-brand-gold/15 text-brand-gold px-1.5 py-0.5 rounded-full align-middle">
+      Soon
+    </span>
+  );
+}
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -21,13 +31,23 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl">🍵</span>
-            <span
-              className="font-display text-xl font-bold text-brand-green tracking-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Kanta Greens
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
+            <Image
+              src="/brand/kanta-greens-logo.png"
+              alt=""
+              width={40}
+              height={40}
+              className="rounded-full"
+              priority
+            />
+            <span className="flex flex-col leading-none">
+              <span
+                className="font-display text-xl font-bold text-brand-green tracking-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Kanta Greens
+              </span>
+              <span className="hidden sm:block text-[10px] text-brand-muted mt-1">{BRAND_TAGLINE}</span>
             </span>
           </Link>
 
@@ -40,6 +60,7 @@ export default function Header() {
                 className="px-4 py-2 text-sm font-medium text-brand-muted hover:text-brand-green hover:bg-brand-mint rounded-lg transition-colors"
               >
                 {item.label}
+                {item.soon && <SoonPill />}
               </Link>
             ))}
           </nav>
@@ -89,6 +110,7 @@ export default function Header() {
                 className="block px-4 py-2.5 text-sm font-medium text-brand-dark hover:text-brand-green hover:bg-brand-mint rounded-lg transition-colors"
               >
                 {item.label}
+                {item.soon && <SoonPill />}
               </Link>
             ))}
           </div>

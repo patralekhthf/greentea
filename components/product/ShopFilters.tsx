@@ -2,48 +2,26 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
+import { COOK_WITH, DISH_TYPES, SPICE_LEVELS } from "@/lib/catalog";
 
-const TEA_TYPES = [
-  { label: "Green Tea",     slug: "green-tea" },
-  { label: "Herbal Tea",    slug: "herbal-tea" },
-  { label: "Ayurvedic Tea", slug: "ayurvedic-tea" },
-  { label: "Floral Tea",    slug: "floral-tea" },
-  { label: "Detox Tea",     slug: "detox-tea" },
-  { label: "Gift Packs",    slug: "gift-packs" },
-];
+// URL params this sidebar owns (also cleared by "Clear all")
+const FILTER_PARAMS = ["dish", "cookWith", "spice", "nog"] as const;
 
-const WELLNESS_GOALS = [
-  { label: "Better Sleep",      slug: "better-sleep" },
-  { label: "Stress Relief",     slug: "stress-relief" },
-  { label: "Weight Management", slug: "weight-management" },
-  { label: "Immunity Support",  slug: "immunity-support" },
-  { label: "Detox & Cleanse",   slug: "detox" },
-  { label: "Energy & Focus",    slug: "energy-focus" },
-  { label: "Digestion Support", slug: "digestion" },
-  { label: "Women's Wellness",  slug: "womens-wellness" },
-];
-
-const CAFFEINE_LEVELS = [
-  { label: "Caffeine-free", value: "NONE" },
-  { label: "Low",           value: "LOW" },
-  { label: "Medium",        value: "MEDIUM" },
-  { label: "High",          value: "HIGH" },
-];
-
-type Section = "teaType" | "wellness" | "caffeine";
+type Section = "dish" | "cookWith" | "spice" | "diet";
 
 export default function ShopFilters({ isMobile = false }: { isMobile?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const rawSearchParams = useSearchParams();
   const searchParams = rawSearchParams ?? new URLSearchParams();
-  const [open, setOpen] = useState<Section[]>(["teaType", "wellness", "caffeine"]);
+  const [open, setOpen] = useState<Section[]>(["dish", "cookWith", "spice", "diet"]);
 
-  const currentCategory = searchParams.get("category") ?? "";
-  const currentWellness = searchParams.get("wellness") ?? "";
-  const currentCaffeine = searchParams.get("caffeine") ?? "";
+  const currentDish     = searchParams.get("dish") ?? "";
+  const currentCookWith = searchParams.get("cookWith") ?? "";
+  const currentSpice    = searchParams.get("spice") ?? "";
+  const currentNog      = searchParams.get("nog") ?? "";
 
-  const hasFilters = currentCategory || currentWellness || currentCaffeine;
+  const hasFilters = FILTER_PARAMS.some((p) => searchParams.get(p));
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -61,9 +39,7 @@ export default function ShopFilters({ isMobile = false }: { isMobile?: boolean }
 
   const clearAll = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("category");
-    params.delete("wellness");
-    params.delete("caffeine");
+    FILTER_PARAMS.forEach((p) => params.delete(p));
     params.delete("page");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [router, pathname, searchParams]);
@@ -156,37 +132,45 @@ export default function ShopFilters({ isMobile = false }: { isMobile?: boolean }
       </div>
 
       <div className="space-y-0">
-        <FilterSection id="teaType" title="Tea Type">
-          {TEA_TYPES.map((t) => (
+        <FilterSection id="dish" title="Dish Type">
+          {DISH_TYPES.map((d) => (
             <CheckItem
-              key={t.slug}
-              label={t.label}
-              active={currentCategory === t.slug}
-              onClick={() => updateParam("category", t.slug)}
+              key={d.slug}
+              label={`${d.icon}  ${d.label}`}
+              active={currentDish === d.slug}
+              onClick={() => updateParam("dish", d.slug)}
             />
           ))}
         </FilterSection>
 
-        <FilterSection id="wellness" title="Wellness Goal">
-          {WELLNESS_GOALS.map((w) => (
+        <FilterSection id="cookWith" title="Cook With">
+          {COOK_WITH.map((c) => (
             <CheckItem
-              key={w.slug}
-              label={w.label}
-              active={currentWellness === w.slug}
-              onClick={() => updateParam("wellness", w.slug)}
+              key={c.slug}
+              label={`${c.icon}  ${c.label}`}
+              active={currentCookWith === c.slug}
+              onClick={() => updateParam("cookWith", c.slug)}
             />
           ))}
         </FilterSection>
 
-        <FilterSection id="caffeine" title="Caffeine Level">
-          {CAFFEINE_LEVELS.map((c) => (
+        <FilterSection id="spice" title="Spice Level">
+          {SPICE_LEVELS.map((sl) => (
             <CheckItem
-              key={c.value}
-              label={c.label}
-              active={currentCaffeine === c.value}
-              onClick={() => updateParam("caffeine", c.value)}
+              key={sl.value}
+              label={`${sl.label}  ${"🌶️".repeat(sl.chillies)}`}
+              active={currentSpice === sl.value}
+              onClick={() => updateParam("spice", sl.value)}
             />
           ))}
+        </FilterSection>
+
+        <FilterSection id="diet" title="Diet">
+          <CheckItem
+            label="No Onion · No Garlic"
+            active={currentNog === "1"}
+            onClick={() => updateParam("nog", "1")}
+          />
         </FilterSection>
       </div>
     </aside>

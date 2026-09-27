@@ -27,8 +27,8 @@ const EMPTY: Zone = {
   upiVpa:         "",
   upiPayeeName:   "",
   upiInstructions: "",
-  bannerText:     "You're in our local delivery zone — get ultra-fresh teas via WhatsApp.",
-  freshnessNote:  "Zero preservatives. Fresh for 14 days from packaging.",
+  bannerText:     "You're in our local delivery zone — order our premixes on WhatsApp.",
+  freshnessNote:  "Just add water and heat. Ships the next working day.",
   paymentNote:    "Pay via WhatsApp, GPay, or any UPI app.",
 };
 

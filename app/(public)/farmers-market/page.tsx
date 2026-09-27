@@ -8,9 +8,9 @@ import FarmersMarketProductCard from "@/components/local/FarmersMarketProductCar
 import FloatingCart from "@/components/local/FloatingCart";
 
 export const metadata: Metadata = {
-  title: "Farmers Market — Fresh Local Delivery",
+  title: "Farmers Market — Local Delivery in Delhi",
   description:
-    "Get ultra-fresh, zero-preservative teas delivered locally. Order via WhatsApp, pay via UPI or GPay.",
+    "Kanta Greens masala premixes delivered locally in Delhi. Order via WhatsApp, pay via UPI.",
 };
 
 export const dynamic = "force-dynamic";
@@ -23,6 +23,7 @@ export default async function FarmersMarketPage() {
   // Fetch products available in India with primary image + IN config
   const products = await db.product.findMany({
     where: {
+      productLine: "PREMIX", // teas are coming soon and can't be ordered
       status: "PUBLISHED",
       countryConfigs: { some: { country: { code: "IN" }, isAvailable: true } },
     },
@@ -50,26 +51,20 @@ export default async function FarmersMarketPage() {
               className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-5"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Ultra-Fresh Teas, <br className="hidden sm:block" />
+              Masala Premixes, <br className="hidden sm:block" />
               <span className="text-brand-sage">Delivered Locally</span>
             </h1>
             <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
-              Every order is freshly packed the night before or same morning it ships — you get a full 14 days of freshness from the day you receive it. Order via WhatsApp, pay via UPI.
+              Build your WhatsApp Cart, pay by UPI, and we ship your premixes the next working day. Just add water and heat at home.
             </p>
 
             {/* Value chips */}
             <div className="flex flex-wrap gap-3 mb-8">
               <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
-                <span>🚫</span> Zero preservatives
-              </span>
-              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
-                <span>📦</span> Packed fresh on your order
+                <span>🏠</span> Homemade taste
               </span>
               <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
                 <span>🛵</span> Ships next working day
-              </span>
-              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
-                <span>📅</span> Full 14 days freshness
               </span>
               <span className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-medium px-3 py-2 rounded-full border border-white/20">
                 <span>💸</span> Pay via UPI / GPay
@@ -90,7 +85,7 @@ export default async function FarmersMarketPage() {
                 href="#products"
                 className="inline-flex items-center gap-2 bg-white/10 text-white font-semibold px-6 py-3 rounded-full hover:bg-white/20 transition-colors text-sm border border-white/30"
               >
-                Browse fresh teas ↓
+                Browse premixes ↓
               </a>
             </div>
           </div>
@@ -102,9 +97,9 @@ export default async function FarmersMarketPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { n: "1", title: "Pick your blend", desc: "Browse below or tap 'Build Your Order' to select multiple products." },
+              { n: "1", title: "Pick your premixes", desc: "Tap a premix to choose size and quantity. Keep adding to your WhatsApp Cart." },
               { n: "2", title: "Review & send", desc: "Choose quantity, payment method — 'Place Order' sends everything via WhatsApp." },
-              { n: "3", title: "Packed fresh & shipped", desc: "We pack your order fresh the night before / same morning, and ship next working day. Full 14-day freshness guaranteed." },
+              { n: "3", title: "Pay & we ship", desc: "Pay by UPI and share the screenshot on WhatsApp. We ship the next working day." },
             ].map((s) => (
               <div key={s.n} className="flex items-start gap-4">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-brand-mint text-brand-green font-bold flex items-center justify-center">
@@ -135,7 +130,7 @@ export default async function FarmersMarketPage() {
             Are you (or they) in our zone?
           </h2>
           <p className="text-sm text-brand-muted max-w-xl mx-auto">
-            We deliver fresh within a {zone.radiusKm} km radius of {zone.addressLabel}. Check below — or send a pincode to confirm a recipient&apos;s address.
+            We deliver within a {zone.radiusKm} km radius of {zone.addressLabel}. Check below — or send a pincode to confirm a recipient&apos;s address.
           </p>
         </div>
 
@@ -155,10 +150,10 @@ export default async function FarmersMarketPage() {
               className="text-2xl sm:text-3xl font-bold text-brand-green mb-2"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              What&apos;s fresh today
+              Our premixes
             </h2>
             <p className="text-sm text-brand-muted">
-              Tap any tea to choose size &amp; quantity. Keep adding to your WhatsApp Cart until you&apos;re done.
+              Tap any premix to choose size &amp; quantity. Keep adding to your WhatsApp Cart until you&apos;re done.
             </p>
           </div>
           <Link
@@ -170,7 +165,7 @@ export default async function FarmersMarketPage() {
         </div>
 
         {products.length === 0 ? (
-          <p className="text-center text-brand-muted py-20">No teas available right now. Check back soon.</p>
+          <p className="text-center text-brand-muted py-20">No premixes available right now. Check back soon.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {products.map((p) => {
@@ -192,6 +187,11 @@ export default async function FarmersMarketPage() {
                     salePrice: config?.salePrice ? Number(config.salePrice) : null,
                     sizes:     p.packagingSizes,
                     imageUrl,
+                    isVeg:           p.isVeg,
+                    noOnionGarlic:   p.noOnionGarlic,
+                    spiceLevel:      p.spiceLevel,
+                    cookTimeMinutes: p.cookTimeMinutes,
+                    dishType:        p.dishType,
                   }}
                 />
               );
@@ -215,12 +215,10 @@ export default async function FarmersMarketPage() {
           <p className="text-sm text-brand-muted mb-6 max-w-xl mx-auto">{zone.paymentNote}</p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
             {[
-              { icon: "💬", label: "WhatsApp Pay" },
               { icon: "🟢", label: "GPay" },
               { icon: "🟣", label: "PhonePe" },
               { icon: "🔵", label: "Paytm" },
-              { icon: "🏦", label: "Any UPI" },
-              { icon: "💵", label: "Cash on delivery" },
+              { icon: "🏦", label: "Any UPI app" },
             ].map((m) => (
               <div key={m.label} className="flex items-center gap-2 bg-white border border-brand-border px-4 py-2 rounded-full text-sm font-medium text-brand-dark">
                 <span>{m.icon}</span> {m.label}

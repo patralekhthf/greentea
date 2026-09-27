@@ -159,7 +159,7 @@ export default function LocationCheckBanner({ country }: { country: string }) {
             <span className="text-xl shrink-0">🌱</span>
             <p className="text-sm text-white/95 truncate">
               <span className="font-semibold">You&apos;re in our local zone!</span>{" "}
-              <span className="hidden sm:inline">{result?.zone?.bannerText ?? "Ultra-fresh teas via WhatsApp."}</span>
+              <span className="hidden sm:inline">{result?.zone?.bannerText ?? "Order our premixes on WhatsApp."}</span>
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -188,7 +188,7 @@ export default function LocationCheckBanner({ country }: { country: string }) {
           <div className="flex items-center gap-3 min-w-0">
             <span className="text-xl shrink-0">📍</span>
             <p className="text-sm text-brand-dark truncate">
-              <span className="font-semibold">Get ultra-fresh teas locally.</span>{" "}
+              <span className="font-semibold">Get our premixes delivered locally.</span>{" "}
               <span className="hidden sm:inline text-brand-muted">Check if you&apos;re in our delivery area.</span>
             </p>
           </div>

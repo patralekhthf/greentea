@@ -2,13 +2,9 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback } from "react";
+import { DISH_TYPES } from "@/lib/catalog";
 
-const QUICK_CATEGORIES = [
-  { label: "Green Tea",     slug: "green-tea"     },
-  { label: "Herbal Tea",    slug: "herbal-tea"    },
-  { label: "Ayurvedic Tea", slug: "ayurvedic-tea" },
-  { label: "Gift Packs",    slug: "gift-packs"    },
-];
+const QUICK_CATEGORIES = DISH_TYPES.slice(0, 4);
 
 export default function ShopCategoryQuickLinks() {
   const router   = useRouter();
@@ -16,16 +12,16 @@ export default function ShopCategoryQuickLinks() {
   const rawParams = useSearchParams();
   const searchParams = rawParams ?? new URLSearchParams();
 
-  const activeCategory = searchParams.get("category");
+  const activeCategory = searchParams.get("dish");
 
   const handleClick = useCallback(
     (slug: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (params.get("category") === slug) {
+      if (params.get("dish") === slug) {
         // Already active — toggle off
-        params.delete("category");
+        params.delete("dish");
       } else {
-        params.set("category", slug);
+        params.set("dish", slug);
       }
       params.delete("page");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });

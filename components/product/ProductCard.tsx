@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ProductForCard } from "@/lib/products";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
+import { dishTypeLabel, spiceLevel } from "@/lib/catalog";
+import VegMark from "./VegMark";
 
 type Props = {
   product: ProductForCard;
@@ -9,17 +11,13 @@ type Props = {
   currencySymbol: string;
 };
 
-const CAFFEINE_LABEL: Record<string, string> = {
-  NONE: "Caffeine-free",
-  LOW: "Low caffeine",
-  MEDIUM: "Medium caffeine",
-  HIGH: "Caffeinated",
-};
-
 export default function ProductCard({ product, country, currencySymbol }: Props) {
   const config = product.countryConfig;
   const isIndia = country === "IN";
   const outOfStock = config?.status === "OUT_OF_STOCK";
+
+  const spice = spiceLevel(product.spiceLevel);
+  const dish = dishTypeLabel(product.dishType);
 
   const imageUrl = product.primaryImage
     ? buildImageUrl(product.primaryImage, TRANSFORMS.productCard)
@@ -41,7 +39,7 @@ export default function ProductCard({ product, country, currencySymbol }: Props)
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-6xl opacity-60">🍵</span>
+              <span className="text-6xl opacity-60">🥘</span>
             </div>
           )}
 
@@ -64,10 +62,15 @@ export default function ProductCard({ product, country, currencySymbol }: Props)
             )}
           </div>
 
-          {/* Caffeine tag */}
-          {product.caffeineLevel === "NONE" && (
+          {/* Veg mark */}
+          <span className="absolute top-3 right-3 rounded-sm shadow-sm">
+            <VegMark isVeg={product.isVeg} />
+          </span>
+
+          {/* No onion no garlic */}
+          {product.noOnionGarlic && (
             <span className="absolute bottom-3 right-3 text-xs bg-white/90 text-brand-green font-medium px-2 py-0.5 rounded-full border border-brand-border">
-              Caffeine-free
+              No Onion · No Garlic
             </span>
           )}
         </div>
@@ -75,14 +78,12 @@ export default function ProductCard({ product, country, currencySymbol }: Props)
 
       {/* Info */}
       <div className="flex flex-col flex-1 p-4">
-        {/* Category tags */}
-        {product.categoryNames.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {product.categoryNames.slice(0, 2).map((cat) => (
-              <span key={cat} className="text-xs text-brand-muted">
-                {cat}
-              </span>
-            ))}
+        {/* Dish type · cook time · spice */}
+        {(dish || product.cookTimeMinutes || spice) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2 text-xs text-brand-muted">
+            {dish && <span>{dish}</span>}
+            {product.cookTimeMinutes && <span>· ⏱ {product.cookTimeMinutes} min</span>}
+            {spice && <span title={`${spice.label} spice`}>· {"🌶️".repeat(spice.chillies)}</span>}
           </div>
         )}
 

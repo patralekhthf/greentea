@@ -5,11 +5,12 @@ import { getProducts } from "@/lib/products";
 import { COUNTRY_CONFIG, isValidCountry } from "@/lib/ipapi";
 import ShopClient from "./ShopClient";
 import ShopCategoryQuickLinks from "@/components/product/ShopCategoryQuickLinks";
+import { cookWithLabel, dishTypeLabel } from "@/lib/catalog";
 
 export const metadata: Metadata = {
-  title: "Shop All Teas",
+  title: "Shop Masala Premixes",
   description:
-    "Browse our full collection of premium organic green and herbal teas. Filter by wellness goal, tea type, or caffeine level.",
+    "Ready-to-cook masala premixes: sambhar, chhole, paneer tikka gravy and more. Filter by dish, what you're cooking with, or spice level.",
 };
 
 type PageProps = {
@@ -33,17 +34,20 @@ export default async function ShopPage({ searchParams }: PageProps) {
   // Fetch products from DB
   const products = await getProducts({
     country,
-    search:   getString(params.search),
-    category: getString(params.category),
-    wellness: getString(params.wellness),
-    sort:     getString(params.sort),
-    caffeine: getString(params.caffeine),
+    search:        getString(params.search),
+    dish:          getString(params.dish),
+    cookWith:      getString(params.cookWith),
+    spice:         getString(params.spice),
+    noOnionGarlic: getString(params.nog) === "1",
+    sort:          getString(params.sort),
   });
 
   // Active filter labels for the breadcrumb/header
   const activeSearch   = getString(params.search);
-  const activeCategory = getString(params.category);
-  const activeWellness = getString(params.wellness);
+  const dishSlug       = getString(params.dish);
+  const cookWithSlug   = getString(params.cookWith);
+  const activeCategory = dishSlug ? dishTypeLabel(dishSlug) : null;
+  const activeWellness = cookWithSlug ? `Cook with ${cookWithLabel(cookWithSlug)}` : null;
 
   return (
     <div className="min-h-screen bg-brand-cream">
@@ -59,16 +63,16 @@ export default async function ShopPage({ searchParams }: PageProps) {
             {activeCategory && (
               <>
                 <span>/</span>
-                <span className="text-brand-dark font-medium capitalize">
-                  {activeCategory.replace(/-/g, " ")}
+                <span className="text-brand-dark font-medium">
+                  {activeCategory}
                 </span>
               </>
             )}
             {activeWellness && (
               <>
                 <span>/</span>
-                <span className="text-brand-dark font-medium capitalize">
-                  {activeWellness.replace(/-/g, " ")}
+                <span className="text-brand-dark font-medium">
+                  {activeWellness}
                 </span>
               </>
             )}
@@ -82,14 +86,10 @@ export default async function ShopPage({ searchParams }: PageProps) {
               >
                 {activeSearch
                   ? `Results for "${activeSearch}"`
-                  : activeCategory
-                  ? activeCategory.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-                  : activeWellness
-                  ? activeWellness.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-                  : "Our Collection"}
+                  : activeCategory ?? activeWellness ?? "Masala Premixes"}
               </h1>
               <p className="text-brand-muted mt-1 text-sm">
-                Premium organic teas · {country === "IN" ? "Free delivery above ₹499" : "Ships globally via Amazon"}
+                Just add water, heat, and add your ingredients. Home-style food in minutes.
               </p>
             </div>
 

@@ -16,12 +16,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Kanta Greens — Premium Organic Teas",
+    default: "Kanta Greens — Ready-to-Cook Masala Premixes",
     template: "%s | Kanta Greens",
   },
   description:
-    "Premium organic green and herbal teas crafted for your daily wellness ritual. Sourced from India's finest gardens.",
-  keywords: ["organic tea", "herbal tea", "green tea", "wellness tea", "ayurvedic tea"],
+    "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
+  keywords: ["masala premix", "ready to cook masala", "sambhar premix", "chhole masala", "paneer tikka gravy", "instant gravy mix"],
   openGraph: {
     siteName: "Kanta Greens",
     type: "website",

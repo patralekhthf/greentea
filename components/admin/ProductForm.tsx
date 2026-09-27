@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
+import { COOK_WITH, DISH_TYPES, SPICE_LEVELS } from "@/lib/catalog";
 
 const CAFFEINE_OPTIONS = ["NONE", "LOW", "MEDIUM", "HIGH"];
 const STATUS_OPTIONS   = ["DRAFT", "PUBLISHED", "ARCHIVED"];
@@ -35,6 +36,7 @@ type ProductImage = {
 
 export type ProductFormValues = {
   id?: string;
+  productLine: "PREMIX" | "TEA";
   sku: string;
   name: string;
   slug: string;
@@ -52,9 +54,21 @@ export type ProductFormValues = {
   status: string;
   isBestseller: boolean;
   isFeatured: boolean;
-  // Farmers Market freshness — only shown to local customers
+  // Farmers Market freshness — tea only
   packedOn: string;       // "YYYY-MM-DD" or "" for none
   freshnessDays: number;  // shelf life from packedOn, default 14
+  // Premix details (numbers kept as strings while editing)
+  spiceLevel: string;     // "" | SpiceLevel
+  dishType: string;
+  pairsWith: string[];
+  cookTimeMinutes: string;
+  servings: string;
+  yieldNote: string;
+  cookingInstructions: string;
+  isVeg: boolean;
+  noOnionGarlic: boolean;
+  allergens: string;
+  shelfLifeMonths: string;
   countryConfigs: CountryConfig[];
   existingImages: ProductImage[];
 };
@@ -76,6 +90,8 @@ export default function ProductForm({ initial }: Props) {
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState("");
   const [activeTab, setActiveTab] = useState<"basic" | "content" | "pricing" | "images">("basic");
+
+  const isPremix = values.productLine === "PREMIX";
 
   function set<K extends keyof ProductFormValues>(key: K, val: ProductFormValues[K]) {
     setValues((v) => ({ ...v, [key]: val }));
@@ -141,7 +157,9 @@ export default function ProductForm({ initial }: Props) {
     setSaving(true);
     setError("");
     try {
+      const toInt = (v: string) => (v.trim() && !Number.isNaN(parseInt(v)) ? parseInt(v) : null);
       const payload = {
+        productLine:         values.productLine,
         sku:                 values.sku || null,
         name:                values.name,
         slug:                values.slug,
@@ -149,7 +167,7 @@ export default function ProductForm({ initial }: Props) {
         shortDescription:    values.shortDescription,
         longDescription:     values.longDescription,
         ingredients:         values.ingredients,
-        brewingInstructions: values.brewingInstructions,
+        brewingInstructions: values.brewingInstructions || null,
         benefits:            values.benefits,
         caffeineLevel:       values.caffeineLevel,
         tasteProfile:        values.tasteProfile || null,
@@ -161,6 +179,17 @@ export default function ProductForm({ initial }: Props) {
         isFeatured:          values.isFeatured,
         packedOn:            values.packedOn ? new Date(values.packedOn).toISOString() : null,
         freshnessDays:       Number(values.freshnessDays) || 14,
+        spiceLevel:          values.spiceLevel || null,
+        dishType:            values.dishType || null,
+        pairsWith:           values.pairsWith,
+        cookTimeMinutes:     toInt(values.cookTimeMinutes),
+        servings:            values.servings || null,
+        yieldNote:           values.yieldNote || null,
+        cookingInstructions: values.cookingInstructions || null,
+        isVeg:               values.isVeg,
+        noOnionGarlic:       values.noOnionGarlic,
+        allergens:           values.allergens || null,
+        shelfLifeMonths:     toInt(values.shelfLifeMonths),
       };
 
       let productId = initial.id;
@@ -251,6 +280,28 @@ export default function ProductForm({ initial }: Props) {
         {/* ── Basic Info ── */}
         {activeTab === "basic" && (
           <div className="space-y-5">
+            <Field label="Product Line">
+              <div className="flex gap-2">
+                {([
+                  { v: "PREMIX", label: "🥘 Masala Premix" },
+                  { v: "TEA",    label: "🍵 Tea (coming soon, not orderable)" },
+                ] as const).map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => set("productLine", o.v)}
+                    className={`px-4 py-2 text-sm font-medium rounded-xl border transition-colors ${
+                      values.productLine === o.v
+                        ? "bg-brand-green text-white border-brand-green"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-brand-sage"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
             <div className="grid sm:grid-cols-2 gap-5">
               <Field label="Product Name *">
                 <input
@@ -260,7 +311,7 @@ export default function ProductForm({ initial }: Props) {
                     if (!isEdit) set("slug", slugify(e.target.value));
                   }}
                   className={INPUT}
-                  placeholder="Himalayan Tulsi Green Tea"
+                  placeholder={isPremix ? "Paneer Tikka Gravy Premix" : "Himalayan Tulsi Green Tea"}
                 />
               </Field>
               <Field label="Slug *">
@@ -273,13 +324,13 @@ export default function ProductForm({ initial }: Props) {
                 value={values.sku}
                 onChange={(e) => set("sku", e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
                 className={INPUT}
-                placeholder="KG-TUL-001"
+                placeholder={isPremix ? "KG-PTG-001" : "KG-TUL-001"}
               />
               <p className="text-xs text-gray-400 mt-1">Unique short code shown on WhatsApp orders. Letters, numbers, hyphens only.</p>
             </Field>
 
             <Field label="Tagline">
-              <input value={values.tagline} onChange={(e) => set("tagline", e.target.value)} className={INPUT} placeholder="Clarity in every sip" />
+              <input value={values.tagline} onChange={(e) => set("tagline", e.target.value)} className={INPUT} placeholder={isPremix ? "Restaurant-style gravy in minutes" : "Clarity in every sip"} />
             </Field>
 
             <Field label="Short Description *">
@@ -287,11 +338,13 @@ export default function ProductForm({ initial }: Props) {
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-5">
-              <Field label="Caffeine Level">
-                <select value={values.caffeineLevel} onChange={(e) => set("caffeineLevel", e.target.value)} className={INPUT}>
-                  {CAFFEINE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
-                </select>
-              </Field>
+              {!isPremix && (
+                <Field label="Caffeine Level">
+                  <select value={values.caffeineLevel} onChange={(e) => set("caffeineLevel", e.target.value)} className={INPUT}>
+                    {CAFFEINE_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                  </select>
+                </Field>
+              )}
               <Field label="Status">
                 <select value={values.status} onChange={(e) => set("status", e.target.value)} className={INPUT}>
                   {STATUS_OPTIONS.map((o) => <option key={o}>{o}</option>)}
@@ -299,22 +352,103 @@ export default function ProductForm({ initial }: Props) {
               </Field>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-5">
-              <Field label="Taste Profile">
-                <input value={values.tasteProfile} onChange={(e) => set("tasteProfile", e.target.value)} className={INPUT} placeholder="Grassy, slightly sweet…" />
+            {isPremix ? (
+              <Field label="Flavour Profile">
+                <input value={values.tasteProfile} onChange={(e) => set("tasteProfile", e.target.value)} className={INPUT} placeholder="Tangy, mildly spiced, rich tomato-onion base…" />
               </Field>
-              <Field label="Aroma Profile">
-                <input value={values.aromaProfile} onChange={(e) => set("aromaProfile", e.target.value)} className={INPUT} placeholder="Fresh green tea…" />
-              </Field>
-            </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-5">
+                <Field label="Taste Profile">
+                  <input value={values.tasteProfile} onChange={(e) => set("tasteProfile", e.target.value)} className={INPUT} placeholder="Grassy, slightly sweet…" />
+                </Field>
+                <Field label="Aroma Profile">
+                  <input value={values.aromaProfile} onChange={(e) => set("aromaProfile", e.target.value)} className={INPUT} placeholder="Fresh green tea…" />
+                </Field>
+              </div>
+            )}
 
             <Field label="Packaging Sizes (comma-separated)">
-              <input value={values.packagingSizes} onChange={(e) => set("packagingSizes", e.target.value)} className={INPUT} placeholder="50g, 100g, 200g" />
+              <input value={values.packagingSizes} onChange={(e) => set("packagingSizes", e.target.value)} className={INPUT} placeholder={isPremix ? "100g" : "50g, 100g, 200g"} />
             </Field>
 
             <Field label="Storage Instructions">
-              <input value={values.storageInstructions} onChange={(e) => set("storageInstructions", e.target.value)} className={INPUT} />
+              <input value={values.storageInstructions} onChange={(e) => set("storageInstructions", e.target.value)} className={INPUT} placeholder={isPremix ? "Store in a cool, dry place and keep in an airtight container" : ""} />
             </Field>
+
+            {/* Premix details */}
+            {isPremix && (
+              <div className="pt-5 border-t border-gray-100 space-y-5">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">🥘 Premix details</h4>
+
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <Field label="Dish Type">
+                    <select value={values.dishType} onChange={(e) => set("dishType", e.target.value)} className={INPUT}>
+                      <option value="">— Select —</option>
+                      {DISH_TYPES.map((d) => <option key={d.slug} value={d.slug}>{d.label}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Spice Level">
+                    <select value={values.spiceLevel} onChange={(e) => set("spiceLevel", e.target.value)} className={INPUT}>
+                      <option value="">Not applicable (e.g. sweets)</option>
+                      {SPICE_LEVELS.map((sl) => <option key={sl.value} value={sl.value}>{sl.label}</option>)}
+                    </select>
+                  </Field>
+                </div>
+
+                <Field label="Cook It With (what the customer adds)">
+                  <div className="flex flex-wrap gap-2">
+                    {COOK_WITH.map((c) => {
+                      const on = values.pairsWith.includes(c.slug);
+                      return (
+                        <button
+                          key={c.slug}
+                          type="button"
+                          onClick={() =>
+                            set("pairsWith", on ? values.pairsWith.filter((x) => x !== c.slug) : [...values.pairsWith, c.slug])
+                          }
+                          className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                            on ? "bg-brand-green text-white border-brand-green" : "bg-white text-gray-600 border-gray-200 hover:border-brand-sage"
+                          }`}
+                        >
+                          {c.icon} {c.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+
+                <div className="grid sm:grid-cols-3 gap-5">
+                  <Field label="Cook Time (minutes)">
+                    <input type="number" min={1} value={values.cookTimeMinutes} onChange={(e) => set("cookTimeMinutes", e.target.value)} className={INPUT} placeholder="20" />
+                  </Field>
+                  <Field label="Serves">
+                    <input value={values.servings} onChange={(e) => set("servings", e.target.value)} className={INPUT} placeholder="Serves 3–4" />
+                  </Field>
+                  <Field label="Shelf Life (months)">
+                    <input type="number" min={1} value={values.shelfLifeMonths} onChange={(e) => set("shelfLifeMonths", e.target.value)} className={INPUT} placeholder="6" />
+                  </Field>
+                </div>
+
+                <Field label="Yield Note">
+                  <input value={values.yieldNote} onChange={(e) => set("yieldNote", e.target.value)} className={INPUT} placeholder="1 pack (100 g) cooks 250 g paneer" />
+                </Field>
+
+                <Field label="Allergens">
+                  <input value={values.allergens} onChange={(e) => set("allergens", e.target.value)} className={INPUT} placeholder="Contains mustard. May contain traces of nuts." />
+                </Field>
+
+                <div className="flex flex-wrap gap-6">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={values.isVeg} onChange={(e) => set("isVeg", e.target.checked)} className="rounded" />
+                    <span className="font-medium text-gray-700">Vegetarian pack (green veg mark)</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={values.noOnionGarlic} onChange={(e) => set("noOnionGarlic", e.target.checked)} className="rounded" />
+                    <span className="font-medium text-gray-700">No Onion No Garlic variant</span>
+                  </label>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-6">
               <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -327,7 +461,8 @@ export default function ProductForm({ initial }: Props) {
               </label>
             </div>
 
-            {/* Farmers Market freshness */}
+            {/* Farmers Market freshness (tea only) */}
+            {!isPremix && (
             <div className="pt-5 border-t border-gray-100">
               <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">🌿 Farmers Market freshness</h4>
               <p className="text-xs text-gray-400 mb-4">Shown only to customers inside your local delivery zone.</p>
@@ -357,6 +492,7 @@ export default function ProductForm({ initial }: Props) {
                 </p>
               )}
             </div>
+            )}
           </div>
         )}
 
@@ -364,24 +500,37 @@ export default function ProductForm({ initial }: Props) {
         {activeTab === "content" && (
           <div className="space-y-5">
             <Field label="Long Description (Markdown)">
-              <textarea rows={10} value={values.longDescription} onChange={(e) => set("longDescription", e.target.value)} className={TEXTAREA} placeholder="## About This Tea&#10;&#10;Supports **## headings**, **bold**, *italic*, and - bullet lists." />
+              <textarea rows={10} value={values.longDescription} onChange={(e) => set("longDescription", e.target.value)} className={TEXTAREA} placeholder="## About This Premix&#10;&#10;Supports **## headings**, **bold**, *italic*, and - bullet lists." />
             </Field>
             <Field label="Ingredients (Markdown)">
-              <textarea rows={6} value={values.ingredients} onChange={(e) => set("ingredients", e.target.value)} className={TEXTAREA} placeholder="- Green Tea (80%)&#10;- Tulsi (20%)" />
+              <textarea rows={6} value={values.ingredients} onChange={(e) => set("ingredients", e.target.value)} className={TEXTAREA} placeholder={isPremix ? "Tur dal, salt, mustard seed, chana dal, tamarind, hing…" : "- Green Tea (80%)\n- Tulsi (20%)"} />
             </Field>
-            <Field label="Brewing Instructions (Markdown)">
-              <textarea rows={8} value={values.brewingInstructions} onChange={(e) => set("brewingInstructions", e.target.value)} className={TEXTAREA} />
-            </Field>
-            <Field label="Benefits (Markdown)">
-              <textarea rows={6} value={values.benefits} onChange={(e) => set("benefits", e.target.value)} className={TEXTAREA} />
-            </Field>
+            {isPremix ? (
+              <>
+                <Field label="How to Cook (Markdown)">
+                  <textarea rows={8} value={values.cookingInstructions} onChange={(e) => set("cookingInstructions", e.target.value)} className={TEXTAREA} placeholder={"1. Mix 4 tbsp (50 g) premix in 500 ml water.\n2. Add to the cooker with 3 tbsp oil and vegetables.\n3. Give 2 whistles and serve hot."} />
+                </Field>
+                <Field label="Highlights (Markdown, optional)">
+                  <textarea rows={5} value={values.benefits} onChange={(e) => set("benefits", e.target.value)} className={TEXTAREA} placeholder={"- Homemade taste\n- No chopping or grinding"} />
+                </Field>
+              </>
+            ) : (
+              <>
+                <Field label="Brewing Instructions (Markdown)">
+                  <textarea rows={8} value={values.brewingInstructions} onChange={(e) => set("brewingInstructions", e.target.value)} className={TEXTAREA} />
+                </Field>
+                <Field label="Benefits (Markdown)">
+                  <textarea rows={6} value={values.benefits} onChange={(e) => set("benefits", e.target.value)} className={TEXTAREA} />
+                </Field>
+              </>
+            )}
           </div>
         )}
 
         {/* ── Pricing ── */}
         {activeTab === "pricing" && (
           <div className="space-y-6">
-            {COUNTRIES.map(({ code, label, symbol }) => {
+            {COUNTRIES.filter((c) => !isPremix || c.code === "IN").map(({ code, label, symbol }) => {
               const cc = values.countryConfigs.find((c) => c.code === code);
               if (!cc) return null;
               return (

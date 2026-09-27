@@ -8,116 +8,44 @@ import { getProducts } from "@/lib/products";
 import { COUNTRY_CONFIG, isValidCountry } from "@/lib/ipapi";
 import { db } from "@/lib/db";
 import { buildImageUrl } from "@/lib/cloudinary-url";
+import { BRAND_TAGLINE, DISH_TYPES } from "@/lib/catalog";
 
 export const metadata: Metadata = {
-  title: "Kanta Greens — Premium Organic Teas",
+  title: "Kanta Greens — Ready-to-Cook Masala Premixes",
   description:
-    "Discover premium organic green and herbal teas crafted for your wellness journey. Sourced from India's finest gardens.",
+    "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
 };
 
 export const dynamic = "force-dynamic";
 
-// ─── Wellness categories ──────────────────────────────────────────────────────
-const WELLNESS = [
-  { icon: "🌙", title: "Better Sleep",      desc: "Calming blends to help you unwind and sleep deeper.",     href: "/shop?wellness=better-sleep" },
-  { icon: "🧘", title: "Stress Relief",     desc: "Adaptogenic herbs to quiet the mind and ease tension.",    href: "/shop?wellness=stress-relief" },
-  { icon: "🌿", title: "Detox & Cleanse",   desc: "Purifying blends to support your body's natural detox.",   href: "/shop?wellness=detox" },
-  { icon: "🛡️", title: "Immunity Support",  desc: "Antioxidant-rich teas to strengthen your defences.",       href: "/shop?wellness=immunity-support" },
-  { icon: "⚖️", title: "Weight Management", desc: "Metabolism-boosting green teas to support your goals.",    href: "/shop?wellness=weight-management" },
-  { icon: "⚡", title: "Energy & Focus",    desc: "Clean energy without the crash — naturally caffeinated.",  href: "/shop?wellness=energy-focus" },
-];
-
+// ─── How to use (mirrors the "How to use premix" panel on our packs) ─────────
 const TRUST = [
-  { icon: "🌱", label: "100% Organic" },
-  { icon: "🔬", label: "Lab Certified" },
-  { icon: "🚫", label: "No Additives" },
-  { icon: "🤝", label: "Ethically Sourced" },
+  { icon: "💧", label: "Just add water" },
+  { icon: "🔥", label: "Heat & cook" },
+  { icon: "🥘", label: "Add paneer, chana or veggies" },
+  { icon: "🏠", label: "Homemade taste" },
 ];
 
-// ─── Brewing ritual steps ─────────────────────────────────────────────────────
-const RITUAL = [
+const STEPS = [
   {
     step: "01",
-    title: "Choose Your Blend",
-    desc: "Browse teas curated by wellness intention — sleep, energy, calm, immunity. Find what your body asks for today.",
-    icon: "🍃",
+    title: "Mix with Water",
+    desc: "Stir the premix into water as shown on the pack. No chopping, grinding or measuring a dozen spices.",
+    icon: "💧",
   },
   {
     step: "02",
-    title: "Brew with Care",
-    desc: "Use filtered water at the right temperature. Let the leaves unfurl for 3–5 minutes. The wait is part of the ritual.",
-    icon: "🫖",
+    title: "Heat & Cook",
+    desc: "Cook it in a pan or pressure cooker. The masala comes together into a rich, home-style base.",
+    icon: "🔥",
   },
   {
     step: "03",
-    title: "Savor the Moment",
-    desc: "Sip slowly. Breathe deeply. A few quiet minutes with the right tea can reset your entire day.",
-    icon: "🌅",
+    title: "Add & Serve",
+    desc: "Add your paneer, chana or vegetables, give it a final tadka if you like, and serve it hot.",
+    icon: "🍛",
   },
 ];
-
-// ─── Testimonials (realistic placeholders — editable later) ───────────────────
-const TESTIMONIALS = [
-  {
-    quote:
-      "I've tried every sleep tea on the market. Kanta's chamomile blend is the first one that actually lives up to the hype. My evenings feel calmer.",
-    name: "Aanya Sharma",
-    title: "Yoga instructor · Bengaluru",
-    rating: 5,
-  },
-  {
-    quote:
-      "The Tulsi Green has become my morning non-negotiable. Smooth, no bitterness, and I feel genuinely sharper through the day.",
-    name: "Rohan Mehta",
-    title: "Product designer · Mumbai",
-    rating: 5,
-  },
-  {
-    quote:
-      "Beautiful packaging, thoughtful blends, and you can taste the difference. This is the first tea brand that feels like it's made with intention.",
-    name: "Priya Iyer",
-    title: "Wellness writer · Delhi",
-    rating: 5,
-  },
-];
-
-// Country-specific trust microcopy shown under the hero CTAs
-const HERO_TRUST_COPY: Record<
-  "IN" | "US" | "GB" | "AU",
-  { shipping: string; freshness: string; testing: string }
-> = {
-  IN: {
-    shipping:  "Free shipping over ₹499",
-    freshness: "100-day freshness guarantee",
-    testing:   "Lab-tested for purity",
-  },
-  US: {
-    shipping:  "Free shipping with Amazon Prime",
-    freshness: "100-day freshness guarantee",
-    testing:   "Lab-tested for purity",
-  },
-  GB: {
-    shipping:  "Free delivery via Amazon UK",
-    freshness: "100-day freshness guarantee",
-    testing:   "Lab-tested for purity",
-  },
-  AU: {
-    shipping:  "Free delivery via Amazon AU",
-    freshness: "100-day freshness guarantee",
-    testing:   "Lab-tested for purity",
-  },
-};
-
-// Country-specific secondary CTA
-const HERO_SECONDARY_CTA: Record<
-  "IN" | "US" | "GB" | "AU",
-  { label: string; href: string }
-> = {
-  IN: { label: "Explore Bestsellers",  href: "/shop?sort=bestseller" },
-  US: { label: "Shop on Amazon US",    href: "/shop?sort=bestseller" },
-  GB: { label: "Shop on Amazon UK",    href: "/shop?sort=bestseller" },
-  AU: { label: "Shop on Amazon AU",    href: "/shop?sort=bestseller" },
-};
 
 export default async function HomePage() {
   // Resolve country
@@ -125,8 +53,6 @@ export default async function HomePage() {
   const rawCountry = cookieStore.get("gt_country")?.value ?? "IN";
   const country = isValidCountry(rawCountry) ? rawCountry : "IN";
   const { currencySymbol } = COUNTRY_CONFIG[country];
-  const trustCopy = HERO_TRUST_COPY[country];
-  const secondaryCta = HERO_SECONDARY_CTA[country];
 
   // Parallel fetches — bestsellers + latest journal posts + country hero image
   const [bestsellers, journalPosts, heroBanner] = await Promise.all([
@@ -178,15 +104,15 @@ export default async function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* ─── Left: copy ─────────────────────────────────────────────── */}
             <div>
-              {/* Eyebrow with rating */}
+              {/* Eyebrow */}
               <div className="flex flex-wrap items-center gap-2 mb-6">
                 <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-medium px-3 py-1.5 rounded-full border border-white/20">
                   <span>🌿</span>
-                  <span>Premium Organic · Wellness Teas</span>
+                  <span>{BRAND_TAGLINE}</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 bg-brand-gold/20 text-white text-xs font-medium px-3 py-1.5 rounded-full border border-brand-gold/30">
-                  <span className="text-brand-gold">★</span>
-                  <span>4.8 · Loved by 5,000+ tea drinkers</span>
+                  <span>🥘</span>
+                  <span>Ready-to-cook masala premixes</span>
                 </div>
               </div>
 
@@ -195,14 +121,15 @@ export default async function HomePage() {
                 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.05] mb-6 tracking-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Nature&apos;s Finest,
+                Homemade Taste,
                 <br />
-                <span className="text-brand-sage">Steeped in Care</span>
+                <span className="text-brand-sage">Ready in Minutes</span>
               </h1>
 
               {/* Sub */}
               <p className="text-lg text-white/75 leading-relaxed mb-10 max-w-xl">
-                Premium organic teas sourced from India&apos;s finest gardens — crafted for your daily wellness ritual, not just your cup.
+                Healthy, hygienic, homemade — for busy bees. Our dry masala premixes turn into sambhar,
+                chhole or paneer tikka gravy with just water and heat. You add the fresh ingredients; we&apos;ve done the rest.
               </p>
 
               {/* CTAs */}
@@ -211,22 +138,22 @@ export default async function HomePage() {
                   href="/shop"
                   className="inline-flex items-center gap-2 bg-white text-brand-green font-semibold px-7 py-3.5 rounded-full hover:bg-brand-mint transition-colors text-sm shadow-lg shadow-black/10"
                 >
-                  Shop All Teas
+                  Shop Premixes
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link
-                  href={secondaryCta.href}
+                <a
+                  href="#how-it-works"
                   className="inline-flex items-center gap-2 bg-transparent text-white border border-white/40 font-semibold px-7 py-3.5 rounded-full hover:bg-white/10 transition-colors text-sm"
                 >
-                  {secondaryCta.label}
-                </Link>
+                  How It Works
+                </a>
               </div>
 
-              {/* Trust microcopy — country-aware */}
+              {/* Microcopy */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/60">
-                {[trustCopy.shipping, trustCopy.freshness, trustCopy.testing].map((line) => (
+                {["No chopping or grinding", "No onion no garlic options", "Order on WhatsApp in Delhi"].map((line) => (
                   <span key={line} className="inline-flex items-center gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -256,12 +183,12 @@ export default async function HomePage() {
                     {/* Bottom-left floating badge */}
                     <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between gap-3">
                       <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
-                        <span className="text-base">🌱</span>
-                        <span className="text-xs font-semibold text-brand-green">100% Organic</span>
+                        <span className="text-base">💧</span>
+                        <span className="text-xs font-semibold text-brand-green">Just add water</span>
                       </div>
                       <div className="bg-brand-green/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-1.5 shadow-lg">
-                        <span className="text-brand-gold text-sm">★</span>
-                        <span className="text-xs font-semibold text-white">4.8 / 5</span>
+                        <span className="text-sm">🔥</span>
+                        <span className="text-xs font-semibold text-white">Heat &amp; serve</span>
                       </div>
                     </div>
                   </div>
@@ -271,7 +198,7 @@ export default async function HomePage() {
                 <div className="relative aspect-[4/5] rounded-[1.75rem] overflow-hidden bg-gradient-to-br from-brand-sage/30 via-brand-green to-brand-dark ring-1 ring-white/10">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <svg className="w-3/5 h-3/5 text-white/15" viewBox="0 0 200 200" fill="none">
-                      {/* Stylized tea leaf */}
+                      {/* Stylized leaf (brand mark) */}
                       <path
                         d="M100,20 C60,40 30,90 60,160 C90,140 130,100 130,55 C125,35 115,25 100,20 Z"
                         fill="currentColor"
@@ -312,39 +239,38 @@ export default async function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════ */}
-      {/* WELLNESS GOALS                                                           */}
+      {/* SHOP BY DISH                                                             */}
       {/* ════════════════════════════════════════════════════════════════════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
           <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-            Shop by Wellness Goal
+            Shop by Dish
           </p>
           <h2
             className="text-3xl sm:text-4xl font-bold text-brand-green"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Find Your Perfect Blend
+            What&apos;s Cooking Today?
           </h2>
           <p className="mt-4 text-brand-muted max-w-xl mx-auto">
-            Every body is different. Every cup should be too.
+            From a quick breakfast to Sunday&apos;s chhole, there&apos;s a premix for it.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {WELLNESS.map((w) => (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {DISH_TYPES.slice(0, 4).map((d) => (
             <Link
-              key={w.href}
-              href={w.href}
-              className="group flex flex-col items-center text-center p-5 rounded-2xl border border-brand-border bg-white hover:border-brand-sage hover:shadow-md hover:-translate-y-0.5 transition-all"
+              key={d.slug}
+              href={`/shop?dish=${d.slug}`}
+              className="group flex flex-col items-center text-center p-6 rounded-2xl border border-brand-border bg-white hover:border-brand-sage hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
-              <span className="text-3xl mb-3 transition-transform group-hover:scale-110">{w.icon}</span>
+              <span className="text-4xl mb-3 transition-transform group-hover:scale-110">{d.icon}</span>
               <h3
-                className="text-sm font-bold text-brand-green mb-1.5 group-hover:text-brand-mid"
+                className="text-sm font-bold text-brand-green group-hover:text-brand-mid"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                {w.title}
+                {d.label}
               </h3>
-              <p className="text-xs text-brand-muted leading-snug hidden sm:block">{w.desc}</p>
             </Link>
           ))}
         </div>
@@ -358,13 +284,13 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-12">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-                Our Bestsellers
+                Our Premixes
               </p>
               <h2
                 className="text-3xl sm:text-4xl font-bold text-brand-green"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Loved by Thousands
+                Pick Tonight&apos;s Dish
               </h2>
             </div>
             <Link
@@ -391,7 +317,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <p className="text-center text-brand-muted py-12">
-              Our blends are arriving soon. Check back shortly.
+              Our premixes are arriving soon. Check back shortly.
             </p>
           )}
 
@@ -401,7 +327,7 @@ export default async function HomePage() {
               href="/shop"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-green hover:text-brand-mid transition-colors"
             >
-              View All Teas
+              View All Premixes
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -411,22 +337,22 @@ export default async function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════ */}
-      {/* BREWING RITUAL                                                           */}
+      {/* HOW IT WORKS                                                             */}
       {/* ════════════════════════════════════════════════════════════════════════ */}
-      <section className="bg-brand-cream py-20">
+      <section id="how-it-works" className="bg-brand-cream py-20 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-              The Kanta Ritual
+              How It Works
             </p>
             <h2
               className="text-3xl sm:text-4xl font-bold text-brand-green"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Three Steps to a Better Day
+              Three Steps to Dinner
             </h2>
             <p className="mt-4 text-brand-muted max-w-xl mx-auto">
-              Tea isn&apos;t just a drink — it&apos;s a pause. A return to yourself.
+              Every pack has its own instructions printed on the back. This is the idea.
             </p>
           </div>
 
@@ -434,7 +360,7 @@ export default async function HomePage() {
             {/* Connecting line — visible on desktop */}
             <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px bg-brand-border" aria-hidden />
 
-            {RITUAL.map((r) => (
+            {STEPS.map((r) => (
               <div key={r.step} className="relative flex flex-col items-center text-center">
                 {/* Number circle */}
                 <div className="relative w-24 h-24 rounded-full bg-white border-2 border-brand-sage flex items-center justify-center mb-6 shadow-sm">
@@ -467,20 +393,20 @@ export default async function HomePage() {
           {/* Text */}
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-              Our Promise
+              From Kittu&apos;s Kitchen
             </p>
             <h2
               className="text-3xl sm:text-4xl font-bold text-brand-green mb-6"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Wellness is a Ritual,
-              <br />Not a Product
+              Home Cooking,
+              <br />Without the Prep
             </h2>
             <p className="text-brand-muted leading-relaxed mb-5">
-              At Kanta Greens, we believe the best teas are the ones you reach for every morning — not because you have to, but because they make you feel genuinely good.
+              Every Kanta Greens premix is a delicacy of Kittu&apos;s Kitchen: healthy, hygienic, homemade masalas, packed for busy bees who still want real home food.
             </p>
             <p className="text-brand-muted leading-relaxed mb-8">
-              Every blend is formulated with intention. Every ingredient is chosen for its proven wellness benefit. Every batch is lab-tested before it reaches you.
+              The spices are already blended in the right proportions. You bring the fresh paneer, chana or vegetables, and a home-style dish is ready in minutes.
             </p>
             <Link
               href="/about"
@@ -496,10 +422,10 @@ export default async function HomePage() {
           {/* Feature grid */}
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: "🌱", title: "Organically Grown",   desc: "Certified organic farms, no pesticides." },
-              { icon: "🔬", title: "Lab Tested",          desc: "Every batch tested for purity and potency." },
-              { icon: "📦", title: "Freshly Packed",      desc: "Sealed within 48 hours of blending." },
-              { icon: "🌍", title: "Global Reach",        desc: "Available on Amazon in US, UK, and AU." },
+              { icon: "🥄", title: "No Measuring",        desc: "Every spice is already in the pack, in the right amount." },
+              { icon: "🍳", title: "Cook Easy",           desc: "Water, heat and your fresh ingredients. That's the recipe." },
+              { icon: "🧄", title: "No Onion No Garlic",  desc: "Separate packs for households that skip onion and garlic." },
+              { icon: "💬", title: "Order on WhatsApp",   desc: "Local delivery in Delhi through our Farmers Market." },
             ].map((f) => (
               <div key={f.title} className="p-5 rounded-2xl border border-brand-border bg-white hover:shadow-md transition-shadow">
                 <span className="text-2xl mb-3 block">{f.icon}</span>
@@ -517,51 +443,29 @@ export default async function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════ */}
-      {/* TESTIMONIALS                                                             */}
+      {/* TEAS — COMING SOON                                                       */}
       {/* ════════════════════════════════════════════════════════════════════════ */}
-      <section className="bg-brand-green text-white py-20 relative overflow-hidden">
+      <section className="bg-brand-green text-white py-16 relative overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-white/[0.04] pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-white/[0.04] pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-              What Customers Say
-            </p>
-            <h2
-              className="text-3xl sm:text-4xl font-bold text-white"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Real Cups. Real Stories.
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-7 flex flex-col"
-              >
-                {/* Stars */}
-                <div className="flex text-brand-gold mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <span key={i} className="text-lg">★</span>
-                  ))}
-                </div>
-                {/* Quote */}
-                <blockquote className="text-white/90 text-sm leading-relaxed mb-6 flex-1">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                {/* Attribution */}
-                <div className="pt-5 border-t border-white/10">
-                  <p className="text-sm font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                    {t.name}
-                  </p>
-                  <p className="text-xs text-white/60 mt-0.5">{t.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-block text-xs font-bold uppercase tracking-widest bg-brand-gold/20 border border-brand-gold/30 px-3 py-1.5 rounded-full mb-5">
+            Coming soon
+          </span>
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-4"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Kanta Greens Teas
+          </h2>
+          <p className="text-white/75 max-w-xl mx-auto mb-8">
+            Our tea collection isn&apos;t available to order yet. Join the waitlist and we&apos;ll tell you the day it launches.
+          </p>
+          <Link
+            href="/teas"
+            className="inline-flex items-center gap-2 bg-white text-brand-green font-semibold px-7 py-3.5 rounded-full hover:bg-brand-mint transition-colors text-sm"
+          >
+            Join the Tea Waitlist →
+          </Link>
         </div>
       </section>
 
@@ -573,13 +477,13 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-12">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-                From the Journal
+                Recipes
               </p>
               <h2
                 className="text-3xl sm:text-4xl font-bold text-brand-green"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Stories, Tips & Rituals
+                From Kittu&apos;s Kitchen
               </h2>
             </div>
             <Link
@@ -610,7 +514,7 @@ export default async function HomePage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-30">🍵</div>
+                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-30">🍲</div>
                   )}
                 </div>
                 <div className="p-5">
@@ -643,7 +547,7 @@ export default async function HomePage() {
               href="/blog"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-green hover:text-brand-mid transition-colors"
             >
-              Read All Posts
+              All Recipes
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -665,7 +569,7 @@ export default async function HomePage() {
             Stay in the Loop
           </h2>
           <p className="text-brand-muted mb-8">
-            New blends, wellness tips, and launch offers — straight to your inbox. No spam, ever.
+            New premixes, recipes and launch offers, straight to your inbox. No spam, ever.
           </p>
           <NewsletterForm />
           <p className="text-xs text-brand-muted mt-4">

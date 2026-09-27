@@ -1,5 +1,5 @@
 import { db } from "./db";
-import type { CaffeineLevel } from "@prisma/client";
+import type { Prisma, ProductLine, SpiceLevel } from "@prisma/client";
 
 export type ProductForCard = {
   id: string;
@@ -7,7 +7,12 @@ export type ProductForCard = {
   slug: string;
   tagline: string | null;
   shortDescription: string;
-  caffeineLevel: CaffeineLevel;
+  productLine: ProductLine;
+  spiceLevel: SpiceLevel | null;
+  dishType: string | null;
+  cookTimeMinutes: number | null;
+  isVeg: boolean;
+  noOnionGarlic: boolean;
   isBestseller: boolean;
   isFeatured: boolean;
   primaryImage: string | null; // Cloudinary public_id
@@ -25,64 +30,59 @@ export type ProductForCard = {
 };
 
 export type GetProductsParams = {
+  line?: ProductLine;  // defaults to PREMIX
   country?: string;
   search?: string;
-  category?: string;   // tea type slug
-  wellness?: string;   // wellness goal slug
+  dish?: string;       // DISH_TYPES slug
+  cookWith?: string;   // COOK_WITH slug
+  spice?: string;      // SpiceLevel
+  noOnionGarlic?: boolean;
   sort?: string;
-  caffeine?: string;
 };
+
+const SPICE_VALUES: SpiceLevel[] = ["MILD", "MEDIUM", "HOT", "EXTRA_HOT"];
 
 export async function getProducts(params: GetProductsParams): Promise<ProductForCard[]> {
   const {
+    line = "PREMIX",
     country = "IN",
     search,
-    category,
-    wellness,
+    dish,
+    cookWith,
+    spice,
+    noOnionGarlic,
     sort = "newest",
-    caffeine,
   } = params;
 
-  const rows = await db.product.findMany({
-    where: {
-      status: "PUBLISHED",
-      countryConfigs: {
-        some: {
-          country: { code: country },
-          isAvailable: true,
-        },
+  const spiceFilter = SPICE_VALUES.find((v) => v === spice);
+
+  const where: Prisma.ProductWhereInput = {
+    productLine: line,
+    status: "PUBLISHED",
+    countryConfigs: {
+      some: {
+        country: { code: country },
+        isAvailable: true,
       },
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" } },
-              { shortDescription: { contains: search, mode: "insensitive" } },
-              { ingredients: { contains: search, mode: "insensitive" } },
-              { benefits: { contains: search, mode: "insensitive" } },
-              { tagline: { contains: search, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      ...(caffeine ? { caffeineLevel: caffeine as CaffeineLevel } : {}),
-      ...(category
-        ? {
-            categories: {
-              some: {
-                category: { slug: category, categoryType: "TEA_TYPE" },
-              },
-            },
-          }
-        : {}),
-      ...(wellness
-        ? {
-            categories: {
-              some: {
-                category: { slug: wellness, categoryType: "WELLNESS_GOAL" },
-              },
-            },
-          }
-        : {}),
     },
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { shortDescription: { contains: search, mode: "insensitive" } },
+            { ingredients: { contains: search, mode: "insensitive" } },
+            { tagline: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(dish ? { dishType: dish } : {}),
+    ...(cookWith ? { pairsWith: { has: cookWith } } : {}),
+    ...(spiceFilter ? { spiceLevel: spiceFilter } : {}),
+    ...(noOnionGarlic ? { noOnionGarlic: true } : {}),
+  };
+
+  const rows = await db.product.findMany({
+    where,
     include: {
       countryConfigs: {
         where: { country: { code: country } },
@@ -105,7 +105,7 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
   });
 
   // Shape into card-friendly format + handle price sorting in app code
-  let products: ProductForCard[] = rows.map((p) => {
+  const products: ProductForCard[] = rows.map((p) => {
     const config = p.countryConfigs[0] ?? null;
     return {
       id: p.id,
@@ -113,7 +113,12 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
       slug: p.slug,
       tagline: p.tagline,
       shortDescription: p.shortDescription,
-      caffeineLevel: p.caffeineLevel,
+      productLine: p.productLine,
+      spiceLevel: p.spiceLevel,
+      dishType: p.dishType,
+      cookTimeMinutes: p.cookTimeMinutes,
+      isVeg: p.isVeg,
+      noOnionGarlic: p.noOnionGarlic,
       isBestseller: p.isBestseller,
       isFeatured: p.isFeatured,
       primaryImage: p.images[0]?.cloudinaryPublicId ?? null,

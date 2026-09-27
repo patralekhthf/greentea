@@ -105,7 +105,7 @@ export default async function BlogPostPage({ params }: Props) {
               className="text-2xl font-bold text-brand-green mb-8"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              More from the Journal
+              More Recipes
             </h2>
             <div className="grid sm:grid-cols-3 gap-6">
               {related.map((p) => (
@@ -123,7 +123,7 @@ export default async function BlogPostPage({ params }: Props) {
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">🍵</div>
+                      <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">🍲</div>
                     )}
                   </div>
                   <div className="p-4">
@@ -147,14 +147,14 @@ export default async function BlogPostPage({ params }: Props) {
           className="text-2xl font-bold mb-3"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Ready to start your ritual?
+          Cook it tonight
         </h2>
-        <p className="text-white/70 mb-6 text-sm">Explore our full collection of premium organic teas.</p>
+        <p className="text-white/70 mb-6 text-sm">Every premix is ready to cook: just add water, heat and your ingredients.</p>
         <Link
           href="/shop"
           className="inline-block px-8 py-3 bg-white text-brand-green font-semibold text-sm rounded-full hover:bg-brand-mint transition-colors"
         >
-          Shop All Teas
+          Shop Premixes
         </Link>
       </div>
     </div>

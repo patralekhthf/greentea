@@ -278,7 +278,7 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
             Your WhatsApp Cart is empty
           </h1>
           <p className="text-sm text-brand-muted mb-6">
-            Add a tea from the Farmers Market to get started. Choose size and quantity for each product, then place your order in one go.
+            Add a premix from the Farmers Market to get started. Choose size and quantity for each product, then place your order in one go.
           </p>
           <Link
             href="/farmers-market"
@@ -309,7 +309,7 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
             Continue the conversation with the seller in WhatsApp. They&apos;ll confirm availability and share payment details shortly.
           </p>
           <p className="text-xs text-brand-muted mb-6">
-            We pack fresh the night before / same morning and ship the next working day.
+            We pack your order and ship it the next working day.
           </p>
           <div className="flex flex-col gap-3">
             <button
@@ -618,11 +618,11 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
                 </li>
                 <li className="flex gap-3">
                   <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">4</span>
-                  <span>We verify the payment, pack fresh the night before / same morning, and ship next working day</span>
+                  <span>We verify the payment, pack your order, and ship it the next working day</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">5</span>
-                  <span>You receive your order with a full 14 days of freshness — zero preservatives</span>
+                  <span>Your premixes arrive: just add water, heat and cook</span>
                 </li>
               </>
             ) : (
@@ -641,7 +641,7 @@ export default function OrderReviewClient({ whatsappNumber, addressLabel, radius
                 </li>
                 <li className="flex gap-3">
                   <span className="shrink-0 w-6 h-6 rounded-full bg-brand-mint text-brand-green text-xs font-bold flex items-center justify-center">4</span>
-                  <span>We pack fresh and ship next working day — 14-day freshness</span>
+                  <span>We pack your order and ship it the next working day</span>
                 </li>
               </>
             )}

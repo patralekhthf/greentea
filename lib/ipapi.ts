@@ -3,7 +3,9 @@
 
 export type CountryCode = "IN" | "US" | "GB" | "AU";
 
-export const SUPPORTED_COUNTRIES: CountryCode[] = ["IN", "US", "GB", "AU"];
+// Phase 1 is India only: any other cookie value resolves to IN.
+// Add "US", "GB", "AU" back here (and in proxy.ts + LocationSwitcher) to go international.
+export const SUPPORTED_COUNTRIES: CountryCode[] = ["IN"];
 export const DEFAULT_COUNTRY: CountryCode = "IN";
 
 export const COUNTRY_CONFIG: Record<

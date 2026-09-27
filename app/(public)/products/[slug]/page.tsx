@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { getProductBySlug, getProducts } from "@/lib/products";
@@ -9,6 +9,8 @@ import ProductDetailCTA from "@/components/product/ProductDetailCTA";
 import ProductCard from "@/components/product/ProductCard";
 import ProductContentTabs from "@/components/product/ProductContentTabs";
 import ProductSizeSelector from "@/components/product/ProductSizeSelector";
+import VegMark from "@/components/product/VegMark";
+import { TEA_LINE_LIVE, cookWithLabel, dishTypeLabel, spiceLevel } from "@/lib/catalog";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -28,13 +30,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-const CAFFEINE_LABELS: Record<string, { label: string; color: string }> = {
-  NONE:   { label: "Caffeine-free",   color: "bg-brand-mint text-brand-green" },
-  LOW:    { label: "Low caffeine",    color: "bg-yellow-50 text-yellow-700" },
-  MEDIUM: { label: "Medium caffeine", color: "bg-orange-50 text-orange-700" },
-  HIGH:   { label: "Caffeinated",     color: "bg-red-50 text-red-700" },
-};
-
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const cookieStore = await cookies();
@@ -44,6 +39,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   const product = await getProductBySlug(slug, country);
   if (!product) notFound();
+  // Teas are "coming soon": no detail page, no buying. Send visitors to the teas tab.
+  if (product.productLine === "TEA" && !TEA_LINE_LIVE) redirect("/teas");
 
   const config = product.countryConfigs[0] ?? null;
   const outOfStock = config?.status === "OUT_OF_STOCK";
@@ -52,21 +49,21 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const rating = config?.displayRating ? parseFloat(config.displayRating.toString()) : null;
   const reviewCount = config?.displayReviewCount ?? null;
 
-  const teaTypeCategories = product.categories
-    .filter((c) => c.category.categoryType === "TEA_TYPE")
-    .map((c) => c.category);
-  const wellnessCategories = product.categories
-    .filter((c) => c.category.categoryType === "WELLNESS_GOAL")
-    .map((c) => c.category);
+  const dish  = dishTypeLabel(product.dishType);
+  const spice = spiceLevel(product.spiceLevel);
 
-  const caffeine = CAFFEINE_LABELS[product.caffeineLevel] ?? CAFFEINE_LABELS.NONE;
+  // Quick facts — only the ones filled in on the product
+  const facts = [
+    product.cookTimeMinutes ? { icon: "⏱", label: "Cook time", value: `${product.cookTimeMinutes} min` } : null,
+    product.servings        ? { icon: "🍽", label: "Serves",    value: product.servings } : null,
+    spice                   ? { icon: "🌶️", label: "Spice",     value: spice.label } : null,
+    product.shelfLifeMonths ? { icon: "📦", label: "Best before", value: `${product.shelfLifeMonths} months` } : null,
+  ].filter((f): f is { icon: string; label: string; value: string } => f !== null);
 
-  // Related products — same tea type, exclude current
-  const related = teaTypeCategories[0]
-    ? (
-        await getProducts({ country, category: teaTypeCategories[0].slug })
-      ).filter((p) => p.slug !== product.slug).slice(0, 4)
-    : [];
+  // Related products — same dish type (or any premix), exclude current
+  const related = (
+    await getProducts({ country, dish: product.dishType ?? undefined })
+  ).filter((p) => p.slug !== product.slug).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-brand-cream">
@@ -78,14 +75,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <Link href="/" className="hover:text-brand-green transition-colors">Home</Link>
             <span>/</span>
             <Link href="/shop" className="hover:text-brand-green transition-colors">Shop</Link>
-            {teaTypeCategories[0] && (
+            {dish && (
               <>
                 <span>/</span>
                 <Link
-                  href={`/shop?category=${teaTypeCategories[0].slug}`}
-                  className="hover:text-brand-green transition-colors capitalize"
+                  href={`/shop?dish=${product.dishType}`}
+                  className="hover:text-brand-green transition-colors"
                 >
-                  {teaTypeCategories[0].name}
+                  {dish}
                 </Link>
               </>
             )}
@@ -112,15 +109,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
             {/* Category + badges */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {teaTypeCategories.map((cat) => (
+              <VegMark isVeg={product.isVeg} size={18} />
+              {dish && (
                 <Link
-                  key={cat.id}
-                  href={`/shop?category=${cat.slug}`}
+                  href={`/shop?dish=${product.dishType}`}
                   className="text-xs font-medium text-brand-green bg-brand-mint px-3 py-1 rounded-full hover:bg-brand-sage/20 transition-colors"
                 >
-                  {cat.name}
+                  {dish}
                 </Link>
-              ))}
+              )}
+              {product.noOnionGarlic && (
+                <span className="text-xs font-medium text-brand-green border border-brand-sage px-3 py-1 rounded-full">
+                  No Onion · No Garlic
+                </span>
+              )}
               {product.isBestseller && (
                 <span className="text-xs font-semibold bg-brand-green text-white px-3 py-1 rounded-full">
                   Bestseller
@@ -178,25 +180,38 @@ export default async function ProductDetailPage({ params }: PageProps) {
               {product.shortDescription}
             </p>
 
-            {/* Caffeine badge */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${caffeine.color}`}>
-                {caffeine.label}
-              </span>
-            </div>
+            {/* Quick facts */}
+            {facts.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                {facts.map((f) => (
+                  <div key={f.label} className="bg-white border border-brand-border rounded-xl px-3 py-2.5">
+                    <p className="text-[10px] font-semibold text-brand-muted uppercase tracking-wider">
+                      {f.icon} {f.label}
+                    </p>
+                    <p className="text-sm font-semibold text-brand-dark mt-0.5">{f.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {/* Wellness goals */}
-            {wellnessCategories.length > 0 && (
+            {product.yieldNote && (
+              <p className="text-sm text-brand-dark bg-brand-mint rounded-xl px-4 py-3 mb-6">
+                🥘 {product.yieldNote}
+              </p>
+            )}
+
+            {/* Cook with */}
+            {product.pairsWith.length > 0 && (
               <div className="mb-6">
-                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-2">Wellness Goals</p>
+                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-2">Cook it with</p>
                 <div className="flex flex-wrap gap-2">
-                  {wellnessCategories.map((cat) => (
+                  {product.pairsWith.map((slug) => (
                     <Link
-                      key={cat.id}
-                      href={`/shop?wellness=${cat.slug}`}
+                      key={slug}
+                      href={`/shop?cookWith=${slug}`}
                       className="text-xs text-brand-muted border border-brand-border bg-white px-3 py-1 rounded-full hover:border-brand-sage hover:text-brand-green transition-colors"
                     >
-                      {cat.name}
+                      {cookWithLabel(slug)}
                     </Link>
                   ))}
                 </div>
@@ -217,9 +232,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-3 py-5 border-t border-brand-border">
               {[
-                { icon: "🌿", label: "100% Organic" },
-                { icon: "🚚", label: country === "IN" ? "Free above ₹499" : "Ships via Amazon" },
-                { icon: "✅", label: "Quality Assured" },
+                { icon: "💧", label: "Just add water" },
+                { icon: "🔥", label: "Heat & cook" },
+                { icon: "🏠", label: "Homemade taste" },
               ].map(({ icon, label }) => (
                 <div key={label} className="flex flex-col items-center text-center gap-1">
                   <span className="text-2xl">{icon}</span>
@@ -235,12 +250,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <ProductContentTabs
           longDescription={product.longDescription}
+          flavourProfile={product.tasteProfile}
+          cookingInstructions={product.cookingInstructions}
+          yieldNote={product.yieldNote}
+          storageInstructions={product.storageInstructions}
+          shelfLifeMonths={product.shelfLifeMonths}
           ingredients={product.ingredients}
-          brewingInstructions={product.brewingInstructions}
-          benefits={product.benefits}
-          tasteProfile={product.tasteProfile ?? null}
-          aromaProfile={product.aromaProfile ?? null}
-          storageInstructions={product.storageInstructions ?? null}
+          allergens={product.allergens}
+          highlights={product.benefits}
         />
       </div>
 
