@@ -10,7 +10,7 @@ import { cookWithLabel, dishTypeLabel } from "@/lib/catalog";
 export const metadata: Metadata = {
   title: "Shop Masala Premixes",
   description:
-    "Ready-to-cook masala premixes: sambhar, chhole, paneer tikka gravy and more. Filter by dish, what you're cooking with, or spice level.",
+    "Ready-to-cook masala premixes: sambhar, chhole, paneer tikka gravy and more. Filter by dish, what you're cooking with, or spice level.",  alternates: { canonical: "/shop" },
 };
 
 type PageProps = {

@@ -9,12 +9,58 @@ import { COUNTRY_CONFIG, isValidCountry } from "@/lib/ipapi";
 import { db } from "@/lib/db";
 import { buildImageUrl } from "@/lib/cloudinary-url";
 import { BRAND_TAGLINE, DISH_TYPES } from "@/lib/catalog";
+import { BUSINESS } from "@/lib/business";
+import { SITE_URL } from "@/lib/site";
+import JsonLd from "@/components/ui/JsonLd";
 
 export const metadata: Metadata = {
   // absolute: skip the "| Kanta Greens" template suffix, the brand is already in the title
   title: { absolute: "Kanta Greens — Ready-to-Cook Masala Premixes" },
   description:
-    "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
+    "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",  alternates: { canonical: "/" },
+};
+
+const ORGANIZATION_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: BUSINESS.name,
+      slogan: BUSINESS.tagline,
+      url: SITE_URL,
+      logo: `${SITE_URL}/brand/kanta-greens-logo.png`,
+      description:
+        "Ready-to-cook Indian masala premixes from Kittu's Kitchen: sambhar, chhole, paneer tikka and other gravies, delivered across India.",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: BUSINESS.addressLines.slice(0, 2).join(", "),
+        addressLocality: "New Delhi",
+        postalCode: "110070",
+        addressCountry: "IN",
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: `+${BUSINESS.customerCareE164}`,
+        contactType: "customer service",
+        areaServed: "IN",
+        availableLanguage: ["English", "Hindi"],
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: BUSINESS.name,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      inLanguage: "en-IN",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/shop?search={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 };
 
 export const dynamic = "force-dynamic";
@@ -83,6 +129,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={ORGANIZATION_LD} />
       {/* ════════════════════════════════════════════════════════════════════════ */}
       {/* HERO                                                                     */}
       {/* ════════════════════════════════════════════════════════════════════════ */}
@@ -478,7 +525,7 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-12">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-                Recipes
+                From the Blog
               </p>
               <h2
                 className="text-3xl sm:text-4xl font-bold text-brand-green"
@@ -548,7 +595,7 @@ export default async function HomePage() {
               href="/blog"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-green hover:text-brand-mid transition-colors"
             >
-              All Recipes
+              Read the Blog
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

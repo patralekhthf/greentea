@@ -11,7 +11,10 @@ import ProductContentTabs from "@/components/product/ProductContentTabs";
 import ProductSizeSelector from "@/components/product/ProductSizeSelector";
 import VegMark from "@/components/product/VegMark";
 import { TEA_LINE_LIVE, cookWithLabel, dishTypeLabel, spiceLevel } from "@/lib/catalog";
+import { SHIPPING } from "@/lib/shipping";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
+import JsonLd from "@/components/ui/JsonLd";
+import { SITE_URL } from "@/lib/site";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -21,12 +24,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
+  const image = product.images[0]?.cloudinaryPublicId;
   return {
     title: product.name,
     description: product.shortDescription,
+    alternates: { canonical: `/products/${product.slug}` },
     openGraph: {
       title: product.name,
       description: product.shortDescription,
+      url: `/products/${product.slug}`,
+      ...(image ? { images: [buildImageUrl(image, "w_1200,h_630,c_pad,b_white,f_jpg,q_auto")] } : {}),
     },
   };
 }
@@ -66,8 +73,59 @@ export default async function ProductDetailPage({ params }: PageProps) {
     await getProducts({ country, dish: product.dishType ? [product.dishType] : undefined })
   ).filter((p) => p.slug !== product.slug).slice(0, 4);
 
+  const productUrl = `${SITE_URL}/products/${product.slug}`;
+  const productLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription,
+    url: productUrl,
+    ...(product.sku ? { sku: product.sku } : {}),
+    brand: { "@type": "Brand", name: "Kanta Greens" },
+    ...(dish ? { category: dish } : {}),
+    image: product.images.map((img) => buildImageUrl(img.cloudinaryPublicId, "w_1200,h_1200,c_pad,b_white,f_jpg,q_auto")),
+    additionalProperty: [
+      ...(product.ingredients.trim() && !/coming soon/i.test(product.ingredients) ? [{ "@type": "PropertyValue", name: "Ingredients", value: product.ingredients }] : []),
+      ...(product.cookTimeMinutes ? [{ "@type": "PropertyValue", name: "Cook time", value: `${product.cookTimeMinutes} minutes` }] : []),
+      ...(product.servings ? [{ "@type": "PropertyValue", name: "Servings", value: product.servings }] : []),
+      ...(spice ? [{ "@type": "PropertyValue", name: "Spice level", value: spice.label }] : []),
+      { "@type": "PropertyValue", name: "Diet", value: product.isVeg ? "Vegetarian" : "Non-vegetarian" },
+      ...(product.noOnionGarlic ? [{ "@type": "PropertyValue", name: "No onion no garlic", value: "Yes" }] : []),
+    ],
+    ...(price !== null ? { offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "INR",
+      price: (salePrice ?? price).toFixed(2),
+      availability: outOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: "Kanta Greens" },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: { "@type": "MonetaryAmount", value: SHIPPING.firstUnit, currency: "INR" },
+        shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 2, unitCode: "DAY" },
+          transitTime:  { "@type": "QuantitativeValue", minValue: 3, maxValue: 7, unitCode: "DAY" },
+        },
+      },
+    } } : {}),
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Shop", item: `${SITE_URL}/shop` },
+      { "@type": "ListItem", position: 3, name: product.name, item: productUrl },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-brand-cream">
+      <JsonLd data={productLd} />
+      <JsonLd data={breadcrumbLd} />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-brand-border">

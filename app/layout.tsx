@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -15,6 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Kanta Greens — Ready-to-Cook Masala Premixes",
     template: "%s | Kanta Greens",
@@ -25,6 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Kanta Greens",
     type: "website",
+    locale: "en_IN",
   },
 };
 

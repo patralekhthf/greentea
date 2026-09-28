@@ -5,6 +5,7 @@ import { BUSINESS } from "@/lib/business";
 export const metadata: Metadata = {
   title: "Contact Us",
   description: "Get in touch with Kanta Greens on WhatsApp or phone for orders, bulk enquiries and support.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

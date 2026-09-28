@@ -16,7 +16,7 @@ const COOK_WITH_LINKS = [
 
 const COMPANY_LINKS = [
   { label: "About Us",    href: "/about" },
-  { label: "Recipes",     href: "/blog" },
+  { label: "Blog",        href: "/blog" },
   { label: "Contact",     href: "/contact" },
   { label: "Bulk Orders", href: "/contact#bulk" },
   { label: "Track Order", href: "/track" },

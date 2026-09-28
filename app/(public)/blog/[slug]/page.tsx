@@ -5,6 +5,8 @@ import Image from "next/image";
 import { db } from "@/lib/db";
 import { buildImageUrl } from "@/lib/cloudinary-url";
 import SimpleMarkdown from "@/components/ui/SimpleMarkdown";
+import JsonLd from "@/components/ui/JsonLd";
+import { SITE_URL } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -15,11 +17,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.metaTitle ?? post.title,
     description: post.metaDescription ?? post.excerpt ?? undefined,
+    alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
+      type: "article",
+      url: `/blog/${post.slug}`,
       title: post.metaTitle ?? post.title,
       description: post.metaDescription ?? post.excerpt ?? undefined,
+      ...(post.publishedAt ? { publishedTime: post.publishedAt.toISOString() } : {}),
+      modifiedTime: post.updatedAt.toISOString(),
       ...(post.coverImageUrl
-        ? { images: [buildImageUrl(post.coverImageUrl, "w_1200,h_630,c_fill,f_webp,q_auto")] }
+        ? { images: [buildImageUrl(post.coverImageUrl, "w_1200,h_630,c_fill,f_jpg,q_auto")] }
         : {}),
     },
   };
@@ -40,8 +47,25 @@ export default async function BlogPostPage({ params }: Props) {
     take: 3,
   });
 
+  const postUrl = `${SITE_URL}/blog/${post.slug}`;
+  const postLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.metaDescription ?? post.excerpt ?? undefined,
+    url: postUrl,
+    mainEntityOfPage: postUrl,
+    ...(post.coverImageUrl ? { image: buildImageUrl(post.coverImageUrl, "w_1200,h_630,c_fill,f_jpg,q_auto") } : {}),
+    ...(post.publishedAt ? { datePublished: post.publishedAt.toISOString() } : {}),
+    dateModified: post.updatedAt.toISOString(),
+    author: { "@type": "Organization", name: "Kanta Greens", url: SITE_URL },
+    publisher: { "@type": "Organization", name: "Kanta Greens", url: SITE_URL },
+    inLanguage: "en-IN",
+  };
+
   return (
     <div className="min-h-screen bg-brand-cream">
+      <JsonLd data={postLd} />
       {/* Cover image */}
       {post.coverImageUrl && (
         <div className="relative w-full h-72 sm:h-96 bg-brand-mint">
@@ -105,7 +129,7 @@ export default async function BlogPostPage({ params }: Props) {
               className="text-2xl font-bold text-brand-green mb-8"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              More Recipes
+              More from the Blog
             </h2>
             <div className="grid sm:grid-cols-3 gap-6">
               {related.map((p) => (

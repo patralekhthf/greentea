@@ -5,8 +5,9 @@ import { db } from "@/lib/db";
 import { buildImageUrl } from "@/lib/cloudinary-url";
 
 export const metadata: Metadata = {
-  title: "Recipes",
+  title: "Blog",
   description: "Recipes and kitchen tips from Kittu's Kitchen, made easy with Kanta Greens premixes.",
+  alternates: { canonical: "/blog" },
 };
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function BlogListPage() {
       <div className="bg-white border-b border-brand-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <p className="text-xs font-semibold text-brand-sage uppercase tracking-widest mb-3">
-            Recipes
+            Blog
           </p>
           <h1
             className="text-4xl sm:text-5xl font-bold text-brand-green mb-4"

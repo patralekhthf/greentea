@@ -114,7 +114,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const policy = POLICIES[slug];
-  return policy ? { title: policy.title } : { title: "Not found" };
+  if (!policy) return { title: "Not found" };
+  return { title: policy.title, description: policy.intro, alternates: { canonical: `/legal/${slug}` } };
 }
 
 export default async function PolicyPage({ params }: PageProps) {

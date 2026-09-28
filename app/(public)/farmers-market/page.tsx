@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Farmers Market — Local Delivery in Delhi",
   description:
     "Kanta Greens masala premixes delivered locally in Delhi. Order via WhatsApp, pay via UPI.",
+  alternates: { canonical: "/farmers-market" },
 };
 
 export const dynamic = "force-dynamic";

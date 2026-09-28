@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "About Us",
   description:
     "Kanta Greens is a delicacy of Kittu's Kitchen: healthy, hygienic, homemade masala premixes for busy bees who still want real home food.",
+  alternates: { canonical: "/about" },
 };
 
 export const dynamic = "force-dynamic";

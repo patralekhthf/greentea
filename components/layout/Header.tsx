@@ -9,7 +9,7 @@ import { useSiteCart, siteCartUnits } from "@/lib/site-cart";
 
 const NAV: { label: string; href: string; soon?: boolean }[] = [
   { label: "Premixes", href: "/shop" },
-  { label: "Recipes",  href: "/blog" },
+  { label: "Blog",     href: "/blog" },
   { label: "Teas",     href: "/teas", soon: true },
   { label: "About",    href: "/about" },
   { label: "Contact",  href: "/contact" },

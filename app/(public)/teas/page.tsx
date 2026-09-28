@@ -8,6 +8,7 @@ import NewsletterForm from "@/components/ui/NewsletterForm";
 export const metadata: Metadata = {
   title: "Teas — Coming Soon",
   description: "Kanta Greens teas are coming soon. Join the waitlist to hear the day they launch.",
+  alternates: { canonical: "/teas" },
 };
 
 export const dynamic = "force-dynamic";
