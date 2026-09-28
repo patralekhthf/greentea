@@ -1,96 +1,72 @@
-# Kanta Greens — Session Handoff
+# Kanta Greens: Session Handoff
 
 ## Last updated
-2026-09-27. Business pivot: teas on hold (no FSSAI approval), site repurposed for ready-to-cook masala premixes, India only. Phase 1 code is committed LOCALLY (not pushed, not deployed). FSSAI for premixes is almost done per the user.
+2026-09-27. Premix storefront is LIVE on www.kantagreens.com with website cart + UPI checkout, admin order management, About/Contact/policy pages and 11 recipe posts. Teas are a "coming soon" tab (no FSSAI approval yet). One small local commit (recipe scripts) plus this handoff are unpushed.
 
 ## Live URLs & repo
-- Live (still the OLD tea site): https://greentea-sigma.vercel.app
-- Domain printed on packs: www.kantagreens.com (registered; DNS not yet pointed at Vercel)
-- GitHub: https://github.com/patralekhthf/greentea, branch `main`. Local `main` is ahead of origin.
-- Admin: `/admin/login`
+- Production: https://www.kantagreens.com (also https://greentea-sigma.vercel.app)
+- Admin: /admin/login. Key pages: Admin > Products, Website Orders (/admin/orders), Farmers Market (zone, UPI, orders, carts), Hero Images, Blog.
+- GitHub: https://github.com/patralekhthf/greentea, branch `main`
+- Vercel project auto-deploys `main`. Neon Postgres (host ep-silent-fire...), Cloudinary for images.
 
 ## Infra & deploy model
-- Next.js 16.2.6 App Router (Turbopack), `proxy.ts` (never add `middleware.ts`).
-- Prisma 7 + `@prisma/adapter-pg` + Neon Postgres, tables prefixed `tblgt_`.
-- Vercel auto-deploys every push to `main`. Build: `prisma generate && prisma migrate deploy && next build`, so pushing also migrates the production DB.
-- **DO NOT PUSH** unless the user explicitly asks. User does not want deploys right now.
+- Next.js 16.2.6 (App Router, Turbopack), `proxy.ts` (never add `middleware.ts`), Prisma 7 + `@prisma/adapter-pg`, tables prefixed `tblgt_`.
+- Vercel build: `prisma generate && prisma migrate deploy && next build`. Every push to `main` deploys AND migrates the prod DB.
+- **Pushing needs explicit owner approval every single time** (Vercel free tier throttles and caps deploys; no preview branches either). Commit locally, batch work, ask before pushing. This also applies to /SC.
+- Owner treats production as the test system (no real customers yet), so DB data changes there are OK; pushes still need approval.
+- Content that lives in the DB or Cloudinary goes live without a deploy: products, hero image, blog posts, zone/UPI settings.
+- Local dev: `npm run dev` (port 3000). Browser-preview launch config lives in the session folder `/Users/patralekh/Documents/Codex/Projects/Green Tea Portal/.claude/launch.json` (runs `npm --prefix <repo> run dev`).
+- Checks: `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/eslint <paths>`, `./node_modules/.bin/next build` (skips migrate).
 
-## Feature flags & env (names only)
-- `TEA_LINE_LIVE = false` in `lib/catalog.ts`: teas show as "coming soon" on `/teas`, tea product URLs redirect to `/teas`, orders reject non-premix items. Flip to true (and deploy) when tea FSSAI clears.
-- India only: `proxy.ts` pins `gt_country=IN`; `SUPPORTED_COUNTRIES = ["IN"]` in `lib/ipapi.ts`; LocationSwitcher lists India + Farmers Market.
-- UPI checkout is enabled when `LocalDeliveryZone.upiVpa` is set (admin > Farmers Market).
-- Env: `DATABASE_URL`, `ADMIN_JWT_SECRET`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `RESEND_API_KEY` (optional).
+## Feature flags & env
+- `TEA_LINE_LIVE = false` (lib/catalog.ts): teas show on /teas as coming soon; tea product URLs redirect there; orders reject non-premix items.
+- India only: `proxy.ts` pins `gt_country=IN`; `SUPPORTED_COUNTRIES = ["IN"]` (lib/ipapi.ts); location switcher shows India + Farmers Market.
+- UPI: VPA + payee in `LocalDeliveryZone` (Admin > Farmers Market > UPI Payment), shared by website checkout and Farmers Market. Currently the owner's small-business UPI ID (kumarikanta218@oksbi, Kanta Kumari).
+- Delivery (website orders): Rs 60 first pack + Rs 5 each additional (lib/shipping.ts). Promise: ships 1 to 2 working days, delivered 3 to 7.
+- Env names: `DATABASE_URL`, `ADMIN_JWT_SECRET`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `RESEND_API_KEY` (not wired yet).
 
 ## Done this session (2026-09-27)
-- 2b61317 (pushed): brand assets at repo root (logo, letterhead, statement of ingredients).
-- 4c121d0 (LOCAL only): premix pivot.
-  - Schema: `Product.productLine` (TEA | PREMIX; existing rows backfill TEA), premix fields (spiceLevel, dishType, pairsWith, cookTimeMinutes, servings, yieldNote, cookingInstructions, isVeg, noOnionGarlic, allergens, shelfLifeMonths); `brewingInstructions` now optional. Migration `20260927100000_premix_product_line` NOT applied anywhere yet.
-  - Storefront copy rewritten (home, shop, product page, header, footer, metadata, Recipes = blog). Removed invented testimonials, the 4.8 / 5,000+ badge and organic / lab-tested claims.
-  - `/teas` coming-soon tab + waitlist. Newsletter form now really saves (`POST /api/newsletter`, source `teas-waitlist` / `homepage`).
-  - Farmers Market lists premixes only; orders API refuses non-premix items.
-  - Admin product form: product-line picker + premix details section.
-- Verified: `tsc --noEmit` clean, `next build` succeeds. NOT verified in a browser (pages need the migration first).
-
-## Launch products (11, in scripts/data/premixes.ts)
-Load with `npm run db:import-premixes -- --dry-run` (validate), then `-- --yes` (upsert as Draft) or `-- --yes --publish`. It prints the DB host before writing.
-- Full back-label data: Sambhar (100 g, 6 mo), Moong Dal Halwa (150 g, 4 to 5 mo, no spice level), Rawa Idli (220 g, 12 to 15 idlis, No Onion No Garlic).
-- Back label pending (ingredients show "coming soon", no How to Cook tab, 100 g and 6 mo assumed): Paneer Tikka Gravy (+ NOG), Chhole Masala (+ NOG), White Gravy (NOG), All Purpose Gravy (NOG), Biryani (NOG), Coconut Chutney (NOG, dish type "Chutneys & Sides").
-- Owner-approved placeholders, marked `// TODO` in the data file: prices (Rs 45 to 110), spice levels, allergens. Every product "Serves 3 to 4".
-- Photos: owner will supply; upload in Admin > Products after import.
-- Manufacturer address on labels: Tower S10, Flat 106, Saraswati Apartment D6, Vasant Kunj, New Delhi 110070. Customer care 9350784240.
-- Some halwa mock-ups say "Kanta's Kit" instead of "Kanta Greens"; confirm the brand name on that pack.
-
-## Website cart + checkout (2026-09-27, live)
-- Two separate carts: Farmers Market WhatsApp cart (local Delhi zone, `lib/farmers-market-cart.ts`) and the website cart for all-India shipping (`lib/site-cart.ts`, localStorage `gt_site_cart_v1`).
-- Flow: Add to Cart (shop / product page) > `/cart` > `/checkout` (address) > UPI QR + UTR > confirmation. `/track` = order number + mobile, and pay a still-unpaid order.
-- Delivery: Rs 60 first pack + Rs 5 each additional (`lib/shipping.ts`). Promise: ships 1 to 2 working days, delivered 3 to 7.
-- Orders use the existing `Order`/`OrderItem`/`OrderAddress`/`ShipmentTracking` tables; numbers `KG-YYYYMMDD-NNNN` (IST). Server re-prices from DB.
-- Admin > Website Orders (`/admin/orders`): verify UTR, clear bad UTR, mark shipped (courier + AWB), delivered, cancel.
-- UPI VPA is shared with the Farmers Market (Admin > Farmers Market > UPI Payment).
-- Migration `20260927140000_website_orders_upi` is ALREADY applied to Neon (tested locally against it).
-- Test order `KG-20260928-0001` ("Test Customer (Claude)", UTR TESTUTR00001) left in the DB so the owner can try the admin flow; cancel or delete it afterwards.
-- Policy pages `/legal/{shipping,refund,terms,privacy}` and `/contact` went live as drafts; owner to review (refund terms are Claude's proposal).
-- Shop filters are multi-select: comma lists in the URL (`?cookWith=paneer,chickpeas&spice=MILD,HOT`), OR within a group, AND across groups.
-- `/about` built from pack wording; STORY block at the top of `app/(public)/about/page.tsx` for the owner to personalise.
-- UPI ID kumarikanta218@oksbi is the owner's small-business UPI ID.
-- Razorpay: later (owner decision). Order confirmation emails: not built (Resend not wired).
+- Business pivot: tea on hold, site repurposed for masala premixes (4c121d0). Product line enum, premix fields, No Onion No Garlic flag, veg mark, new shop filters, product page, home/About copy, logo, India-only.
+- Catalogue: 11 premixes imported and published with photos (scripts/data/premixes.ts, `npm run db:import-premixes`). Sambhar, Moong Dal Halwa, Rawa Idli have full back-label data; 8 others show "coming soon" for ingredients and method.
+- Hero image: premix spread with the All Purpose Gravy pack composited in, set as India hero (Cloudinary gt/hero/dh1bffewyjqeiptjrnw9).
+- Website cart + checkout (cbe9722): separate from the WhatsApp cart; /cart, /checkout (address, UPI QR, UTR), /track (status, courier, pay later); Admin > Website Orders (verify/clear UTR, ship with courier + AWB, deliver, cancel). Orders `KG-YYYYMMDD-NNNN` (IST), server re-prices from DB.
+- About page (4f2e0dd), Contact + draft policy pages /legal/{shipping,refund,terms,privacy}.
+- Multi-select shop filters (6b826cf): comma lists in URL, OR within a group, AND across groups.
+- Second approved push (b3a79f2) is live; verified pages and a live add-to-cart through checkout.
+- 11 recipe blog posts published directly to the DB (`npm run db:import-recipes -- --yes`), covers at gt/blog/recipes/<slug>. Live on /blog.
 
 ## Uncommitted / in-flight
-- `.DS_Store` only (ignore).
-- Pushed to production 2026-09-27: pivot + catalogue (f2ac1e2); then website cart + UPI checkout, order tracking, Admin > Website Orders, About page, Contact + policy pages, multi-select shop filters, home title fix (second approved push, same day).
-- Nothing unpushed except `.DS_Store` (ignore).
+- Local, not pushed: 5f38fe1 (recipe data, covers, import script; scripts only, not part of the site) and this handoff commit. Safe to include in the next approved push.
+- `.DS_Store` modified (ignore, never commit).
+- Test order `KG-20260928-0001` ("Test Customer (Claude)", UTR TESTUTR00001) is in the prod DB for the owner to try the admin flow; cancel or delete afterwards.
 
 ## Next / pending
-1. User reviews the pivot. Go-live checklist when they say deploy:
-   a. Push `main` (runs the migration on Neon).
-   b. Admin > Products: set every existing tea to **Published** if it should appear on `/teas` (coming soon only), or Archived to hide it.
-   c. Add the 7 premixes (Draft first, then Published) with prices, SKUs, photos.
-   d. Admin > Hero Images: replace the tea (Taj Mahal) hero with a premix image, 1200x1500 portrait.
-   e. Admin > Farmers Market: update the banner / payment copy (DB values still mention teas); fill UPI VPA `kumarikanta218@oksbi`, payee `Kanta Kumari`.
-   f. Set tea blog posts to Draft.
-2. Until go-live, the live tea site should be taken offline from admin: untick Farmers Market "Active", set tea products to Draft (DB changes, no deploy).
-3. Domain `kantagreens.com` -> Vercel (A `@` 76.76.21.21, CNAME `www` cname.vercel-dns.com).
+1. SEO fixes proposed, awaiting owner OK (code, needs a push): sitemap.xml from DB (products + posts), robots.txt (disallow admin/cart/checkout), `metadataBase` = https://www.kantagreens.com for canonical/OG, rename "Recipes" label back to "Blog". Then owner submits sitemap in Google Search Console.
+2. Owner to place a real small UPI order from a phone and verify it in Admin > Website Orders.
+3. Owner to review live drafts: Refund policy (48h reporting, replacement/refund, 5 to 7 day UPI refund are Claude's proposal), About story (STORY block in app/(public)/about/page.tsx).
+4. Back labels for 8 premixes (Paneer Tikka x2, Chhole x2, White Gravy, All Purpose, Biryani, Coconut Chutney): update scripts/data/premixes.ts and scripts/data/recipes.ts, re-run both imports (no deploy).
+5. Photos still missing: Sambhar front, Paneer Tikka x2, Chhole regular.
+6. Later: Razorpay (owner deferred), order confirmation emails (Resend), FSSAI licence number on site when issued, teas relaunch when FSSAI clears.
 
 ## Open decisions
-- Shop and product-page "Add to Cart" buttons are placeholders (they do nothing). The only working order path is the Farmers Market WhatsApp cart (Delhi zone). Wire shop buttons into the WhatsApp cart, or build Razorpay checkout for all-India?
-- Admin still shows US/UK/AU pricing and hero-image slots (unused while India-only).
-- Waitlist signups are stored but nothing emails them yet (Resend not wired).
+- Approve the SEO batch above?
+- Farmers Market zone still labelled "home location" with 2.5 km radius; banner/payment copy in DB may still mention teas (admin settings).
+- Admin still shows US/UK/AU pricing and hero slots (unused while India-only).
 
 ## Gotchas
-- **The project lives in iCloud-synced ~/Documents.** macOS "Optimize Mac Storage" offloads files (`find . -flags +dataless`). Offloaded `node_modules` makes tsc / prisma / next hang silently at 0% CPU. Fix: `npm ci` (fast) and `brctl download .` for the rest. Better: right-click the folder in Finder > "Keep Downloaded", or move the repo out of iCloud.
-- iCloud also creates conflict copies named "X 2" (67 appeared in node_modules/@types after the reinstall, breaking tsc with "Cannot find type definition file for 'node 2'"). Delete a "X 2" copy only when "X" exists. A stray `.git/index 2` is harmless.
-- `npm ci` now skips install scripts (prisma, sharp). Run `CHECKPOINT_DISABLE=1 ./node_modules/.bin/prisma generate` afterwards.
-- Prisma CLI can hang on its telemetry check: prefix with `CHECKPOINT_DISABLE=1`. Prefer `./node_modules/.bin/<tool>` over `npx`.
-- `prisma migrate diff --from-schema/--to-schema` hung; write migration SQL by hand.
-- Prisma 7: use `cart: { connect: { id } }`, not scalar `cartId`, when a relation is defined; unknown fields fail at insert.
-- `DATABASE_URL` in `.env.local` may be the production Neon DB: never run `prisma migrate deploy` locally.
-- Pre-existing lint errors (not from this pivot): react-hooks/set-state-in-effect in LocationSwitcher, FloatingCart, LocationCheckBanner; nested components in ShopFilters.
+- Repo lives in iCloud-synced ~/Documents. macOS offloads files (`find . -flags +dataless`) and creates conflict copies named "X 2" / "X 3.ts" (seen in node_modules/@types and .next/types). Symptoms: tsc/prisma/next hang at 0% CPU, or "Cannot find type definition file for 'node 2'", or duplicate-identifier errors from `.next/types/* 3.ts`. Fix: `npm ci`, delete "X N" copies only where the original exists, delete them from .next freely. Best fix: Finder > Keep Downloaded, or move the repo out of iCloud.
+- `npm ci` skips install scripts: run `CHECKPOINT_DISABLE=1 ./node_modules/.bin/prisma generate` after. Prisma CLI hangs on telemetry without `CHECKPOINT_DISABLE=1`. Prefer `./node_modules/.bin/<tool>` over npx.
+- `prisma migrate diff` hung; write migration SQL by hand. `DATABASE_URL` in .env.local IS the prod Neon DB: only run `prisma migrate deploy` locally deliberately (additive migrations were applied this way while testing).
+- Prisma 7: relation writes need `cart: { connect: { id } }`, not scalar FKs; unknown fields fail at insert.
+- `lib/cloudinary.ts` imports "server-only", so tsx scripts must configure the Cloudinary SDK directly.
+- Blog markdown (components/ui/SimpleMarkdown.tsx) supports ## headings, - bullets, **bold**, *italic*, ---. No numbered lists or links; write steps as "**1.** ..." paragraphs.
+- Blog is an SEO channel: keep all posts (old tea posts too) published; no product links in posts unless asked.
+- Browser preview: pane must be visible for screenshots; emulated viewports ignore window.scrollTo on some pages; the shop sidebar filters only render at lg width.
 
 ## Docs map
-- Catalogue vocabulary + flags: `lib/catalog.ts`
-- Product queries: `lib/products.ts` (`getProducts({ line, dish, cookWith, spice, noOnionGarlic })`)
-- Schema: `prisma/schema.prisma`; migrations `prisma/migrations/`
-- Storefront: `app/(public)/{page,shop,products/[slug],teas,blog,farmers-market}`
-- Cart + WhatsApp + UPI: `lib/farmers-market-cart.ts`, `components/local/*`, `app/(public)/farmers-market/order/OrderReviewClient.tsx`
-- Admin: `app/admin/(portal)/*`, form `components/admin/ProductForm.tsx`
-- Proxy (admin gate + India pin): `proxy.ts`
+- This file: docs/SESSION_HANDOFF.md (load with /RC)
+- Catalogue vocabulary + flags: lib/catalog.ts; business details: lib/business.ts; delivery rule: lib/shipping.ts
+- Carts: lib/site-cart.ts (website), lib/farmers-market-cart.ts (WhatsApp); pricing/order numbers: lib/site-orders.ts
+- Data + import scripts: scripts/data/premixes.ts, scripts/data/recipes.ts, scripts/import-premixes.ts, scripts/import-recipes.ts, images in scripts/data/images/
+- Schema + migrations: prisma/schema.prisma, prisma/migrations/
+- Storefront pages: app/(public)/*; admin: app/admin/(portal)/*; APIs: app/api/*
