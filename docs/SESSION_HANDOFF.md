@@ -41,7 +41,8 @@
 - Test order `KG-20260928-0001` ("Test Customer (Claude)", UTR TESTUTR00001) is in the prod DB for the owner to try the admin flow; cancel or delete afterwards.
 
 ## Next / pending
-1. SEO fixes proposed, awaiting owner OK (code, needs a push): sitemap.xml from DB (products + posts), robots.txt (disallow admin/cart/checkout), `metadataBase` = https://www.kantagreens.com for canonical/OG, rename "Recipes" label back to "Blog". Then owner submits sitemap in Google Search Console.
+0. **REMIND OWNER RIGHT AFTER THE NEXT PUSH:** submit https://www.kantagreens.com/sitemap.xml in Google Search Console and Bing Webmaster Tools. First confirm the live sitemap returns 200 (it 404s until SEO commit d83d954 is deployed).
+1. SEO batch DONE locally (d83d954, not pushed): sitemap.xml, robots.txt (AI crawlers explicitly allowed), /llms.txt, canonicals, JSON-LD (Organization, Product, BlogPosting), Recipes label renamed to Blog. Needs the next approved push. Owner should also check the Vercel Firewall has no "AI Bots" block rule on.
 2. Owner to place a real small UPI order from a phone and verify it in Admin > Website Orders.
 3. Owner to review live drafts: Refund policy (48h reporting, replacement/refund, 5 to 7 day UPI refund are Claude's proposal), About story (STORY block in app/(public)/about/page.tsx).
 4. Back labels for 8 premixes (Paneer Tikka x2, Chhole x2, White Gravy, All Purpose, Biryani, Coconut Chutney): update scripts/data/premixes.ts and scripts/data/recipes.ts, re-run both imports (no deploy).
