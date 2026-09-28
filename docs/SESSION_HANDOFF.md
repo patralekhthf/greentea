@@ -42,6 +42,7 @@
 
 ## Next / pending
 0. **REMIND OWNER RIGHT AFTER THE NEXT PUSH:** submit https://www.kantagreens.com/sitemap.xml in Google Search Console and Bing Webmaster Tools. First confirm the live sitemap returns 200 (it 404s until SEO commit d83d954 is deployed).
+0b. WhatsApp catalog: product feed at /feeds/products.csv (Meta Commerce Manager + Google Merchant format, from DB, skips items with no photo; Paneer Tikka x2 + Chhole regular are skipped until photos exist). After the push, owner connects it in Meta Commerce Manager > Data sources > Data feed (scheduled, daily) and links the catalog to the WhatsApp Business account. Manual-entry sheet for all 11: docs/whatsapp-catalog-items.csv.
 1. SEO batch DONE locally (d83d954, not pushed): sitemap.xml, robots.txt (AI crawlers explicitly allowed), /llms.txt, canonicals, JSON-LD (Organization, Product, BlogPosting), Recipes label renamed to Blog. Needs the next approved push. Owner should also check the Vercel Firewall has no "AI Bots" block rule on.
 2. Owner to place a real small UPI order from a phone and verify it in Admin > Website Orders.
 3. Owner to review live drafts: Refund policy (48h reporting, replacement/refund, 5 to 7 day UPI refund are Claude's proposal), About story (STORY block in app/(public)/about/page.tsx).
