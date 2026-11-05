@@ -90,7 +90,7 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
     cookTimeMinutes: 15,
     shelfLifeMonths: 6,
     allergens: "Contains coconut. Made in a kitchen that also handles nuts and milk.", // TODO: placeholder
-    priceINR: 65, // TODO: placeholder
+    priceINR: 329, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
   {
@@ -123,7 +123,7 @@ Roast it in a little ghee, add milk or water, and a rich, festive halwa is ready
     cookTimeMinutes: 15,
     shelfLifeMonths: 4, // label says "4 to 5 months"; the site shows the shorter figure
     allergens: "Contains milk (ghee, milk powder) and tree nuts.", // TODO: confirm
-    priceINR: 110, // TODO: placeholder
+    priceINR: 399, // ₹300–400 range set by owner, 2026-11-04
     isFeatured: true,
   },
   {
@@ -156,7 +156,7 @@ Whisk it with water and curd, rest the batter for five minutes and steam. Serve 
     cookTimeMinutes: 20,
     shelfLifeMonths: 6,
     allergens: "Contains wheat (semolina) and cashew (tree nut).", // TODO: confirm
-    priceINR: 85, // TODO: placeholder
+    priceINR: 359, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
 
@@ -185,7 +185,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "May contain milk and tree nuts.", // TODO: placeholder
-    priceINR: 75, // TODO: placeholder
+    priceINR: 349, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
   {
@@ -210,7 +210,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "May contain milk and tree nuts.", // TODO: placeholder
-    priceINR: 75, // TODO: placeholder
+    priceINR: 349, // ₹300–400 range set by owner, 2026-11-04
   },
   {
     slug: "chhole-masala-premix",
@@ -236,7 +236,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "May contain traces of nuts.", // TODO: placeholder
-    priceINR: 70, // TODO: placeholder
+    priceINR: 339, // ₹300–400 range set by owner, 2026-11-04
     isFeatured: true,
   },
   {
@@ -261,7 +261,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "May contain traces of nuts.", // TODO: placeholder
-    priceINR: 70, // TODO: placeholder
+    priceINR: 339, // ₹300–400 range set by owner, 2026-11-04
   },
   {
     slug: "white-gravy-premix",
@@ -285,7 +285,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "Contains tree nuts (cashew) and milk.", // TODO: placeholder
-    priceINR: 90, // TODO: placeholder
+    priceINR: 369, // ₹300–400 range set by owner, 2026-11-04
   },
   {
     slug: "all-purpose-gravy-premix",
@@ -309,7 +309,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "May contain traces of nuts and milk.", // TODO: placeholder
-    priceINR: 60, // TODO: placeholder
+    priceINR: 319, // ₹300–400 range set by owner, 2026-11-04
   },
   {
     slug: "biryani-premix",
@@ -333,7 +333,7 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "May contain traces of nuts.", // TODO: placeholder
-    priceINR: 95, // TODO: placeholder
+    priceINR: 379, // ₹300–400 range set by owner, 2026-11-04
   },
   {
     slug: "coconut-chutney-premix",
@@ -357,6 +357,6 @@ Also available in a No Onion No Garlic version.`,
     cookTimeMinutes: null,
     shelfLifeMonths: 6, // TODO: confirm
     allergens: "Contains coconut. May contain peanuts.", // TODO: placeholder
-    priceINR: 55, // TODO: placeholder
+    priceINR: 309, // ₹300–400 range set by owner, 2026-11-04
   },
 ];
