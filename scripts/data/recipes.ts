@@ -25,9 +25,9 @@ export const RECIPES: RecipeSeed[] = [
     slug: "paneer-tikka-masala-recipe",
     title: "Restaurant-Style Paneer Tikka Masala at Home",
     excerpt: "Smoky pan-seared paneer and peppers simmered in our Paneer Tikka Gravy. Dinner for four in about 30 minutes.",
-    metaDescription: "Easy paneer tikka masala made with Kanta Greens Paneer Tikka Gravy Premix: seared paneer, peppers and a rich gravy in about 30 minutes.",
+    metaDescription: "Easy paneer tikka masala made with RasoiVita Paneer Tikka Gravy Premix: seared paneer, peppers and a rich gravy in about 30 minutes.",
     cover: "paneer-tikka.jpg",
-    content: `Paneer tikka masala is the dish everyone orders when you eat out. With **Kanta Greens Paneer Tikka Gravy Premix** the gravy is already taken care of, so you can spend your time getting a good sear on the paneer.
+    content: `Paneer tikka masala is the dish everyone orders when you eat out. With **RasoiVita Paneer Tikka Gravy Premix** the gravy is already taken care of, so you can spend your time getting a good sear on the paneer.
 
 ## At a glance
 - Serves 3–4
@@ -35,7 +35,7 @@ export const RECIPES: RecipeSeed[] = [
 - Premix: 1 pack Paneer Tikka Gravy Premix
 
 ## You will need
-- 1 pack Kanta Greens Paneer Tikka Gravy Premix
+- 1 pack RasoiVita Paneer Tikka Gravy Premix
 - 250 g paneer, cut into 1-inch cubes
 - 1 green capsicum and 1 onion, cut into 1-inch squares
 - 3 tbsp thick curd
@@ -69,9 +69,9 @@ export const RECIPES: RecipeSeed[] = [
     slug: "rawa-idli-recipe",
     title: "Soft, Fluffy Rawa Idli in 20 Minutes",
     excerpt: "No soaking, no grinding, no fermenting. Our Rawa Idli Premix gives you 12–15 soft idlis in about 20 minutes.",
-    metaDescription: "Make soft rawa idli in 20 minutes with Kanta Greens Rawa Idli Premix. No soaking, grinding or fermenting. Makes 12–15 idlis.",
+    metaDescription: "Make soft rawa idli in 20 minutes with RasoiVita Rawa Idli Premix. No soaking, grinding or fermenting. Makes 12–15 idlis.",
     cover: "rawa-idli.jpg",
-    content: `Regular idli needs overnight soaking, grinding and fermenting. Rawa idli doesn't. With **Kanta Greens Rawa Idli Premix**, breakfast is on the table about 20 minutes after you decide you want idlis.
+    content: `Regular idli needs overnight soaking, grinding and fermenting. Rawa idli doesn't. With **RasoiVita Rawa Idli Premix**, breakfast is on the table about 20 minutes after you decide you want idlis.
 
 ## At a glance
 - Makes 12–15 idlis (serves 3–4)
@@ -80,7 +80,7 @@ export const RECIPES: RecipeSeed[] = [
 - No onion, no garlic
 
 ## You will need
-- 1 packet (220 g) Kanta Greens Rawa Idli Premix
+- 1 packet (220 g) RasoiVita Rawa Idli Premix
 - 200 ml water
 - 1 cup (140 g) curd
 - A little oil for greasing
@@ -105,16 +105,16 @@ export const RECIPES: RecipeSeed[] = [
 - For a colourful version, stir a little grated carrot and chopped coriander into the batter before steaming.
 
 ## Serve with
-- Kanta Greens Coconut Chutney
-- A bowl of Kanta Greens Sambhar`,
+- RasoiVita Coconut Chutney
+- A bowl of RasoiVita Sambhar`,
   },
   {
     slug: "moong-dal-halwa-recipe",
     title: "Moong Dal Halwa in 15 Minutes (Not 2 Hours)",
     excerpt: "The festive favourite without the hour of stirring. Roast, add milk, and a rich moong dal halwa is ready in about 15 minutes.",
-    metaDescription: "Quick moong dal halwa with Kanta Greens Moong Dal Halwa Premix. Roast in ghee, add milk and it's ready in about 15 minutes.",
+    metaDescription: "Quick moong dal halwa with RasoiVita Moong Dal Halwa Premix. Roast in ghee, add milk and it's ready in about 15 minutes.",
     cover: "halwa.jpg",
-    content: `Moong dal halwa is the dessert everyone loves and nobody wants to make: soaking, grinding and a long, arm-aching stir in ghee. **Kanta Greens Moong Dal Halwa Premix** already has the moong dal, ghee, milk powder, sugar, nuts and cardamom in it, so the slow part is done.
+    content: `Moong dal halwa is the dessert everyone loves and nobody wants to make: soaking, grinding and a long, arm-aching stir in ghee. **RasoiVita Moong Dal Halwa Premix** already has the moong dal, ghee, milk powder, sugar, nuts and cardamom in it, so the slow part is done.
 
 ## At a glance
 - Serves 3–4
@@ -122,7 +122,7 @@ export const RECIPES: RecipeSeed[] = [
 - Premix: 1 packet (150 g) Moong Dal Halwa Premix
 
 ## You will need
-- 1 packet (150 g) Kanta Greens Moong Dal Halwa Premix
+- 1 packet (150 g) RasoiVita Moong Dal Halwa Premix
 - 30 ml (2 tbsp) ghee
 - 1½ cups (375 ml) milk or water
 - Sliced almonds and pistachios to garnish (optional)
@@ -148,9 +148,9 @@ export const RECIPES: RecipeSeed[] = [
     slug: "drumstick-vegetable-sambhar-recipe",
     title: "Homestyle Drumstick & Vegetable Sambhar",
     excerpt: "A comforting pot of sambhar with drumsticks and vegetables, pressure-cooked in minutes and finished with a crackling tadka.",
-    metaDescription: "Drumstick and vegetable sambhar made with Kanta Greens Sambhar Premix. Pressure-cooked in minutes, finished with mustard-curry leaf tadka.",
+    metaDescription: "Drumstick and vegetable sambhar made with RasoiVita Sambhar Premix. Pressure-cooked in minutes, finished with mustard-curry leaf tadka.",
     cover: "sambhar.jpg",
-    content: `Good sambhar needs tur dal, tamarind and a carefully roasted masala. **Kanta Greens Sambhar Premix** has all of that, blended and ready, so all you add is water, vegetables and a quick tadka.
+    content: `Good sambhar needs tur dal, tamarind and a carefully roasted masala. **RasoiVita Sambhar Premix** has all of that, blended and ready, so all you add is water, vegetables and a quick tadka.
 
 ## At a glance
 - Serves 3–4
@@ -159,7 +159,7 @@ export const RECIPES: RecipeSeed[] = [
 - No onion, no garlic
 
 ## You will need
-- 4 tbsp (50 g) Kanta Greens Sambhar Premix
+- 4 tbsp (50 g) RasoiVita Sambhar Premix
 - 500 ml water
 - 3 tbsp oil
 - ½ cup bottle gourd, 1 small carrot, 1 small brinjal, cut into chunks
@@ -188,15 +188,15 @@ For the tadka:
 
 ## Serve with
 - Steamed rice and a spoon of ghee
-- Kanta Greens Rawa Idli, or dosa and vada`,
+- RasoiVita Rawa Idli, or dosa and vada`,
   },
   {
     slug: "coconut-chutney-recipe",
     title: "South Indian Coconut Chutney, No Grating Needed",
     excerpt: "The classic partner for idli and dosa, without cracking or grating a coconut. Finish with a sizzling mustard and curry leaf tadka.",
-    metaDescription: "Easy South Indian coconut chutney with Kanta Greens Coconut Chutney Premix and a mustard-curry leaf tadka. Perfect with idli and dosa.",
+    metaDescription: "Easy South Indian coconut chutney with RasoiVita Coconut Chutney Premix and a mustard-curry leaf tadka. Perfect with idli and dosa.",
     cover: "coconut-chutney.jpg",
-    content: `No idli or dosa is complete without coconut chutney, but cracking and grating a coconut on a weekday morning is another matter. **Kanta Greens Coconut Chutney Premix** skips that step. All it needs is a proper tadka.
+    content: `No idli or dosa is complete without coconut chutney, but cracking and grating a coconut on a weekday morning is another matter. **RasoiVita Coconut Chutney Premix** skips that step. All it needs is a proper tadka.
 
 ## At a glance
 - Serves 3–4
@@ -205,7 +205,7 @@ For the tadka:
 - No onion, no garlic
 
 ## You will need
-- Kanta Greens Coconut Chutney Premix (quantity as directed on the pack)
+- RasoiVita Coconut Chutney Premix (quantity as directed on the pack)
 
 For the tadka:
 - 1 tsp coconut oil or any oil
@@ -229,16 +229,16 @@ For the tadka:
 - The chutney thickens as it sits; stir in a little water to loosen it.
 
 ## Serve with
-- Kanta Greens Rawa Idli
+- RasoiVita Rawa Idli
 - Dosa, uttapam, vada or upma`,
   },
   {
     slug: "punjabi-chhole-recipe",
     title: "Punjabi Chhole, Just Like the Dhaba",
     excerpt: "Dark, tangy Punjabi chhole with soft chickpeas, finished with ginger, green chilli and lemon. Made easy with our Chhole Masala Premix.",
-    metaDescription: "Dhaba-style Punjabi chhole with Kanta Greens Chhole Masala Premix: soft chickpeas, tangy masala, ginger and lemon. Serve with bhature.",
+    metaDescription: "Dhaba-style Punjabi chhole with RasoiVita Chhole Masala Premix: soft chickpeas, tangy masala, ginger and lemon. Serve with bhature.",
     cover: "chhole.jpg",
-    content: `Sunday chhole-bhature is a Punjabi institution. The chickpeas are easy; it's the masala that takes time. **Kanta Greens Chhole Masala Premix** brings the depth and tang, so you can focus on the bhature.
+    content: `Sunday chhole-bhature is a Punjabi institution. The chickpeas are easy; it's the masala that takes time. **RasoiVita Chhole Masala Premix** brings the depth and tang, so you can focus on the bhature.
 
 ## At a glance
 - Serves 3–4
@@ -246,7 +246,7 @@ For the tadka:
 - Premix: 1 pack Chhole Masala Premix
 
 ## You will need
-- 1 pack Kanta Greens Chhole Masala Premix
+- 1 pack RasoiVita Chhole Masala Premix
 - 1 cup dried chickpeas (kabuli chana), soaked overnight, or 2 cans, drained
 - 1 tea bag (optional, for the classic dark colour)
 - 1-inch piece of ginger, cut into thin strips
@@ -277,9 +277,9 @@ For the tadka:
     slug: "no-onion-no-garlic-chhole-recipe",
     title: "No Onion No Garlic Chhole for Every Occasion",
     excerpt: "All the tang of Punjabi chhole, made without onion or garlic. A satvik favourite for puja days and every day.",
-    metaDescription: "No onion no garlic chhole with Kanta Greens Chhole Masala Premix (No Onion No Garlic). Tangy, satvik and perfect with puri.",
+    metaDescription: "No onion no garlic chhole with RasoiVita Chhole Masala Premix (No Onion No Garlic). Tangy, satvik and perfect with puri.",
     cover: "chhole.jpg",
-    content: `Many households cook without onion and garlic on puja days, during certain months, or always. **Kanta Greens Chhole Masala Premix (No Onion No Garlic)** is made for exactly that, so nobody has to miss out on a good plate of chhole.
+    content: `Many households cook without onion and garlic on puja days, during certain months, or always. **RasoiVita Chhole Masala Premix (No Onion No Garlic)** is made for exactly that, so nobody has to miss out on a good plate of chhole.
 
 ## At a glance
 - Serves 3–4
@@ -288,7 +288,7 @@ For the tadka:
 - No onion, no garlic
 
 ## You will need
-- 1 pack Kanta Greens Chhole Masala Premix (No Onion No Garlic)
+- 1 pack RasoiVita Chhole Masala Premix (No Onion No Garlic)
 - 1 cup dried chickpeas, soaked overnight, or 2 cans, drained
 - 1 tomato, finely chopped (optional, for extra tang)
 - 1-inch piece of ginger, cut into thin strips
@@ -321,9 +321,9 @@ For the tadka:
     slug: "no-onion-no-garlic-paneer-tikka-masala-recipe",
     title: "Satvik Paneer Tikka Masala (No Onion No Garlic)",
     excerpt: "Rich, festive paneer tikka masala made entirely without onion or garlic. Seared paneer and peppers in our No Onion No Garlic gravy.",
-    metaDescription: "No onion no garlic paneer tikka masala with Kanta Greens Paneer Tikka Gravy Premix (No Onion No Garlic). Rich, satvik and ready in 30 minutes.",
+    metaDescription: "No onion no garlic paneer tikka masala with RasoiVita Paneer Tikka Gravy Premix (No Onion No Garlic). Rich, satvik and ready in 30 minutes.",
     cover: "paneer-tikka.jpg",
-    content: `Cooking without onion and garlic shouldn't mean giving up your favourite restaurant dishes. **Kanta Greens Paneer Tikka Gravy Premix (No Onion No Garlic)** gives you the full tikka masala experience for satvik kitchens, fasting-day menus and family members who skip onion and garlic.
+    content: `Cooking without onion and garlic shouldn't mean giving up your favourite restaurant dishes. **RasoiVita Paneer Tikka Gravy Premix (No Onion No Garlic)** gives you the full tikka masala experience for satvik kitchens, fasting-day menus and family members who skip onion and garlic.
 
 ## At a glance
 - Serves 3–4
@@ -332,7 +332,7 @@ For the tadka:
 - No onion, no garlic
 
 ## You will need
-- 1 pack Kanta Greens Paneer Tikka Gravy Premix (No Onion No Garlic)
+- 1 pack RasoiVita Paneer Tikka Gravy Premix (No Onion No Garlic)
 - 250 g paneer, cut into 1-inch cubes
 - 1 green capsicum and 1 tomato (seeds removed), cut into 1-inch squares
 - 3 tbsp thick curd
@@ -362,19 +362,18 @@ For the tadka:
   {
     slug: "navratan-korma-white-gravy-recipe",
     title: "Navratan Korma with White Gravy Premix",
-    excerpt: "Nine jewels in a creamy white gravy: mixed vegetables, paneer and dry fruit in a mild, festive korma made without onion or garlic.",
-    metaDescription: "Creamy navratan korma with Kanta Greens White Gravy Premix: mixed vegetables, paneer and dry fruit in a mild, no onion no garlic gravy.",
+    excerpt: "Nine jewels in a creamy white gravy: mixed vegetables, paneer and dry fruit in a mild, festive korma.",
+    metaDescription: "Creamy navratan korma with RasoiVita White Gravy Premix: mixed vegetables, paneer and dry fruit in a mild, creamy gravy.",
     cover: "white-gravy.jpg",
-    content: `Navratan korma, the "nine jewels" curry, is a mild, creamy, gently sweet dish that's perfect for festive meals and for anyone who doesn't like things too spicy. **Kanta Greens White Gravy Premix** makes the creamy base, and you add the jewels.
+    content: `Navratan korma, the "nine jewels" curry, is a mild, creamy, gently sweet dish that's perfect for festive meals and for anyone who doesn't like things too spicy. **RasoiVita White Gravy Premix** makes the creamy base, and you add the jewels.
 
 ## At a glance
 - Serves 3–4
 - Time: about 30 minutes
 - Premix: 1 pack White Gravy Premix
-- No onion, no garlic
 
 ## You will need
-- 1 pack Kanta Greens White Gravy Premix
+- 1 pack RasoiVita White Gravy Premix
 - 2 cups mixed vegetables, cut small: carrot, beans, peas, cauliflower, potato
 - 100 g paneer, cubed
 - 2 tbsp mixed cashews and raisins
@@ -405,18 +404,17 @@ For the tadka:
     slug: "egg-curry-all-purpose-gravy-recipe",
     title: "Dhaba-Style Egg Curry (or Paneer, or Veg) in 20 Minutes",
     excerpt: "One gravy, endless dishes. Here's a quick egg curry with our All Purpose Gravy Premix, plus easy swaps for paneer, chana or vegetables.",
-    metaDescription: "Quick dhaba-style egg curry with Kanta Greens All Purpose Gravy Premix. Easy swaps for paneer, chana or mixed vegetables.",
+    metaDescription: "Quick dhaba-style egg curry with RasoiVita All Purpose Gravy Premix. Easy swaps for paneer, chana or mixed vegetables.",
     cover: "all-purpose-gravy.jpg",
-    content: `**Kanta Greens All Purpose Gravy Premix** is the one to keep in the cupboard for "what's for dinner?" evenings. It's a versatile, onion-and-garlic-free masala base that works with almost anything. Our favourite quick dinner is a dhaba-style egg curry.
+    content: `**RasoiVita All Purpose Gravy Premix** is the one to keep in the cupboard for "what's for dinner?" evenings. It's a versatile masala base that works with almost anything. Our favourite quick dinner is a dhaba-style egg curry.
 
 ## At a glance
 - Serves 3–4
 - Time: about 20 minutes
 - Premix: 1 pack All Purpose Gravy Premix
-- The premix itself contains no onion or garlic
 
 ## You will need
-- 1 pack Kanta Greens All Purpose Gravy Premix
+- 1 pack RasoiVita All Purpose Gravy Premix
 - 6 eggs, hard-boiled and peeled
 - 1 tbsp oil
 - ¼ tsp turmeric and ¼ tsp red chilli powder
@@ -447,9 +445,9 @@ For the tadka:
     slug: "vegetable-dum-biryani-recipe",
     title: "Easy Vegetable Dum Biryani",
     excerpt: "Fragrant layers of basmati rice and spiced vegetables, sealed and slow-cooked on dum. Our Biryani Premix does the spice work.",
-    metaDescription: "Easy vegetable dum biryani with Kanta Greens Biryani Premix: layered basmati rice and spiced vegetables, no onion no garlic.",
+    metaDescription: "Easy vegetable dum biryani with RasoiVita Biryani Premix: layered basmati rice and spiced vegetables, no onion no garlic.",
     cover: "biryani.jpg",
-    content: `A good biryani needs a long list of whole and ground spices. **Kanta Greens Biryani Premix** puts them all in one pack, made without onion or garlic, so a weekend biryani becomes something you can make on a weeknight.
+    content: `A good biryani needs a long list of whole and ground spices. **RasoiVita Biryani Premix** puts them all in one pack, made without onion or garlic, so a weekend biryani becomes something you can make on a weeknight.
 
 ## At a glance
 - Serves 3–4
@@ -458,7 +456,7 @@ For the tadka:
 - No onion, no garlic
 
 ## You will need
-- 1 pack Kanta Greens Biryani Premix
+- 1 pack RasoiVita Biryani Premix
 - 1½ cups basmati rice
 - 3 cups mixed vegetables: carrot, beans, peas, cauliflower, potato
 - 100 g paneer, cubed (optional)

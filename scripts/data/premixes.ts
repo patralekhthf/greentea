@@ -173,18 +173,22 @@ Whisk it with water and curd, rest the batter for five minutes and steam. Serve 
 
 Also available in a No Onion No Garlic version.`,
     highlights: PACK_CLAIMS,
-    ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: METHOD_PENDING,
+    ingredients:
+      "Cashew, melon seed, sesame seed, milk powder, tomato powder, chat masala, cornflour, salt, coriander powder, sugar, turmeric, kasuri methi, Kashmiri chilli, garam masala, citric acid, groundnut oil, cinnamon, bay leaf, ginger powder, clove, nutmeg, onion and garlic powder.",
+    cookingInstructions: `1. In a bowl, mix 4 tbsp (50 g) of premix with 200 ml water and 100 ml milk. Keep aside.
+2. Heat 3–4 tbsp oil in a pan, add the gravy mixture and cook for 2–3 minutes.
+3. Add paneer (marinated and grilled, or fried) and cook for 2–3 minutes.
+4. Stir in 2 tbsp cream and 1 tbsp butter, and serve hot.`,
     dishType: "gravies",
     pairsWith: ["paneer"],
     spiceLevel: "MEDIUM", // TODO: placeholder
     noOnionGarlic: false,
-    netWeight: "100g", // TODO: confirm
+    netWeight: "100g", // from back label, 2026-11-13
     servings: SERVES,
-    yieldNote: null,
-    cookTimeMinutes: null,
-    shelfLifeMonths: 6, // TODO: confirm
-    allergens: "May contain milk and tree nuts.", // TODO: placeholder
+    yieldNote: "4 tbsp (50 g) makes one batch, so a 100 g pack makes two",
+    cookTimeMinutes: 10,
+    shelfLifeMonths: 6, // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew), milk, sesame and peanut (groundnut oil).", // from back label, 2026-11-13
     priceINR: 349, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
@@ -220,22 +224,27 @@ Also available in a No Onion No Garlic version.`,
     tagline: "Punjabi-style chhole, simplified",
     shortDescription:
       "A chhole masala base. Cook it with water as directed on the pack and add boiled chickpeas for Punjabi-style chhole.",
-    longDescription: `A chhole masala base for Punjabi-style chhole. Cook it as directed on the pack with boiled chickpeas, and serve with bhature, kulche or rice.
+    longDescription: `A chhole masala base for Punjabi-style chhole. Cook it as directed on the pack with boiled chickpeas, and serve with bhature, kulche or rice. It works just as well with rajma.
 
 Also available in a No Onion No Garlic version.`,
     highlights: PACK_CLAIMS,
-    ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: METHOD_PENDING,
+    ingredients:
+      "Cashew, roasted chana dal, tomato powder, chat masala, cornflour, salt, coriander powder, mace, black pepper, sugar, turmeric, kasuri methi, Kashmiri chilli, fennel seeds, garam masala, citric acid, groundnut oil, cinnamon, hing, bay leaf, ginger powder, clove, nutmeg, green cardamom, carom seed, dried pomegranate seeds, black salt, mango powder, onion and garlic powder.",
+    cookingInstructions: `1. In a bowl, mix 4 tbsp (50 g) of premix with 200 ml water. Keep aside.
+2. Heat 3–4 tbsp oil in a pan, add 250 g boiled chhole (or rajma) and sauté for 2–3 minutes.
+3. Add the premix gravy, adjust water and salt if needed, and cook for 2 minutes.
+4. Add 1 tbsp butter and cook for 2 more minutes. Serve hot.
+5. Optional: for extra flavour, finish with a tadka of carom seeds, Kashmiri chilli powder and green chilli.`,
     dishType: "gravies",
     pairsWith: ["chickpeas"],
     spiceLevel: "HOT", // TODO: placeholder
     noOnionGarlic: false,
-    netWeight: "100g", // TODO: confirm
+    netWeight: "100g", // from back label, 2026-11-13
     servings: SERVES,
-    yieldNote: null,
-    cookTimeMinutes: null,
-    shelfLifeMonths: 6, // TODO: confirm
-    allergens: "May contain traces of nuts.", // TODO: placeholder
+    yieldNote: "4 tbsp (50 g) cooks 250 g boiled chhole, so a 100 g pack makes two batches",
+    cookTimeMinutes: 10,
+    shelfLifeMonths: 6, // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and peanut (groundnut oil).", // from back label, 2026-11-13
     priceINR: 339, // ₹300–400 range set by owner, 2026-11-04
     isFeatured: true,
   },
@@ -270,21 +279,26 @@ Also available in a No Onion No Garlic version.`,
     name: "White Gravy Premix",
     tagline: "Creamy, mild and rich",
     shortDescription:
-      "A creamy white gravy base, made without onion or garlic. Great with paneer, vegetables or chicken.",
-    longDescription: `A creamy white gravy base, made without onion or garlic. Cook it as directed on the pack and add paneer, mixed vegetables or chicken.`,
+      "A creamy, mild white gravy base made with cashew, melon seeds and milk. Perfect for malai kofta, methi matar malai, kaju curry or navratan korma.",
+    longDescription: `A creamy, mild white gravy base made with cashew, melon seeds and milk powder. Cook it with milk, then add fried, grilled or boiled vegetables, paneer or chicken.
+
+Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
     highlights: PACK_CLAIMS,
-    ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: METHOD_PENDING,
+    ingredients:
+      "Cashew, melon seeds, milk powder, onion powder, kasuri methi, garlic powder, ginger powder, sugar, salt, whole coriander, cardamom powder, fennel, rice flour, white pepper powder, cornflour, javitri, nutmeg, chilli flakes.",
+    cookingInstructions: `1. In a bowl, mix 1 packet (100 g) of premix with 600 ml milk.
+2. Heat 6–7 tbsp oil in a pan, add the premix mixture and cook for 4–5 minutes.
+3. Add vegetables of your choice (fried, oven-grilled or boiled), 1 tbsp cream and butter, and cook for 3–4 minutes. Serve hot.`,
     dishType: "gravies",
     pairsWith: ["paneer", "vegetables", "chicken"],
     spiceLevel: "MILD", // TODO: placeholder
-    noOnionGarlic: true,
-    netWeight: "100g", // TODO: confirm
+    noOnionGarlic: false, // label lists onion and garlic powder, 2026-11-13
+    netWeight: "100g", // from back label, 2026-11-13
     servings: SERVES,
-    yieldNote: null,
-    cookTimeMinutes: null,
-    shelfLifeMonths: 6, // TODO: confirm
-    allergens: "Contains tree nuts (cashew) and milk.", // TODO: placeholder
+    yieldNote: "1 pack (100 g) with 600 ml milk",
+    cookTimeMinutes: 10,
+    shelfLifeMonths: 6, // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and milk.", // from back label, 2026-11-13
     priceINR: 369, // ₹300–400 range set by owner, 2026-11-04
   },
   {
@@ -294,21 +308,24 @@ Also available in a No Onion No Garlic version.`,
     name: "All Purpose Gravy Premix",
     tagline: "One gravy, endless dishes",
     shortDescription:
-      "A versatile onion-and-garlic-free gravy base for paneer, vegetables, chana, eggs or chicken.",
-    longDescription: `The everyday gravy base for busy kitchens. Cook it as directed on the pack and add whatever you have: paneer, mixed vegetables, chana, boiled eggs or chicken. Made without onion or garlic.`,
+      "A versatile everyday gravy base. Mix with water, cook, and add paneer, vegetables, chana, eggs or chicken.",
+    longDescription: `The everyday gravy base for busy kitchens. Cook it as directed on the pack and add whatever you have: paneer, mixed vegetables, chana, boiled eggs or chicken.`,
     highlights: PACK_CLAIMS,
-    ingredients: INGREDIENTS_PENDING,
-    cookingInstructions: METHOD_PENDING,
+    ingredients:
+      "Cashew, melon seeds, coriander powder, onion powder, sugar, milk powder, garlic powder, tomato powder, turmeric powder, black pepper powder, kasuri methi, cumin, coriander seeds, Kashmiri red chilli powder, cornflour, salt, garam masala, oil, black salt, green chilli powder, bay leaf, cinnamon.",
+    cookingInstructions: `1. In a bowl, mix 1 packet (100 g) of premix with 400 ml water.
+2. Heat 6–7 tbsp oil in a pan, add the premix mixture and cook for 4–5 minutes.
+3. Add vegetables of your choice and cook for 2–3 minutes. Add butter and cream, cook for another minute, and finish with chopped coriander.`,
     dishType: "gravies",
     pairsWith: ["paneer", "vegetables", "chickpeas", "chicken", "egg"],
     spiceLevel: "MEDIUM", // TODO: placeholder
-    noOnionGarlic: true,
-    netWeight: "100g", // TODO: confirm
+    noOnionGarlic: false, // label lists onion and garlic powder, 2026-11-13
+    netWeight: "100g", // from back label, 2026-11-13
     servings: SERVES,
-    yieldNote: null,
-    cookTimeMinutes: null,
-    shelfLifeMonths: 6, // TODO: confirm
-    allergens: "May contain traces of nuts and milk.", // TODO: placeholder
+    yieldNote: "1 pack (100 g) with 400 ml water",
+    cookTimeMinutes: 10,
+    shelfLifeMonths: 6, // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and milk.", // from back label, 2026-11-13
     priceINR: 319, // ₹300–400 range set by owner, 2026-11-04
   },
   {
