@@ -194,7 +194,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "paneer-tikka-gravy-premix-no-onion-no-garlic",
-    images: [], // TODO: photo pending
+    images: ["paneer-tikka-gravy-premix-no-onion-no-garlic-front.jpg"], // RasoiVita pack (composited), 2026-11-13
     sku: "KG-PTG-NOG-100",
     name: "Paneer Tikka Gravy Premix (No Onion No Garlic)",
     tagline: "Tikka gravy, without onion or garlic",
@@ -250,7 +250,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "chhole-masala-premix-no-onion-no-garlic",
-    images: ["chhole-masala-premix-no-onion-no-garlic-1.webp"],
+    images: ["chhole-masala-premix-no-onion-no-garlic-front.jpg"], // RasoiVita pack (composited), 2026-11-13
     sku: "KG-CHM-NOG-100",
     name: "Chhole Masala Premix (No Onion No Garlic)",
     tagline: "Chhole masala, without onion or garlic",
@@ -330,7 +330,7 @@ Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
   },
   {
     slug: "biryani-premix",
-    images: ["biryani-premix-1.webp"],
+    images: ["biryani-premix-front.jpg"], // RasoiVita pack (composited), 2026-11-13
     sku: "KG-BIR-100",
     name: "Biryani Premix",
     tagline: "Fragrant biryani, made easy",
@@ -354,7 +354,7 @@ Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
   },
   {
     slug: "coconut-chutney-premix",
-    images: ["coconut-chutney-premix-1.webp"],
+    images: ["coconut-chutney-premix-front.jpg"], // RasoiVita pack (composited), 2026-11-13
     sku: "KG-CCH-100",
     name: "Coconut Chutney Premix",
     tagline: "South Indian chutney in minutes",
