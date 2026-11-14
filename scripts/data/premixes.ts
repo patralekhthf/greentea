@@ -64,7 +64,7 @@ export const PREMIXES: PremixSeed[] = [
   // ─── Back label available ────────────────────────────────────────────────
   {
     slug: "sambhar-premix",
-    images: ["sambhar-premix-1.jpg"],
+    images: ["sambhar-premix-front.jpg", "sambhar-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-SAM-100",
     name: "Sambhar Premix",
     tagline: "Homestyle sambhar, no grinding",
@@ -95,7 +95,7 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
   },
   {
     slug: "moong-dal-halwa-premix",
-    images: ["moong-dal-halwa-premix-1.webp"],
+    images: ["moong-dal-halwa-premix-front.jpg", "moong-dal-halwa-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-MDH-150",
     name: "Moong Dal Halwa Premix",
     tagline: "Pure desi taste that brings sweet cravings",
@@ -128,7 +128,7 @@ Roast it in a little ghee, add milk or water, and a rich, festive halwa is ready
   },
   {
     slug: "rawa-idli-premix",
-    images: ["rawa-idli-premix-1.webp", "rawa-idli-premix-2.webp"],
+    images: ["rawa-idli-premix-front.jpg", "rawa-idli-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-RID-220",
     name: "Rawa Idli Premix",
     tagline: "Soft, fluffy idlis in 20 minutes",
@@ -163,7 +163,7 @@ Whisk it with water and curd, rest the batter for five minutes and steam. Serve 
   // ─── Back label pending: ingredients, method, weight, shelf life TODO ────
   {
     slug: "paneer-tikka-gravy-premix",
-    images: [], // TODO: photo pending
+    images: ["paneer-tikka-gravy-premix-front.jpg", "paneer-tikka-gravy-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-PTG-100",
     name: "Paneer Tikka Gravy Premix",
     tagline: "Restaurant-style tikka gravy at home",
@@ -214,7 +214,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "chhole-masala-premix",
-    images: [], // TODO: photo pending
+    images: ["chhole-masala-premix-front.jpg", "chhole-masala-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-CHM-100",
     name: "Chhole Masala Premix",
     tagline: "Punjabi-style chhole, simplified",
@@ -265,7 +265,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "white-gravy-premix",
-    images: ["white-gravy-premix-1.webp"],
+    images: ["white-gravy-premix-front.jpg", "white-gravy-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-WGR-100",
     name: "White Gravy Premix",
     tagline: "Creamy, mild and rich",
@@ -289,7 +289,7 @@ Also available in a No Onion No Garlic version.`,
   },
   {
     slug: "all-purpose-gravy-premix",
-    images: ["all-purpose-gravy-premix-1.webp"],
+    images: ["all-purpose-gravy-premix-front.jpg", "all-purpose-gravy-premix-back.jpg"], // RasoiVita pack, 2026-11-13
     sku: "KG-APG-100",
     name: "All Purpose Gravy Premix",
     tagline: "One gravy, endless dishes",
