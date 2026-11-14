@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BRAND_TAGLINE, COOK_WITH, DISH_TYPES } from "@/lib/catalog";
+import { BRAND_NAME, BRAND_TAGLINE, COOK_WITH, DISH_TYPES } from "@/lib/catalog";
 
 const SHOP_LINKS = [
   { label: "All Premixes", href: "/shop" },
@@ -51,13 +51,13 @@ export default function Footer() {
                   className="text-xl font-bold tracking-tight"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Kanta Greens
+                  {BRAND_NAME}<sup className="text-[0.5em] font-semibold ml-0.5 align-super">™</sup>
                 </span>
                 <span className="text-[10px] text-white/60 mt-1">{BRAND_TAGLINE}</span>
               </span>
             </div>
             <p className="text-sm text-white/70 leading-relaxed mb-5">
-              Ready-to-cook masala premixes. Add water, heat, and a home-style dish is ready in minutes.
+              RasoiVita ready-to-cook masala premixes by Kanta Greens. Add water, heat, and a home-style dish is ready in minutes.
             </p>
             {/* Badges */}
             <div className="flex flex-wrap gap-2">

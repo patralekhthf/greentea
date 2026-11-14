@@ -10,7 +10,7 @@ import { DELIVERY_PROMISE } from "@/lib/shipping";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Kanta Greens is a delicacy of Kittu's Kitchen: healthy, hygienic, homemade masala premixes for busy bees who still want real home food.",
+    "RasoiVita is a delicacy of Kanta Greens: healthy, hygienic, homemade masala premixes for busy bees who still want real home food.",
   alternates: { canonical: "/about" },
 };
 
@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
 const STORY = {
   heading: "Real home food, for busy bees",
   paragraphs: [
-    "Kanta Greens is a delicacy of Kittu's Kitchen. Every premix starts as a masala we'd cook with at home: the same spices, in the same proportions, blended so you don't have to.",
+    "RasoiVita is a delicacy of Kanta Greens. Every premix starts as a masala we'd cook with at home: the same spices, in the same proportions, blended so you don't have to.",
     "We know weeknights are busy. Chopping, roasting and grinding a dozen spices isn't always possible, but ready meals never taste like home. Our premixes sit in between: you still cook with fresh paneer, chana or vegetables, and we take care of the masala.",
     "Every pack is made in small batches in New Delhi, the way we'd make it for our own family: healthy, hygienic and homemade.",
   ],
@@ -97,7 +97,7 @@ export default async function AboutPage() {
               <div className="relative aspect-[4/5] rounded-[1.75rem] overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-white/10">
                 <Image
                   src={buildImageUrl(hero.imageUrl, "w_700,h_875,c_fill,f_webp,q_auto")}
-                  alt="A spread of dishes made with Kanta Greens premixes"
+                  alt="A spread of dishes made with RasoiVita premixes"
                   fill
                   sizes="(max-width: 1024px) 0px, 40vw"
                   className="object-cover"

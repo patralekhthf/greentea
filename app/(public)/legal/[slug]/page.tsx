@@ -14,7 +14,7 @@ const contactLine = `WhatsApp or call ${BUSINESS.customerCare}`;
 const POLICIES: Record<string, Policy> = {
   shipping: {
     title: "Shipping Policy",
-    intro: `We deliver Kanta Greens premixes across India. ${DELIVERY_PROMISE}`,
+    intro: `We deliver RasoiVita premixes across India. ${DELIVERY_PROMISE}`,
     sections: [
       { h: "Delivery charges", p: [
         `Delivery costs ₹${SHIPPING.firstUnit} for the first pack and ₹${SHIPPING.additionalUnit} for each additional pack in the same order. The charge is shown in your cart before you pay.`,

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import LocationSwitcher from "./LocationSwitcher";
-import { BRAND_TAGLINE } from "@/lib/catalog";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/catalog";
 import { useSiteCart, siteCartUnits } from "@/lib/site-cart";
 
 const NAV: { label: string; href: string; soon?: boolean }[] = [
@@ -48,7 +48,7 @@ export default function Header() {
                 className="font-display text-xl font-bold text-brand-green tracking-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Kanta Greens
+                {BRAND_NAME}<sup className="text-[0.5em] font-semibold ml-0.5 align-super">™</sup>
               </span>
               <span className="hidden sm:block text-[10px] text-brand-muted mt-1">{BRAND_TAGLINE}</span>
             </span>

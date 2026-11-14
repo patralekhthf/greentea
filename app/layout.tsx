@@ -18,14 +18,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Kanta Greens — Ready-to-Cook Masala Premixes",
-    template: "%s | Kanta Greens",
+    default: "RasoiVita by Kanta Greens — Ready-to-Cook Masala Premixes",
+    template: "%s | RasoiVita",
   },
   description:
-    "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
+    "RasoiVita ready-to-cook masala premixes, a delicacy of Kanta Greens. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
   keywords: ["masala premix", "ready to cook masala", "sambhar premix", "chhole masala", "paneer tikka gravy", "instant gravy mix"],
   openGraph: {
-    siteName: "Kanta Greens",
+    siteName: "RasoiVita by Kanta Greens",
     type: "website",
     locale: "en_IN",
   },

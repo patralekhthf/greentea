@@ -81,7 +81,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     description: product.shortDescription,
     url: productUrl,
     ...(product.sku ? { sku: product.sku } : {}),
-    brand: { "@type": "Brand", name: "Kanta Greens" },
+    brand: { "@type": "Brand", name: "RasoiVita" },
     ...(dish ? { category: dish } : {}),
     image: product.images.map((img) => buildImageUrl(img.cloudinaryPublicId, "w_1200,h_1200,c_pad,b_white,f_jpg,q_auto")),
     additionalProperty: [

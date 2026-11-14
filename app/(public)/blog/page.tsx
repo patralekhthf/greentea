@@ -6,7 +6,7 @@ import { buildImageUrl } from "@/lib/cloudinary-url";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Recipes and kitchen tips from Kittu's Kitchen, made easy with Kanta Greens premixes.",
+  description: "Recipes and kitchen tips made easy with RasoiVita premixes, a delicacy of Kanta Greens.",
   alternates: { canonical: "/blog" },
 };
 
@@ -30,7 +30,7 @@ export default async function BlogListPage() {
             className="text-4xl sm:text-5xl font-bold text-brand-green mb-4"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            From Kittu&apos;s Kitchen
+            From Our Kitchen
           </h1>
           <p className="text-brand-muted max-w-xl mx-auto">
             Recipes, serving ideas and kitchen tips for cooking with our premixes.

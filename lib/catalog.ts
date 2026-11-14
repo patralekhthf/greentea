@@ -7,7 +7,9 @@ import type { SpiceLevel } from "@prisma/client";
 /** Teas stay visible as "coming soon" and cannot be ordered until this is true. */
 export const TEA_LINE_LIVE = false;
 
-export const BRAND_TAGLINE = "A Delicacy of Kittu's Kitchen";
+/** Product brand printed on the packs. The company (seller) stays Kanta Greens: see lib/business.ts. */
+export const BRAND_NAME = "RasoiVita";
+export const BRAND_TAGLINE = "A Delicacy of Kanta Greens";
 
 export const DISH_TYPES = [
   { slug: "gravies",   label: "Curries & Gravies", icon: "🍛" },

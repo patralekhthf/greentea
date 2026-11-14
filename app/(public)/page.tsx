@@ -14,10 +14,11 @@ import { SITE_URL } from "@/lib/site";
 import JsonLd from "@/components/ui/JsonLd";
 
 export const metadata: Metadata = {
-  // absolute: skip the "| Kanta Greens" template suffix, the brand is already in the title
-  title: { absolute: "Kanta Greens — Ready-to-Cook Masala Premixes" },
+  // absolute: skip the "| RasoiVita" template suffix, the brand is already in the title
+  title: { absolute: "RasoiVita by Kanta Greens — Ready-to-Cook Masala Premixes" },
   description:
-    "Ready-to-cook masala premixes from Kittu's Kitchen. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",  alternates: { canonical: "/" },
+    "RasoiVita ready-to-cook masala premixes, a delicacy of Kanta Greens. Add water, heat, and your sambhar, chhole or paneer gravy is ready in minutes.",
+  alternates: { canonical: "/" },
 };
 
 const ORGANIZATION_LD = {
@@ -28,10 +29,11 @@ const ORGANIZATION_LD = {
       "@id": `${SITE_URL}/#organization`,
       name: BUSINESS.name,
       slogan: BUSINESS.tagline,
+      brand: { "@type": "Brand", name: BUSINESS.brand, slogan: BRAND_TAGLINE },
       url: SITE_URL,
       logo: `${SITE_URL}/brand/kanta-greens-logo.png`,
       description:
-        "Ready-to-cook Indian masala premixes from Kittu's Kitchen: sambhar, chhole, paneer tikka and other gravies, delivered across India.",
+        "Makers of RasoiVita ready-to-cook Indian masala premixes: sambhar, chhole, paneer tikka and other gravies, delivered across India.",
       address: {
         "@type": "PostalAddress",
         streetAddress: BUSINESS.addressLines.slice(0, 2).join(", "),
@@ -51,7 +53,8 @@ const ORGANIZATION_LD = {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#website`,
       url: SITE_URL,
-      name: BUSINESS.name,
+      name: `${BUSINESS.brand} by ${BUSINESS.name}`,
+      alternateName: [BUSINESS.brand, BUSINESS.name],
       publisher: { "@id": `${SITE_URL}/#organization` },
       inLanguage: "en-IN",
       potentialAction: {
@@ -222,7 +225,7 @@ export default async function HomePage() {
                   <div className="relative aspect-[4/5] rounded-[1.75rem] overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-white/10">
                     <Image
                       src={buildImageUrl(heroBanner.imageUrl, "w_800,h_1000,c_fill,f_webp,q_auto")}
-                      alt={heroBanner.title ?? "Kanta Greens"}
+                      alt={heroBanner.title ?? "RasoiVita masala premix"}
                       fill
                       sizes="(max-width: 1024px) 0px, 50vw"
                       className="object-cover"
@@ -441,7 +444,7 @@ export default async function HomePage() {
           {/* Text */}
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-brand-sage mb-3">
-              From Kittu&apos;s Kitchen
+              From Our Kitchen
             </p>
             <h2
               className="text-3xl sm:text-4xl font-bold text-brand-green mb-6"
@@ -451,7 +454,7 @@ export default async function HomePage() {
               <br />Without the Prep
             </h2>
             <p className="text-brand-muted leading-relaxed mb-5">
-              Every Kanta Greens premix is a delicacy of Kittu&apos;s Kitchen: healthy, hygienic, homemade masalas, packed for busy bees who still want real home food.
+              Every RasoiVita premix is a delicacy of Kanta Greens: healthy, hygienic, homemade masalas, packed for busy bees who still want real home food.
             </p>
             <p className="text-brand-muted leading-relaxed mb-8">
               The spices are already blended in the right proportions. You bring the fresh paneer, chana or vegetables, and a home-style dish is ready in minutes.
@@ -531,7 +534,7 @@ export default async function HomePage() {
                 className="text-3xl sm:text-4xl font-bold text-brand-green"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                From Kittu&apos;s Kitchen
+                From Our Kitchen
               </h2>
             </div>
             <Link

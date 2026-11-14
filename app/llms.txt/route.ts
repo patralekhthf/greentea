@@ -4,7 +4,7 @@
 import { db } from "@/lib/db";
 import { BUSINESS } from "@/lib/business";
 import { DELIVERY_PROMISE, SHIPPING } from "@/lib/shipping";
-import { TEA_LINE_LIVE, dishTypeLabel } from "@/lib/catalog";
+import { BRAND_TAGLINE, TEA_LINE_LIVE, dishTypeLabel } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -40,9 +40,9 @@ export async function GET() {
     (p) => `- [${p.title}](${SITE_URL}/blog/${p.slug})${p.excerpt ? `: ${p.excerpt}` : ""}`,
   );
 
-  const body = `# ${BUSINESS.name}
+  const body = `# ${BUSINESS.brand} by ${BUSINESS.name}
 
-> ${BUSINESS.name} (${BUSINESS.tagline}) makes ready-to-cook Indian masala premixes: sambhar, chhole, paneer tikka and other gravies, biryani, chutney and sweets. Add water and your main ingredient, heat, and the dish is ready in minutes. Sold online across India with UPI payment, and locally in New Delhi through our Farmers Market WhatsApp cart.
+> ${BUSINESS.brand} (${BRAND_TAGLINE}) is the masala premix brand of ${BUSINESS.name}, New Delhi. We make ready-to-cook Indian masala premixes: sambhar, chhole, paneer tikka and other gravies, biryani, chutney and sweets. Add water and your main ingredient, heat, and the dish is ready in minutes. Sold online across India with UPI payment, and locally in New Delhi through our Farmers Market WhatsApp cart.
 
 - Ships within India only. ${DELIVERY_PROMISE}
 - Delivery: ₹${SHIPPING.firstUnit} for the first pack, ₹${SHIPPING.additionalUnit} for each additional pack.

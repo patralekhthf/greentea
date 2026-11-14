@@ -53,7 +53,7 @@ export async function GET() {
       link: `${SITE_URL}/products/${p.slug}`,
       image_link: buildImageUrl(p.images[0].cloudinaryPublicId, FEED_IMAGE),
       additional_image_link: p.images.slice(1, 10).map((i) => buildImageUrl(i.cloudinaryPublicId, FEED_IMAGE)).join(","),
-      brand: "Kanta Greens",
+      brand: "RasoiVita",
       product_type: `Masala Premixes > ${dishTypeLabel(p.dishType) ?? "Premixes"}`,
       google_product_category: "Food, Beverages & Tobacco > Food Items > Seasonings & Spices > Herbs & Spices",
     };
