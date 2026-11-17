@@ -239,7 +239,7 @@ Also available in a No Onion No Garlic version.`,
     yieldNote: "4 tbsp (50 g) cooks 250 g boiled chhole, so a 100 g pack makes two batches",
     cookTimeMinutes: 10,
     shelfLifeMonths: 6, // from back label, 2026-11-13
-    allergens: "Contains tree nuts (cashew) and peanut (groundnut oil). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and peanut (groundnut oil). May contain wheat (gluten): the hing (asafoetida) we use is usually blended with wheat flour. Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
     priceINR: 339, // ₹300–400 range set by owner, 2026-11-04
     isFeatured: true,
   },

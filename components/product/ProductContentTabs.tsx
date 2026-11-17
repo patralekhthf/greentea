@@ -141,7 +141,7 @@ export default function ProductContentTabs({
                 </h3>
                 <AllergenGrid present={detectAllergens(ingredients)} />
                 <p className="text-xs text-brand-muted mt-3">
-                  ✓ present in this premix · ✕ not in the recipe. Based on the ingredient list on the pack.
+                  ✓ present in this premix · ! may be present through a bought-in ingredient · ✕ not in the recipe. Based on the ingredient list on the pack.
                 </p>
               </>
             )}

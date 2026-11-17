@@ -3,9 +3,12 @@
 // allergens that can occur in a veg masala, plus mustard (common in masalas).
 
 export type AllergenKey = "gluten" | "milk" | "treeNuts" | "peanuts" | "sesame" | "soy" | "mustard";
+export type AllergenState = "present" | "may" | "absent";
 
-export const ALLERGENS: { key: AllergenKey; label: string; hint: string; pattern: RegExp }[] = [
-  { key: "gluten",   label: "Wheat / Gluten", hint: "rawa, suji, maida, atta", pattern: /\b(wheat|rawa|semolina|suji|sooji|maida|atta|barley|rye|oats?)\b/i },
+// `may`: ingredients that usually carry the allergen but vary by supplier.
+export const ALLERGENS: { key: AllergenKey; label: string; hint: string; pattern: RegExp; may?: { pattern: RegExp; reason: string } }[] = [
+  { key: "gluten",   label: "Wheat / Gluten", hint: "rawa, suji, maida, atta", pattern: /\b(wheat|rawa|semolina|suji|sooji|maida|atta|barley|rye|oats?)\b/i,
+    may: { pattern: /\b(hings?|asafoetida)\b/i, reason: "hing is usually blended with wheat flour" } },
   { key: "milk",     label: "Milk",           hint: "milk powder, ghee, curd", pattern: /\b(milk|ghee|butter|cream|curd|paneer|khoa|khoya|whey|casein)\b/i },
   { key: "treeNuts", label: "Tree nuts",      hint: "cashew, almond",          pattern: /\b(cashews?|almonds?|pistachios?|walnuts?|nuts)\b/i },
   { key: "peanuts",  label: "Peanuts",        hint: "groundnut, groundnut oil", pattern: /\b(peanuts?|groundnuts?)\b/i },
@@ -36,6 +39,8 @@ export function splitIngredients(ingredients: string): string[] {
   return items.map((i) => i.charAt(0).toUpperCase() + i.slice(1));
 }
 
-export function detectAllergens(ingredients: string): Record<AllergenKey, boolean> {
-  return Object.fromEntries(ALLERGENS.map((a) => [a.key, a.pattern.test(ingredients)])) as Record<AllergenKey, boolean>;
+export function detectAllergens(ingredients: string): Record<AllergenKey, AllergenState> {
+  return Object.fromEntries(
+    ALLERGENS.map((a) => [a.key, a.pattern.test(ingredients) ? "present" : a.may?.pattern.test(ingredients) ? "may" : "absent"]),
+  ) as Record<AllergenKey, AllergenState>;
 }

@@ -1,4 +1,4 @@
-import { ALLERGENS, type AllergenKey } from "@/lib/allergens";
+import { ALLERGENS, type AllergenKey, type AllergenState } from "@/lib/allergens";
 
 // Simple line icons (24x24, currentColor) so they match the site in any theme.
 const ICONS: Record<AllergenKey, React.ReactNode> = {
@@ -56,29 +56,29 @@ const ICONS: Record<AllergenKey, React.ReactNode> = {
   ),
 };
 
-export default function AllergenGrid({ present }: { present: Record<AllergenKey, boolean> }) {
+const STATE: Record<AllergenState, { card: string; badge: string; mark: string; icon: string; name: string; text: string; label: string }> = {
+  present: { card: "bg-amber-50 border-amber-300", badge: "bg-amber-500 text-white", mark: "✓", icon: "text-amber-700", name: "text-amber-900", text: "text-amber-800", label: "Present" },
+  may:     { card: "bg-orange-50/60 border-orange-200 border-dashed", badge: "bg-orange-100 text-orange-700 ring-1 ring-orange-300", mark: "!", icon: "text-orange-600", name: "text-orange-900", text: "text-orange-700", label: "May contain" },
+  absent:  { card: "bg-white border-brand-border", badge: "bg-brand-mint text-brand-green", mark: "✕", icon: "text-brand-muted/60", name: "text-brand-dark", text: "text-brand-green", label: "Not present" },
+};
+
+export default function AllergenGrid({ present }: { present: Record<AllergenKey, AllergenState> }) {
   return (
     <ul className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
       {ALLERGENS.map((a) => {
-        const yes = present[a.key];
+        const state = present[a.key];
+        const s = STATE[state];
         return (
-          <li
-            key={a.key}
-            className={`relative flex flex-col items-center text-center rounded-xl border p-4 ${
-              yes ? "bg-amber-50 border-amber-300" : "bg-white border-brand-border"
-            }`}
-          >
+          <li key={a.key} className={`relative flex flex-col items-center text-center rounded-xl border p-4 ${s.card}`}>
             <span
-              className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                yes ? "bg-amber-500 text-white" : "bg-brand-mint text-brand-green"
-              }`}
+              className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${s.badge}`}
               aria-hidden
             >
-              {yes ? "✓" : "✕"}
+              {s.mark}
             </span>
             <svg
               viewBox="0 0 24 24"
-              className={`w-10 h-10 mb-2 ${yes ? "text-amber-700" : "text-brand-muted/60"}`}
+              className={`w-10 h-10 mb-2 ${s.icon}`}
               fill="none"
               stroke="currentColor"
               strokeWidth={1.5}
@@ -88,11 +88,10 @@ export default function AllergenGrid({ present }: { present: Record<AllergenKey,
             >
               {ICONS[a.key]}
             </svg>
-            <span className={`text-sm font-semibold ${yes ? "text-amber-900" : "text-brand-dark"}`}>{a.label}</span>
+            <span className={`text-sm font-semibold ${s.name}`}>{a.label}</span>
             <span className="text-[11px] text-brand-muted mt-0.5">{a.hint}</span>
-            <span className={`mt-2 text-[11px] font-semibold uppercase tracking-wider ${yes ? "text-amber-800" : "text-brand-green"}`}>
-              {yes ? "Present" : "Not present"}
-            </span>
+            <span className={`mt-2 text-[11px] font-semibold uppercase tracking-wider ${s.text}`}>{s.label}</span>
+            {state === "may" && a.may && <span className="text-[10px] text-orange-700/80 mt-0.5">{a.may.reason}</span>}
           </li>
         );
       })}
