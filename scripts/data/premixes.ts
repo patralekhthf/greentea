@@ -307,7 +307,7 @@ Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
     longDescription: `The everyday gravy base for busy kitchens. Cook it as directed on the pack and add whatever you have: paneer, mixed vegetables, chana, boiled eggs or chicken.`,
     highlights: PACK_CLAIMS,
     ingredients:
-      "Cashew, melon seeds, coriander powder, onion powder, sugar, milk powder, garlic powder, tomato powder, turmeric powder, black pepper powder, kasuri methi, cumin, coriander seeds, Kashmiri red chilli powder, cornflour, salt, garam masala, oil, black salt, green chilli powder, bay leaf, cinnamon.",
+      "Cashew, melon seeds, coriander powder, onion powder, sugar, milk powder, garlic powder, tomato powder, turmeric powder, black pepper powder, kasuri methi, cumin, coriander seeds, Kashmiri red chilli powder, cornflour, salt, garam masala, groundnut oil, black salt, green chilli powder, bay leaf, cinnamon.",
     cookingInstructions: `1. In a bowl, mix 1 packet (100 g) of premix with 400 ml water.
 2. Heat 6–7 tbsp oil in a pan, add the premix mixture and cook for 4–5 minutes.
 3. Add vegetables of your choice and cook for 2–3 minutes. Add butter and cream, cook for another minute, and finish with chopped coriander.`,
@@ -320,7 +320,7 @@ Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
     yieldNote: "1 pack (100 g) with 400 ml water",
     cookTimeMinutes: 10,
     shelfLifeMonths: 6, // from back label, 2026-11-13
-    allergens: "Contains tree nuts (cashew) and milk. Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew), milk and peanut (groundnut oil). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
     priceINR: 319, // ₹300–400 range set by owner, 2026-11-04
   },
   {
