@@ -38,7 +38,7 @@ export type PremixSeed = {
   cookTimeMinutes: number | null;
   shelfLifeMonths: number;
   allergens: string;
-  priceINR: number;
+  priceINR: number;             // starting price for NEW products only; live prices live in Admin > Pricing
   isBestseller?: boolean;
   isFeatured?: boolean;
   /** Files in scripts/data/images, first = primary. Empty = placeholder until photos arrive. */

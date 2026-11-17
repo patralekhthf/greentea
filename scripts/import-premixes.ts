@@ -7,7 +7,8 @@
  *   add --skip-images to leave product photos untouched
  *
  * - Matches products by slug, so it is safe to re-run after editing the data file.
- * - Writes the India price (ProductCountryConfig for IN). The migration
+ * - Writes the India price only when creating a product. Existing prices and stock
+ *   are managed in Admin > Pricing and are never overwritten. The migration
  *   20260927100000_premix_product_line must already be applied.
  * - Photos listed in the data file (scripts/data/images) are uploaded to Cloudinary
  *   as gt/products/premix/<file name>, overwriting on re-runs, and attached with
@@ -145,7 +146,8 @@ async function main() {
         isAvailable: true,
         directPurchaseEnabled: true,
       },
-      update: { price: p.priceINR, isAvailable: true, directPurchaseEnabled: true },
+      // Prices and stock are owned by Admin > Pricing once a product exists: never overwrite them here.
+      update: { isAvailable: true, directPurchaseEnabled: true },
     });
 
     let photos = 0;
