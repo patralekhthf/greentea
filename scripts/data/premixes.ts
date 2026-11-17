@@ -88,7 +88,7 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
     yieldNote: "4 tbsp (50 g) makes one pot, so a 100 g pack makes two",
     cookTimeMinutes: 15,
     shelfLifeMonths: 6,
-    allergens: "No major allergens in the recipe (contains coconut). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
+    allergens: "Contains mustard (mustard seed) and coconut. Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
     priceINR: 329, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
@@ -150,7 +150,7 @@ Whisk it with water and curd, rest the batter for five minutes and steam. Serve 
     yieldNote: "1 pack (220 g) makes about 10 idlis",
     cookTimeMinutes: 15,
     shelfLifeMonths: 6,
-    allergens: "Contains wheat (semolina), tree nuts (cashew) and peanut (groundnut oil). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
+    allergens: "Contains wheat (semolina), tree nuts (cashew), peanut (groundnut oil) and mustard. Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
     priceINR: 359, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
