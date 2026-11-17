@@ -53,8 +53,7 @@ const METHOD_PENDING =
   "Step-by-step cooking instructions coming soon. Until then, please follow the method printed on the back of the pack.";
 
 /** Claims printed on the front of every pack. */
-const PACK_CLAIMS = `- 100% natural ingredients
-- No artificial colours
+const PACK_CLAIMS = `- No artificial colours
 - Healthy, hygienic & homemade
 - Quick and easy to cook`;
 
@@ -70,16 +69,16 @@ export const PREMIXES: PremixSeed[] = [
     tagline: "Homestyle sambhar, no grinding",
     shortDescription:
       "Tur dal, tamarind and roasted spices, pre-blended. Add water and your vegetables for a pot of homestyle sambhar.",
-    longDescription: `Our sambhar premix brings together tur dal, chana dal, tamarind, curry leaves and freshly roasted spices, so there's no soaking, roasting or grinding.
+    longDescription: `Our sambhar premix brings together tur dal, roasted chana dal, tamarind, curry leaves and roasted spices, so there's no soaking, roasting or grinding.
 
 Mix it with water, pressure-cook it with the vegetables you have, and finish with a quick tadka. Serve it with rice, idli or dosa.`,
     highlights: PACK_CLAIMS,
     ingredients:
-      "Tur dal, salt, mustard seed, chana dal, tamarind, hing, sugar, cumin, desiccated coconut, citric acid, urad dal, roasted chana dal, rice, methi, coriander, Kashmiri mirch, curry patta.",
+      "Tur dal, salt, mustard seed, roasted chana dal, rice, cumin, urad dal, turmeric, citric acid, sugar, tamarind, coriander, curry leaves, Kashmiri red chilli, desiccated coconut, fennel seed.",
     cookingInstructions: `1. Take 4 tbsp (50 g) of premix and mix it into 500 ml water.
-2. In a pressure cooker, heat 3 tbsp oil. Add ½ cup bottle gourd, 1 small carrot, brinjal and 2–3 drumsticks, and sauté for 2–3 minutes.
+2. In a pressure cooker, heat 3 tbsp oil. Add ¼ cup bottle gourd, 1 small carrot, brinjal and 2–3 drumsticks, and sauté for 2–3 minutes.
 3. Add the premix water and pressure-cook for 2 whistles.
-4. For better taste, give a tadka of mustard seeds, curry patta and whole red chillies. Serve hot.`,
+4. For better taste, give a tadka of mustard seeds, curry leaves and whole red chillies. Serve hot.`,
     dishType: "dal",
     pairsWith: ["vegetables"],
     spiceLevel: "MEDIUM", // TODO: placeholder
@@ -89,7 +88,7 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
     yieldNote: "4 tbsp (50 g) makes one pot, so a 100 g pack makes two",
     cookTimeMinutes: 15,
     shelfLifeMonths: 6,
-    allergens: "Contains coconut. Made in a kitchen that also handles nuts and milk.", // TODO: placeholder
+    allergens: "No major allergens in the recipe (contains coconut). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
     priceINR: 329, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
@@ -106,10 +105,9 @@ Mix it with water, pressure-cook it with the vegetables you have, and finish wit
 Roast it in a little ghee, add milk or water, and a rich, festive halwa is ready in about 15 minutes.`,
     highlights: `- Pure desi taste that brings sweet cravings
 - Made with premium flours
-- 100% natural ingredients
 - No artificial colours`,
     ingredients:
-      "Moong dal, ghee, skimmed milk powder, powdered sugar, chopped nuts, green cardamom.",
+      "Moong dal, ghee, skimmed milk powder, powdered sugar, chopped nuts, green cardamom powder.",
     cookingInstructions: `1. Heat 30 ml (2 tbsp) ghee in a pan. Add 1 packet (150 g) of premix and roast for 2–3 minutes.
 2. Add 1½ cups (375 ml) milk or water and cook for 8–10 minutes.
 3. Serve hot.`,
@@ -121,8 +119,8 @@ Roast it in a little ghee, add milk or water, and a rich, festive halwa is ready
     servings: SERVES,
     yieldNote: "1 pack (150 g) with 375 ml milk or water",
     cookTimeMinutes: 15,
-    shelfLifeMonths: 4, // label says "4 to 5 months"; the site shows the shorter figure
-    allergens: "Contains milk (ghee, milk powder) and tree nuts.", // TODO: confirm
+    shelfLifeMonths: 4, // label: best before 4 months
+    allergens: "Contains milk (ghee, milk powder) and tree nuts (chopped nuts). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
     priceINR: 399, // ₹300–400 range set by owner, 2026-11-04
     isFeatured: true,
   },
@@ -134,28 +132,25 @@ Roast it in a little ghee, add milk or water, and a rich, festive halwa is ready
     tagline: "Soft, fluffy idlis in 20 minutes",
     shortDescription:
       "Semolina, urad dal, cashew and spices, pre-mixed. Add water and curd, steam, and serve hot with chutney and sambhar.",
-    longDescription: `No soaking, no grinding, no overnight fermenting. Our rawa idli premix has semolina, urad dal, cashew, curry patta, green chilli and ginger already blended.
+    longDescription: `No soaking, no grinding, no overnight fermenting. Our rawa idli premix has semolina, urad dal, cashew, curry leaves, green chilli and ginger already blended.
 
 Whisk it with water and curd, rest the batter for five minutes and steam. Serve with our coconut chutney and sambhar premixes.`,
     highlights: PACK_CLAIMS,
     ingredients:
-      "Suji (semolina), cashew, salt, urad dal powder, curry patta, soda, mustard seed, green chilli flakes, ginger powder, citric acid, chana dal, oil, baking soda.",
-    cookingInstructions: `1. Take 1 packet (220 g) of premix and add 200 ml water and 1 cup (140 g) curd.
-2. Mix well to a smooth batter and keep aside for 5 minutes.
-3. Grease the idli moulds with a little oil.
-4. Pour the batter into the moulds.
-5. Steam for 8–10 minutes on a medium flame.
-6. Remove and serve hot with chutney and sambhar.`,
+      "Rawa (semolina), cashew, salt, urad dal, curry leaves, baking soda, chana dal, mustard seed, green chilli, ginger powder, citric acid, groundnut oil.",
+    cookingInstructions: `1. Take 1 packet (220 g) of premix, add 200 ml water and ½ cup curd, mix well and keep aside for 5 minutes.
+2. Pour the batter into greased idli moulds.
+3. Steam for 8–10 minutes and serve hot with chutney and sambhar.`,
     dishType: "breakfast",
     pairsWith: [],
     spiceLevel: "MILD", // TODO: placeholder
     noOnionGarlic: true,
     netWeight: "220g",
     servings: SERVES,
-    yieldNote: "1 pack (220 g) makes 12–15 idlis",
-    cookTimeMinutes: 20,
+    yieldNote: "1 pack (220 g) makes about 10 idlis",
+    cookTimeMinutes: 15,
     shelfLifeMonths: 6,
-    allergens: "Contains wheat (semolina) and cashew (tree nut).", // TODO: confirm
+    allergens: "Contains wheat (semolina), tree nuts (cashew) and peanut (groundnut oil). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // RasoiVita back label, 2026-11-16
     priceINR: 359, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
@@ -188,7 +183,7 @@ Also available in a No Onion No Garlic version.`,
     yieldNote: "4 tbsp (50 g) makes one batch, so a 100 g pack makes two",
     cookTimeMinutes: 10,
     shelfLifeMonths: 6, // from back label, 2026-11-13
-    allergens: "Contains tree nuts (cashew), milk, sesame and peanut (groundnut oil).", // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew), milk, sesame and peanut (groundnut oil). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
     priceINR: 349, // ₹300–400 range set by owner, 2026-11-04
     isBestseller: true,
   },
@@ -244,7 +239,7 @@ Also available in a No Onion No Garlic version.`,
     yieldNote: "4 tbsp (50 g) cooks 250 g boiled chhole, so a 100 g pack makes two batches",
     cookTimeMinutes: 10,
     shelfLifeMonths: 6, // from back label, 2026-11-13
-    allergens: "Contains tree nuts (cashew) and peanut (groundnut oil).", // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and peanut (groundnut oil). Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
     priceINR: 339, // ₹300–400 range set by owner, 2026-11-04
     isFeatured: true,
   },
@@ -298,7 +293,7 @@ Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
     yieldNote: "1 pack (100 g) with 600 ml milk",
     cookTimeMinutes: 10,
     shelfLifeMonths: 6, // from back label, 2026-11-13
-    allergens: "Contains tree nuts (cashew) and milk.", // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and milk. Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
     priceINR: 369, // ₹300–400 range set by owner, 2026-11-04
   },
   {
@@ -325,7 +320,7 @@ Use it for methi matar malai, malai kofta, kaju curry or navratan korma.`,
     yieldNote: "1 pack (100 g) with 400 ml water",
     cookTimeMinutes: 10,
     shelfLifeMonths: 6, // from back label, 2026-11-13
-    allergens: "Contains tree nuts (cashew) and milk.", // from back label, 2026-11-13
+    allergens: "Contains tree nuts (cashew) and milk. Made in a kitchen that also handles tree nuts, peanuts, milk, sesame and wheat.", // from back label, 2026-11-13
     priceINR: 319, // ₹300–400 range set by owner, 2026-11-04
   },
   {

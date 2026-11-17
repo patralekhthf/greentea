@@ -65,7 +65,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
     product.cookTimeMinutes ? { icon: "⏱", label: "Cook time", value: `${product.cookTimeMinutes} min` } : null,
     product.servings        ? { icon: "🍽", label: "Serves",    value: product.servings } : null,
     spice                   ? { icon: "🌶️", label: "Spice",     value: spice.label } : null,
-    product.shelfLifeMonths ? { icon: "📦", label: "Best before", value: `${product.shelfLifeMonths} months` } : null,
   ].filter((f): f is { icon: string; label: string; value: string } => f !== null);
 
   // Related products — same dish type (or any premix), exclude current
@@ -328,7 +327,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           cookingInstructions={product.cookingInstructions}
           yieldNote={product.yieldNote}
           storageInstructions={product.storageInstructions}
-          shelfLifeMonths={product.shelfLifeMonths}
           ingredients={product.ingredients}
           allergens={product.allergens}
           highlights={product.benefits}

@@ -29,7 +29,7 @@ const STORY = {
 };
 
 const PROMISES = [
-  { icon: "🌿", title: "100% natural ingredients", desc: "Real spices, dals and dried herbs. Nothing you wouldn't use at home." },
+  { icon: "🌿", title: "Real kitchen ingredients", desc: "Spices, dals, nuts and dried herbs you would use at home." },
   { icon: "🎨", title: "No artificial colours", desc: "The colour in your sambhar or chhole comes from the spices themselves." },
   { icon: "🏠", title: "Healthy, hygienic, homemade", desc: "Made in small batches in a home-style kitchen, not a factory line." },
   { icon: "⏱️", title: "Quick & easy to cook", desc: "Mix with water, cook, add your fresh ingredients. That's it." },

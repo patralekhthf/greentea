@@ -68,13 +68,13 @@ export const RECIPES: RecipeSeed[] = [
   {
     slug: "rawa-idli-recipe",
     title: "Soft, Fluffy Rawa Idli in 20 Minutes",
-    excerpt: "No soaking, no grinding, no fermenting. Our Rawa Idli Premix gives you 12–15 soft idlis in about 20 minutes.",
-    metaDescription: "Make soft rawa idli in 20 minutes with RasoiVita Rawa Idli Premix. No soaking, grinding or fermenting. Makes 12–15 idlis.",
+    excerpt: "No soaking, no grinding, no fermenting. Our Rawa Idli Premix gives you about 10 soft idlis in about 20 minutes.",
+    metaDescription: "Make soft rawa idli in 20 minutes with RasoiVita Rawa Idli Premix. No soaking, grinding or fermenting. Makes about 10 idlis.",
     cover: "rawa-idli.jpg",
     content: `Regular idli needs overnight soaking, grinding and fermenting. Rawa idli doesn't. With **RasoiVita Rawa Idli Premix**, breakfast is on the table about 20 minutes after you decide you want idlis.
 
 ## At a glance
-- Makes 12–15 idlis (serves 3–4)
+- Makes about 10 idlis (serves 3–4)
 - Time: about 20 minutes
 - Premix: 1 packet (220 g) Rawa Idli Premix
 - No onion, no garlic
@@ -82,12 +82,12 @@ export const RECIPES: RecipeSeed[] = [
 ## You will need
 - 1 packet (220 g) RasoiVita Rawa Idli Premix
 - 200 ml water
-- 1 cup (140 g) curd
+- ½ cup curd
 - A little oil for greasing
 - Idli stand and steamer (or a pressure cooker without the whistle)
 
 ## Method
-**1.** Take 1 packet (220 g) of premix and add 200 ml water and 1 cup (140 g) curd.
+**1.** Take 1 packet (220 g) of premix and add 200 ml water and ½ cup curd.
 
 **2.** Mix well to a smooth batter and keep aside for 5 minutes.
 
@@ -162,7 +162,7 @@ export const RECIPES: RecipeSeed[] = [
 - 4 tbsp (50 g) RasoiVita Sambhar Premix
 - 500 ml water
 - 3 tbsp oil
-- ½ cup bottle gourd, 1 small carrot, 1 small brinjal, cut into chunks
+- ¼ cup bottle gourd, 1 small carrot, 1 small brinjal, cut into chunks
 - 2–3 drumsticks, cut into 3-inch pieces
 
 For the tadka:
