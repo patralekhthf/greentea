@@ -6,6 +6,8 @@ type Props = {
   sizes: string[];
   price: number;
   salePrice: number | null;
+  /** Website discount off MRP from Admin > Pricing; falls back to the price difference. */
+  discountPct?: number | null;
   currencySymbol: string;
 };
 
@@ -13,13 +15,14 @@ export default function ProductSizeSelector({
   sizes,
   price,
   salePrice,
+  discountPct: configuredPct,
   currencySymbol,
 }: Props) {
   const [selectedSize, setSelectedSize] = useState(sizes[0] ?? null);
 
   const discountPct =
-    salePrice !== null
-      ? Math.round(((price - salePrice) / price) * 100)
+    salePrice !== null && salePrice < price
+      ? configuredPct || Math.round(((price - salePrice) / price) * 100)
       : null;
 
   return (
@@ -34,9 +37,9 @@ export default function ProductSizeSelector({
             <span className="text-xl text-brand-muted line-through">
               {currencySymbol}{price.toFixed(0)}
             </span>
-            <span className="text-sm font-semibold text-red-600">
-              {discountPct}% off
-            </span>
+            {discountPct ? (
+              <span className="text-sm font-semibold text-red-600">{discountPct}% off</span>
+            ) : null}
           </>
         ) : (
           <span className="text-3xl font-bold text-brand-green">

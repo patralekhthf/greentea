@@ -12,6 +12,7 @@ import ProductSizeSelector from "@/components/product/ProductSizeSelector";
 import VegMark from "@/components/product/VegMark";
 import { TEA_LINE_LIVE, cookWithLabel, dishTypeLabel, spiceLevel } from "@/lib/catalog";
 import { SHIPPING } from "@/lib/shipping";
+import { websiteDiscountPct } from "@/lib/pricing-server";
 import { buildImageUrl, TRANSFORMS } from "@/lib/cloudinary-url";
 import JsonLd from "@/components/ui/JsonLd";
 import { SITE_URL } from "@/lib/site";
@@ -229,6 +230,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 sizes={product.packagingSizes}
                 price={price}
                 salePrice={salePrice}
+                discountPct={await websiteDiscountPct()}
                 currencySymbol={currencySymbol}
               />
             )}

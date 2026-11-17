@@ -16,6 +16,19 @@ export type PricingRow = {
 
 export type PricingData = { config: PricingConfig; rows: PricingRow[]; configUpdatedAt: string | null };
 
+/**
+ * "Website discount off MRP" (config cell B7) as a whole percent, for the
+ * "x% off" badge. Falls back to the default if the pricing table is not there yet.
+ */
+export async function websiteDiscountPct(): Promise<number> {
+  try {
+    const cfg = await db.pricingConfig.findUnique({ where: { id: "default" } });
+    return Math.round(normaliseConfig(cfg?.values).websiteDiscount * 100);
+  } catch {
+    return Math.round(normaliseConfig(null).websiteDiscount * 100);
+  }
+}
+
 const num = (v: { toString(): string } | null | undefined) => (v == null ? null : Number(v.toString()));
 
 /** Everything the Pricing page and the Excel download need. Premixes only (teas are on hold). */

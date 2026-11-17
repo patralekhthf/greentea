@@ -138,6 +138,9 @@ export default function ProductCard({ product, country, currencySymbol }: Props)
                   <span className="text-sm text-brand-muted line-through">
                     {currencySymbol}{parseFloat(config.price).toFixed(0)}
                   </span>
+                  {config.discountPct && (
+                    <span className="text-xs font-semibold text-red-600">{config.discountPct}% off</span>
+                  )}
                 </>
               ) : (
                 <span className="text-base font-bold text-brand-green">

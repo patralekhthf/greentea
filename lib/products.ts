@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { websiteDiscountPct } from "./pricing-server";
 import type { Prisma, ProductLine, SpiceLevel } from "@prisma/client";
 
 export type ProductForCard = {
@@ -21,6 +22,7 @@ export type ProductForCard = {
   countryConfig: {
     price: string;
     salePrice: string | null;
+    discountPct: number | null; // "x% off" badge (Admin > Pricing, website discount), when on sale
     displayRating: string | null;
     displayReviewCount: number | null;
     directPurchaseEnabled: boolean;
@@ -113,6 +115,8 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
         : { createdAt: "desc" },
   });
 
+  const discount = await websiteDiscountPct();
+
   // Shape into card-friendly format + handle price sorting in app code
   const products: ProductForCard[] = rows.map((p) => {
     const config = p.countryConfigs[0] ?? null;
@@ -137,6 +141,7 @@ export async function getProducts(params: GetProductsParams): Promise<ProductFor
         ? {
             price: config.price.toString(),
             salePrice: config.salePrice?.toString() ?? null,
+            discountPct: config.salePrice && Number(config.salePrice) < Number(config.price) && discount > 0 ? discount : null,
             displayRating: config.displayRating?.toString() ?? null,
             displayReviewCount: config.displayReviewCount,
             directPurchaseEnabled: config.directPurchaseEnabled,
